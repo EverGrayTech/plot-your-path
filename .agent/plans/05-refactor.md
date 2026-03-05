@@ -137,13 +137,13 @@ This can trigger integrity errors in realistic LLM output.
 - [x] **Step 6 — Harden skill linking**
   - [x] Deduplicate skills and enforce deterministic requirement-level precedence.
 
-- [ ] **Step 7 — Strengthen tests**
-  - [ ] Add service-focused tests for end-to-end pipeline behavior.
-  - [ ] Add regression tests for:
+- [x] **Step 7 — Strengthen tests**
+  - [x] Add service-focused tests for end-to-end pipeline behavior.
+  - [x] Add regression tests for:
     - [x] duplicate skills in same payload
     - [x] required/preferred overlap
-    - [ ] path format consistency between API and CLI
-    - [ ] rollback behavior on mid-pipeline failure
+    - [x] path format consistency between API and CLI
+    - [x] rollback behavior on mid-pipeline failure
 
 ---
 
@@ -167,4 +167,4 @@ This can trigger integrity errors in realistic LLM output.
 - [x] No blocking file/DB work occurs directly inside async route body.
 - [x] Stored file paths are canonical and consistent across ingestion paths.
 - [x] Duplicate/overlapping skills no longer raise integrity errors.
-- [ ] Existing tests pass and new regression coverage is added for refactor targets.
+- [x] Existing tests pass and new regression coverage is added for refactor targets.
