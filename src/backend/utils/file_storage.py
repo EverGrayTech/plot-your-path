@@ -4,6 +4,13 @@ import os
 from pathlib import Path
 
 
+def to_storage_path(filepath: str) -> str:
+    """Normalize a stored DB path to canonical data-root-relative format."""
+    if os.path.isabs(filepath):
+        return filepath
+    return filepath.removeprefix("data/")
+
+
 def _resolve_path(filepath: str) -> str:
     """
     Resolve a file path to an absolute path.
@@ -28,9 +35,7 @@ def _resolve_path(filepath: str) -> str:
     # Import here to avoid circular imports at module load time
     from backend.config import settings
 
-    # Strip leading "data/" prefix (legacy convention) so the final path is
-    # $DATA_ROOT/jobs/raw/… rather than $DATA_ROOT/data/jobs/raw/…
-    rel = filepath.removeprefix("data/")
+    rel = to_storage_path(filepath)
     return os.path.join(settings.data_root, rel)
 
 
@@ -83,7 +88,8 @@ def save_file(content: str, filepath: str) -> str:
         filepath: The destination path (absolute or relative to data_root).
 
     Returns:
-        The absolute path where the file was saved.
+        Canonical stored path value. Absolute paths remain absolute; relative
+        paths are normalized to data-root-relative format.
 
     Raises:
         IOError: If the file cannot be written.
@@ -92,8 +98,9 @@ def save_file(content: str, filepath: str) -> str:
         >>> save_file("<html>...</html>", "data/jobs/raw/acme-corp/123.html")
         >>> save_file("# Job Description", "data/jobs/cleaned/acme-corp/123.md")
     """
+    stored = to_storage_path(filepath)
     resolved = _resolve_path(filepath)
     Path(resolved).parent.mkdir(parents=True, exist_ok=True)
     with open(resolved, "w", encoding="utf-8") as f:
         f.write(content)
-    return resolved
+    return stored

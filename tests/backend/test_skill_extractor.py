@@ -210,6 +210,37 @@ class TestLinkSkillsToRole:
         python_skills = session.query(Skill).filter_by(name="Python").all()
         assert len(python_skills) == 1
 
+    def test_deduplicates_repeat_within_same_level(self, db):
+        """Repeated skills in one list should only link once."""
+        session, role_id = db
+        extractor = SkillExtractorService(db=session)
+
+        count = extractor.link_skills_to_role(
+            role_id=role_id,
+            required_skills=["Python", "python", " Python "],
+            preferred_skills=[],
+        )
+
+        assert count == 1
+        role_skills = session.query(RoleSkill).filter_by(role_id=role_id).all()
+        assert len(role_skills) == 1
+        assert role_skills[0].requirement_level == "required"
+
+    def test_required_overrides_preferred_overlap(self, db):
+        """If same skill appears in both lists, required takes precedence."""
+        session, role_id = db
+        extractor = SkillExtractorService(db=session)
+
+        count = extractor.link_skills_to_role(
+            role_id=role_id,
+            required_skills=["Python"],
+            preferred_skills=["python"],
+        )
+
+        assert count == 1
+        role_skill = session.query(RoleSkill).filter_by(role_id=role_id).one()
+        assert role_skill.requirement_level == "required"
+
 
 class TestGetSkillsForRole:
     """Tests for retrieving skills for a role."""
