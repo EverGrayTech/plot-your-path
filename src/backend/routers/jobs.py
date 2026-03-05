@@ -2,13 +2,12 @@
 
 from __future__ import annotations
 
-import time
+import asyncio
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from backend.config import llm_config, scraping_config
 from backend.database import get_db
 from backend.models.company import Company
 from backend.models.role import Role
@@ -22,11 +21,14 @@ from backend.schemas.job import (
     RoleStatus,
     SalaryInfo,
 )
-from backend.services.llm_service import LLMError, LLMService
-from backend.services.scraper import ScraperError, ScraperService
+from backend.services.job_capture import (
+    JobCaptureLLMError,
+    JobCapturePersistenceError,
+    JobCaptureScrapingError,
+    JobCaptureService,
+)
 from backend.services.skill_extractor import SkillExtractorService
-from backend.utils.file_storage import file_exists, load_file, save_file
-from backend.utils.slug import create_slug
+from backend.utils.file_storage import file_exists, load_file
 
 router = APIRouter()
 
@@ -180,7 +182,7 @@ def update_job_status(
 
 
 @router.post("/jobs/scrape", response_model=JobScrapeResponse)
-async def scrape_job(
+def scrape_job(
     request: JobScrapeRequest,
     db: Session = Depends(get_db),
 ) -> JobScrapeResponse:
@@ -207,102 +209,22 @@ async def scrape_job(
         HTTPException 422: If the URL cannot be scraped or data cannot be processed.
         HTTPException 500: If an unexpected internal error occurs.
     """
-    start_time = time.time()
     url = str(request.url)
-
-    # --- Deduplication: return existing record if URL was already captured ---
-    existing_role = db.query(Role).filter(Role.url == url).first()
-    if existing_role:
-        company = db.query(Company).filter(Company.id == existing_role.company_id).first()
-        skills_count = (
-            db.query(RoleSkill).filter(RoleSkill.role_id == existing_role.id).count()
-        )
-        return JobScrapeResponse(
-            status="already_exists",
-            role_id=existing_role.id,
-            company=company.name if company else "Unknown",
-            title=existing_role.title,
-            skills_extracted=skills_count,
-            processing_time_seconds=round(time.time() - start_time, 3),
-        )
-
-    # --- Step 1: Scrape HTML ---
-    scraper = ScraperService(config=scraping_config)
+    service = JobCaptureService(db)
     try:
-        html = await scraper.scrape(url)
-    except ScraperError as exc:
+        result = asyncio.run(service.capture_from_url(url))
+    except JobCaptureScrapingError as exc:
         raise HTTPException(status_code=422, detail=f"Scraping failed: {exc}") from exc
-
-    raw_text = scraper.extract_text_from_html(html)
-
-    # --- Step 2: LLM de-noise ---
-    llm = LLMService(config=llm_config)
-    try:
-        markdown = await llm.denoise_job_posting(raw_text)
-    except LLMError as exc:
-        raise HTTPException(
-            status_code=500, detail=f"LLM de-noising failed: {exc}"
-        ) from exc
-
-    # --- Step 3: LLM skill / metadata extraction ---
-    try:
-        job_data = await llm.extract_job_data(markdown)
-    except LLMError as exc:
-        raise HTTPException(
-            status_code=500, detail=f"LLM data extraction failed: {exc}"
-        ) from exc
-
-    # --- Step 4: Upsert Company ---
-    company_name = (job_data.get("company") or "Unknown Company").strip() or "Unknown Company"
-    company = db.query(Company).filter(Company.name.ilike(company_name)).first()
-    if not company:
-        slug = create_slug(company_name)
-        # Resolve slug collisions
-        if db.query(Company).filter(Company.slug == slug).first():
-            slug = f"{slug}-{int(time.time())}"
-        company = Company(name=company_name, slug=slug)
-        db.add(company)
-        db.flush()
-
-    # --- Step 5: Create Role with placeholder paths (need ID first) ---
-    title = (job_data.get("title") or "Unknown Title").strip() or "Unknown Title"
-    role = Role(
-        company_id=company.id,
-        title=title,
-        team_division=job_data.get("team_division"),
-        salary_min=job_data.get("salary_min"),
-        salary_max=job_data.get("salary_max"),
-        salary_currency=job_data.get("salary_currency") or "USD",
-        url=url,
-        raw_html_path="pending",
-        cleaned_md_path="pending",
-        status="active",
-    )
-    db.add(role)
-    db.flush()  # Obtain role.id before building file paths
-
-    # --- Step 6: Persist files at canonical paths ---
-    raw_path = f"data/jobs/raw/{company.slug}/{role.id}.html"
-    cleaned_path = f"data/jobs/cleaned/{company.slug}/{role.id}.md"
-    save_file(html, raw_path)
-    save_file(markdown, cleaned_path)
-
-    role.raw_html_path = raw_path
-    role.cleaned_md_path = cleaned_path
-
-    # --- Step 7: Extract and link skills ---
-    extractor = SkillExtractorService(db)
-    required_skills: list[str] = job_data.get("required_skills") or []
-    preferred_skills: list[str] = job_data.get("preferred_skills") or []
-    skills_count = extractor.link_skills_to_role(role.id, required_skills, preferred_skills)
-
-    db.commit()
+    except JobCaptureLLMError as exc:
+        raise HTTPException(status_code=500, detail=f"LLM processing failed: {exc}") from exc
+    except JobCapturePersistenceError as exc:
+        raise HTTPException(status_code=500, detail=f"Persistence failed: {exc}") from exc
 
     return JobScrapeResponse(
-        status="success",
-        role_id=role.id,
-        company=company.name,
-        title=title,
-        skills_extracted=skills_count,
-        processing_time_seconds=round(time.time() - start_time, 3),
+        status=result.status,
+        role_id=result.role_id,
+        company=result.company,
+        title=result.title,
+        skills_extracted=result.skills_extracted,
+        processing_time_seconds=result.processing_time_seconds,
     )

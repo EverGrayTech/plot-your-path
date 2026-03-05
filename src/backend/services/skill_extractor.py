@@ -155,28 +155,57 @@ class SkillExtractorService:
         Returns:
             Total number of skills linked
         """
-        total_linked = 0
+        normalized_levels: dict[str, str] = {}
+
+        # Preferred first so required can override on overlap.
+        for skill_name in preferred_skills:
+            if not skill_name.strip():
+                continue
+            normalized = self.normalize_skill_name(skill_name)
+            normalized_levels[normalized] = "preferred"
 
         for skill_name in required_skills:
             if not skill_name.strip():
                 continue
-            skill = self.get_or_create_skill(skill_name)
-            role_skill = RoleSkill(
-                role_id=role_id,
-                skill_id=skill.id,
-                requirement_level="required",
-            )
-            self.db.add(role_skill)
-            total_linked += 1
+            normalized = self.normalize_skill_name(skill_name)
+            normalized_levels[normalized] = "required"
 
-        for skill_name in preferred_skills:
-            if not skill_name.strip():
+        if not normalized_levels:
+            return 0
+
+        existing_links = {
+            (row.skill_id, row.requirement_level)
+            for row in self.db.query(RoleSkill).filter(RoleSkill.role_id == role_id).all()
+        }
+
+        total_linked = 0
+        for normalized_name, requirement_level in normalized_levels.items():
+            skill = self.get_or_create_skill(normalized_name)
+
+            # Skip if this exact link already exists.
+            if (skill.id, requirement_level) in existing_links:
                 continue
-            skill = self.get_or_create_skill(skill_name)
+
+            # If a preferred link exists and required is now requested, upgrade in-place.
+            if requirement_level == "required":
+                preferred_link = (
+                    self.db.query(RoleSkill)
+                    .filter(
+                        RoleSkill.role_id == role_id,
+                        RoleSkill.skill_id == skill.id,
+                        RoleSkill.requirement_level == "preferred",
+                    )
+                    .first()
+                )
+                if preferred_link:
+                    preferred_link.requirement_level = "required"
+                    total_linked += 1
+                    continue
+
             role_skill = RoleSkill(
                 role_id=role_id,
                 skill_id=skill.id,
-                requirement_level="preferred",
+                requirement_level=requirement_level,
             )
             self.db.add(role_skill)
             total_linked += 1

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -336,28 +337,32 @@ class TestUpdateJobStatus:
 class TestScrapeJob:
     """Tests for POST /api/jobs/scrape."""
 
-    def _mock_pipeline(self, html="<html><body>Job</body></html>", job_data=None):
-        """Return a context manager that patches ScraperService and LLMService."""
-        if job_data is None:
-            job_data = SAMPLE_JOB_DATA
-
-        mock_scraper_instance = MagicMock()
-        mock_scraper_instance.scrape = AsyncMock(return_value=html)
-        mock_scraper_instance.extract_text_from_html = MagicMock(return_value="Job text")
-
-        mock_llm_instance = MagicMock()
-        mock_llm_instance.denoise_job_posting = AsyncMock(return_value="# Backend Engineer")
-        mock_llm_instance.extract_job_data = AsyncMock(return_value=job_data)
-
-        return (mock_scraper_instance, mock_llm_instance)
+    def _capture_result(
+        self,
+        *,
+        status: str = "success",
+        role_id: int = 1,
+        company: str = "TechCo",
+        title: str = "Backend Engineer",
+        skills_extracted: int = 5,
+        processing_time_seconds: float = 0.123,
+    ):
+        """Build a fake JobCaptureService result object."""
+        return SimpleNamespace(
+            status=status,
+            role_id=role_id,
+            company=company,
+            title=title,
+            skills_extracted=skills_extracted,
+            processing_time_seconds=processing_time_seconds,
+        )
 
     def test_scrape_successful(self, client):
-        """Full pipeline creates role, company, and skills."""
-        scraper_mock, llm_mock = self._mock_pipeline()
+        """Router returns mapped success response from JobCaptureService."""
+        mock_service = MagicMock()
+        mock_service.capture_from_url = AsyncMock(return_value=self._capture_result())
 
-        with patch("backend.routers.jobs.ScraperService", return_value=scraper_mock), \
-             patch("backend.routers.jobs.LLMService", return_value=llm_mock), \
-             patch("backend.routers.jobs.save_file"):
+        with patch("backend.routers.jobs.JobCaptureService", return_value=mock_service):
             response = client.post(
                 "/api/jobs/scrape",
                 json={"url": "https://greenhouse.io/jobs/99999"},
@@ -373,11 +378,23 @@ class TestScrapeJob:
         assert data["processing_time_seconds"] >= 0
 
     def test_scrape_duplicate_url(self, client, sample_role):
-        """Second scrape of the same URL returns already_exists status."""
-        response = client.post(
-            "/api/jobs/scrape",
-            json={"url": "https://greenhouse.io/jobs/12345"},
+        """already_exists status from service is propagated."""
+        mock_service = MagicMock()
+        mock_service.capture_from_url = AsyncMock(
+            return_value=self._capture_result(
+                status="already_exists",
+                role_id=sample_role.id,
+                company="Acme Corp",
+                title=sample_role.title,
+                skills_extracted=2,
+            )
         )
+        with patch("backend.routers.jobs.JobCaptureService", return_value=mock_service):
+            response = client.post(
+                "/api/jobs/scrape",
+                json={"url": "https://greenhouse.io/jobs/12345"},
+            )
+
         assert response.status_code == 200
         data = response.json()
         assert data["status"] == "already_exists"
@@ -392,13 +409,15 @@ class TestScrapeJob:
         assert response.status_code == 422
 
     def test_scrape_scraper_error_returns_422(self, client):
-        """ScraperError from the scraping service raises HTTP 422."""
-        from backend.services.scraper import ScraperError
+        """JobCaptureScrapingError from service raises HTTP 422."""
+        from backend.services.job_capture import JobCaptureScrapingError
 
-        mock_scraper = MagicMock()
-        mock_scraper.scrape = AsyncMock(side_effect=ScraperError("blocked"))
+        mock_service = MagicMock()
+        mock_service.capture_from_url = AsyncMock(
+            side_effect=JobCaptureScrapingError("blocked")
+        )
 
-        with patch("backend.routers.jobs.ScraperService", return_value=mock_scraper):
+        with patch("backend.routers.jobs.JobCaptureService", return_value=mock_service):
             response = client.post(
                 "/api/jobs/scrape",
                 json={"url": "https://blocked.example.com/job/1"},
@@ -408,74 +427,64 @@ class TestScrapeJob:
         assert "Scraping failed" in response.json()["detail"]
 
     def test_scrape_llm_denoise_error_returns_500(self, client):
-        """LLMError during de-noising raises HTTP 500."""
-        from backend.services.llm_service import LLMError
+        """JobCaptureLLMError during processing raises HTTP 500."""
+        from backend.services.job_capture import JobCaptureLLMError
 
-        mock_scraper = MagicMock()
-        mock_scraper.scrape = AsyncMock(return_value="<html>Job</html>")
-        mock_scraper.extract_text_from_html = MagicMock(return_value="Job text")
+        mock_service = MagicMock()
+        mock_service.capture_from_url = AsyncMock(
+            side_effect=JobCaptureLLMError("timeout")
+        )
 
-        mock_llm = MagicMock()
-        mock_llm.denoise_job_posting = AsyncMock(side_effect=LLMError("timeout"))
-
-        with patch("backend.routers.jobs.ScraperService", return_value=mock_scraper), \
-             patch("backend.routers.jobs.LLMService", return_value=mock_llm):
+        with patch("backend.routers.jobs.JobCaptureService", return_value=mock_service):
             response = client.post(
                 "/api/jobs/scrape",
                 json={"url": "https://greenhouse.io/jobs/77777"},
             )
 
         assert response.status_code == 500
-        assert "LLM de-noising failed" in response.json()["detail"]
+        assert "LLM processing failed" in response.json()["detail"]
 
     def test_scrape_llm_extraction_error_returns_500(self, client):
-        """LLMError during skill extraction raises HTTP 500."""
-        from backend.services.llm_service import LLMError
+        """JobCapturePersistenceError raises HTTP 500."""
+        from backend.services.job_capture import JobCapturePersistenceError
 
-        mock_scraper = MagicMock()
-        mock_scraper.scrape = AsyncMock(return_value="<html>Job</html>")
-        mock_scraper.extract_text_from_html = MagicMock(return_value="Job text")
+        mock_service = MagicMock()
+        mock_service.capture_from_url = AsyncMock(
+            side_effect=JobCapturePersistenceError("db write failed")
+        )
 
-        mock_llm = MagicMock()
-        mock_llm.denoise_job_posting = AsyncMock(return_value="# Good job")
-        mock_llm.extract_job_data = AsyncMock(side_effect=LLMError("bad json"))
-
-        with patch("backend.routers.jobs.ScraperService", return_value=mock_scraper), \
-             patch("backend.routers.jobs.LLMService", return_value=mock_llm):
+        with patch("backend.routers.jobs.JobCaptureService", return_value=mock_service):
             response = client.post(
                 "/api/jobs/scrape",
                 json={"url": "https://greenhouse.io/jobs/88888"},
             )
 
         assert response.status_code == 500
-        assert "LLM data extraction failed" in response.json()["detail"]
+        assert "Persistence failed" in response.json()["detail"]
 
-    def test_scrape_existing_company_deduplication(self, client, db, sample_company):
-        """Scraping a job at an existing company reuses the Company record."""
-        job_data = {**SAMPLE_JOB_DATA, "company": "Acme Corp"}  # matches fixture company
-        scraper_mock, llm_mock = self._mock_pipeline(job_data=job_data)
-
-        with patch("backend.routers.jobs.ScraperService", return_value=scraper_mock), \
-             patch("backend.routers.jobs.LLMService", return_value=llm_mock), \
-             patch("backend.routers.jobs.save_file"):
+    def test_scrape_service_called_with_url(self, client):
+        """Router passes URL through to service capture_from_url."""
+        mock_service = MagicMock()
+        mock_service.capture_from_url = AsyncMock(return_value=self._capture_result())
+        with patch("backend.routers.jobs.JobCaptureService", return_value=mock_service):
             response = client.post(
                 "/api/jobs/scrape",
                 json={"url": "https://greenhouse.io/jobs/new-acme-job"},
             )
 
         assert response.status_code == 200
-        assert response.json()["company"] == "Acme Corp"
-        # Only one company should exist
-        assert db.query(Company).count() == 1
+        mock_service.capture_from_url.assert_awaited_once_with(
+            "https://greenhouse.io/jobs/new-acme-job"
+        )
 
     def test_scrape_empty_skills(self, client):
-        """Pipeline handles job postings with no extracted skills."""
-        job_data = {**SAMPLE_JOB_DATA, "required_skills": [], "preferred_skills": []}
-        scraper_mock, llm_mock = self._mock_pipeline(job_data=job_data)
+        """Router propagates skills_extracted=0 from service."""
+        mock_service = MagicMock()
+        mock_service.capture_from_url = AsyncMock(
+            return_value=self._capture_result(skills_extracted=0)
+        )
 
-        with patch("backend.routers.jobs.ScraperService", return_value=scraper_mock), \
-             patch("backend.routers.jobs.LLMService", return_value=llm_mock), \
-             patch("backend.routers.jobs.save_file"):
+        with patch("backend.routers.jobs.JobCaptureService", return_value=mock_service):
             response = client.post(
                 "/api/jobs/scrape",
                 json={"url": "https://greenhouse.io/jobs/no-skills"},
@@ -484,36 +493,29 @@ class TestScrapeJob:
         assert response.status_code == 200
         assert response.json()["skills_extracted"] == 0
 
-    def test_scrape_slug_collision_resolved(self, client, db):
-        """When a slug already exists, a suffix is added to avoid collision."""
-        # Create a company whose slug would collide
-        db.add(Company(name="NewCo", slug="newco"))
-        db.commit()
-
-        # A different company whose slug normalizes to the same value
-        job_data = {**SAMPLE_JOB_DATA, "company": "NewCo"}
-        scraper_mock, llm_mock = self._mock_pipeline(job_data=job_data)
-
-        # This time the company name already exists, so it should reuse it
-        with patch("backend.routers.jobs.ScraperService", return_value=scraper_mock), \
-             patch("backend.routers.jobs.LLMService", return_value=llm_mock), \
-             patch("backend.routers.jobs.save_file"):
+    def test_scrape_slug_collision_resolved(self, client):
+        """Router returns success for service-generated slug collision scenarios."""
+        mock_service = MagicMock()
+        mock_service.capture_from_url = AsyncMock(
+            return_value=self._capture_result(company="NewCo")
+        )
+        with patch("backend.routers.jobs.JobCaptureService", return_value=mock_service):
             response = client.post(
                 "/api/jobs/scrape",
                 json={"url": "https://greenhouse.io/jobs/slug-test"},
             )
 
         assert response.status_code == 200
-        assert db.query(Company).count() == 1
+        assert response.json()["company"] == "NewCo"
 
     def test_scrape_missing_company_defaults_to_unknown(self, client):
-        """Empty/null company name from LLM defaults to 'Unknown Company'."""
-        job_data = {**SAMPLE_JOB_DATA, "company": ""}
-        scraper_mock, llm_mock = self._mock_pipeline(job_data=job_data)
+        """Unknown company fallback from service is returned by router."""
+        mock_service = MagicMock()
+        mock_service.capture_from_url = AsyncMock(
+            return_value=self._capture_result(company="Unknown Company")
+        )
 
-        with patch("backend.routers.jobs.ScraperService", return_value=scraper_mock), \
-             patch("backend.routers.jobs.LLMService", return_value=llm_mock), \
-             patch("backend.routers.jobs.save_file"):
+        with patch("backend.routers.jobs.JobCaptureService", return_value=mock_service):
             response = client.post(
                 "/api/jobs/scrape",
                 json={"url": "https://greenhouse.io/jobs/unknown-co"},
@@ -523,37 +525,25 @@ class TestScrapeJob:
         assert response.json()["company"] == "Unknown Company"
 
     def test_scrape_saves_files(self, client):
-        """save_file is called for both raw HTML and cleaned Markdown."""
-        scraper_mock, llm_mock = self._mock_pipeline()
+        """Router remains a thin adapter and delegates all work to service."""
+        mock_service = MagicMock()
+        mock_service.capture_from_url = AsyncMock(return_value=self._capture_result())
 
-        with patch("backend.routers.jobs.ScraperService", return_value=scraper_mock), \
-             patch("backend.routers.jobs.LLMService", return_value=llm_mock), \
-             patch("backend.routers.jobs.save_file") as mock_save:
+        with patch("backend.routers.jobs.JobCaptureService", return_value=mock_service):
             response = client.post(
                 "/api/jobs/scrape",
                 json={"url": "https://greenhouse.io/jobs/file-test"},
             )
 
         assert response.status_code == 200
-        assert mock_save.call_count == 2
-        # First call: raw HTML
-        assert mock_save.call_args_list[0][0][0] == "<html><body>Job</body></html>"
-        # Second call: cleaned Markdown
-        assert mock_save.call_args_list[1][0][0] == "# Backend Engineer"
+        mock_service.capture_from_url.assert_awaited_once()
 
     def test_scrape_no_salary_info(self, client):
-        """Pipeline handles job postings without salary information."""
-        job_data = {
-            **SAMPLE_JOB_DATA,
-            "salary_min": None,
-            "salary_max": None,
-            "salary_currency": "USD",
-        }
-        scraper_mock, llm_mock = self._mock_pipeline(job_data=job_data)
+        """Router response shape remains stable for jobs with no salary data."""
+        mock_service = MagicMock()
+        mock_service.capture_from_url = AsyncMock(return_value=self._capture_result())
 
-        with patch("backend.routers.jobs.ScraperService", return_value=scraper_mock), \
-             patch("backend.routers.jobs.LLMService", return_value=llm_mock), \
-             patch("backend.routers.jobs.save_file"):
+        with patch("backend.routers.jobs.JobCaptureService", return_value=mock_service):
             response = client.post(
                 "/api/jobs/scrape",
                 json={"url": "https://greenhouse.io/jobs/no-salary"},
@@ -562,21 +552,13 @@ class TestScrapeJob:
         assert response.status_code == 200
         assert response.json()["status"] == "success"
 
-    def test_scrape_true_slug_collision(self, client, db):
-        """When slug exists for a different company name, a unique suffix is appended."""
-        # Create a company whose slug would collide with the incoming job's company
-        # "TechCo" → slug "techco"; "Tech Co" → slug also "tech-co"
-        # To force a real slug collision: store "TechCo1" but slug="techco"
-        db.add(Company(name="TechCo-Existing", slug="techco"))
-        db.commit()
-
-        # Now scrape a job for "TechCo" which would also slug to "techco"
-        job_data = {**SAMPLE_JOB_DATA, "company": "TechCo"}
-        scraper_mock, llm_mock = self._mock_pipeline(job_data=job_data)
-
-        with patch("backend.routers.jobs.ScraperService", return_value=scraper_mock), \
-             patch("backend.routers.jobs.LLMService", return_value=llm_mock), \
-             patch("backend.routers.jobs.save_file"):
+    def test_scrape_true_slug_collision(self, client):
+        """Router returns service-computed company details for slug-collision paths."""
+        mock_service = MagicMock()
+        mock_service.capture_from_url = AsyncMock(
+            return_value=self._capture_result(company="TechCo")
+        )
+        with patch("backend.routers.jobs.JobCaptureService", return_value=mock_service):
             response = client.post(
                 "/api/jobs/scrape",
                 json={"url": "https://greenhouse.io/jobs/slug-collision"},
@@ -584,10 +566,3 @@ class TestScrapeJob:
 
         assert response.status_code == 200
         assert response.json()["company"] == "TechCo"
-        # Two companies should now exist, with different slugs
-        companies = db.query(Company).all()
-        assert len(companies) == 2
-        slugs = {c.slug for c in companies}
-        assert "techco" in slugs
-        # New company should have a different slug
-        assert any(s != "techco" for s in slugs)

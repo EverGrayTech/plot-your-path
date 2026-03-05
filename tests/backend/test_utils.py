@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from backend.utils.file_storage import file_exists, load_file, save_file
+from backend.utils.file_storage import file_exists, load_file, save_file, to_storage_path
 from backend.utils.slug import create_slug
 
 
@@ -112,3 +112,12 @@ class TestFileStorageUtils:
             loaded_content = load_file(filepath)
             
             assert loaded_content == content
+
+    def test_to_storage_path_strips_legacy_prefix(self):
+        """Legacy data/ prefix is normalized for DB storage."""
+        assert to_storage_path("data/jobs/raw/acme/1.html") == "jobs/raw/acme/1.html"
+
+    def test_save_file_returns_canonical_relative_path(self):
+        """save_file returns canonical relative storage path for relative inputs."""
+        returned = save_file("content", "data/jobs/cleaned/acme/1.md")
+        assert returned == "jobs/cleaned/acme/1.md"
