@@ -23,7 +23,7 @@ This plan closes those three gaps with minimum scope: no server, no frontend, no
 
 ---
 
-## 1. Technical Changes
+## Technical Design
 
 ### Affected Files
 
@@ -52,7 +52,7 @@ Usage: uv run python capture.py <job-url>
 
 ---
 
-## 2. Configuration Design
+### Configuration Design
 
 ### `DATA_ROOT` Environment Variable
 
@@ -99,58 +99,58 @@ DATA_ROOT=/home/rosea/Documents/plot_your_path
 
 ---
 
-## 3. Implementation Steps
+## Implementation Steps
 
-### Step 1 — Git branch
+- [x] **Step 1 — Git branch**
 ```
 git checkout -b feature/mvf-job-capture-cli
 ```
 
-### Step 2 — Update `config.py`
-- Add `data_root: str` field to `Settings`, expanding `~` to absolute path
-- Derive `database_url` from `data_root` when not explicitly set
-- Add `base_url: str | None = None` to `LLMConfig`
+- [x] **Step 2 — Update `config.py`**
+  - [x] Add `data_root: str` field to `Settings`, expanding `~` to absolute path
+  - [x] Derive `database_url` from `data_root` when not explicitly set
+  - [x] Add `base_url: str | None = None` to `LLMConfig`
 
-### Step 3 — Update `llm_service.py`
-- In `_call_openai()`, pass `base_url=self.config.base_url` to `AsyncOpenAI(...)` when set
-- In `complete()`, treat `provider == "openrouter"` as an alias for `"openai"`
+- [x] **Step 3 — Update `llm_service.py`**
+  - [x] In `_call_openai()`, pass `base_url=self.config.base_url` to `AsyncOpenAI(...)` when set
+  - [x] In `complete()`, treat `provider == "openrouter"` as an alias for `"openai"`
 
-### Step 4 — Update `file_storage.py`
-- Read `DATA_ROOT` from `settings` (not hardcoded `data/`)
-- `save_file()` and `load_file()` resolve paths relative to the configured data root when given a relative path
+- [x] **Step 4 — Update `file_storage.py`**
+  - [x] Read `DATA_ROOT` from `settings` (not hardcoded `data/`)
+  - [x] `save_file()` and `load_file()` resolve paths relative to the configured data root when given a relative path
 
-### Step 5 — Update `config/llm.json`
-- Set provider, base_url, api_key_env, and a default model for OpenRouter
+- [x] **Step 5 — Update `config/llm.json`**
+  - [x] Set provider, base_url, api_key_env, and a default model for OpenRouter
 
-### Step 6 — Update `.env.example`
-- Add `OPENROUTER_API_KEY`, `DATA_ROOT` with documentation comments
+- [x] **Step 6 — Update `.env.example`**
+  - [x] Add `OPENROUTER_API_KEY`, `DATA_ROOT` with documentation comments
 
-### Step 7 — Create `.env`
-- Set `OPENROUTER_API_KEY` and `DATA_ROOT=/home/rosea/Documents/plot_your_path`
-- `.env` is gitignored; this stays local
+- [x] **Step 7 — Create `.env`**
+  - [x] Set `OPENROUTER_API_KEY` and `DATA_ROOT=/home/rosea/Documents/plot_your_path`
+  - [x] `.env` is gitignored; this stays local
 
-### Step 8 — Create `capture.py`
-- Standalone async script at repo root
-- Mirrors the `scrape_job()` router function directly (no HTTP layer)
-- Prints step-by-step progress
-- Reports final: company, title, role_id, skills_count, elapsed time
+- [x] **Step 8 — Create `capture.py`**
+  - [x] Standalone async script at repo root
+  - [x] Mirrors the `scrape_job()` router function directly (no HTTP layer)
+  - [x] Prints step-by-step progress
+  - [x] Reports final: company, title, role_id, skills_count, elapsed time
 
-### Step 9 — Bootstrap external data directory
-- Create `~/Documents/plot_your_path/jobs/raw/` and `.../jobs/cleaned/`
-- Run `uv run python src/backend/init_db.py` to initialize the SQLite DB at the configured path
+- [x] **Step 9 — Bootstrap external data directory**
+  - [x] Create `~/Documents/plot_your_path/jobs/raw/` and `.../jobs/cleaned/`
+  - [x] Run `uv run python src/backend/init_db.py` to initialize the SQLite DB at the configured path
 
-### Step 10 — Smoke test
-- Run: `uv run python capture.py <a real job url>`
-- Verify: DB has a new row, files appear in `~/Documents/plot_your_path/jobs/`
+- [x] **Step 10 — Smoke test**
+  - [x] Run: `uv run python capture.py <a real job url>`
+  - [x] Verify: DB has a new row, files appear in `~/Documents/plot_your_path/jobs/`
 
-### Step 11 — Commit
+- [x] **Step 11 — Commit**
 ```
 feat(capture): add MVF CLI, OpenRouter support, and external data root
 ```
 
 ---
 
-## 4. Out of Scope (Punted)
+## Out of Scope
 
 - Frontend (Next.js app) — all of phases 10–16 from the original plan
 - E2E tests
@@ -160,11 +160,11 @@ feat(capture): add MVF CLI, OpenRouter support, and external data root
 
 ---
 
-## 5. Success Criteria
+## Success Criteria
 
-- [ ] `uv run python capture.py <linkedin-or-greenhouse-url>` completes without error
-- [ ] `~/Documents/plot_your_path/plot_your_path.db` contains a Company and Role row
-- [ ] `~/Documents/plot_your_path/jobs/raw/` contains the scraped HTML file
-- [ ] `~/Documents/plot_your_path/jobs/cleaned/` contains the LLM-cleaned Markdown
-- [ ] Running the same URL a second time returns `already_exists` (deduplication works)
-- [ ] No data files exist inside the repo after a successful capture
+- [x] `uv run python capture.py <linkedin-or-greenhouse-url>` completes without error
+- [x] `~/Documents/plot_your_path/plot_your_path.db` contains a Company and Role row
+- [x] `~/Documents/plot_your_path/jobs/raw/` contains the scraped HTML file
+- [x] `~/Documents/plot_your_path/jobs/cleaned/` contains the LLM-cleaned Markdown
+- [x] Running the same URL a second time returns `already_exists` (deduplication works)
+- [x] No data files exist inside the repo after a successful capture
