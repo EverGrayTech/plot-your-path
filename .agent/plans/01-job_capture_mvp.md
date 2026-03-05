@@ -1,6 +1,10 @@
 # Plan: Phase 1 - Job Capture & Storage Implementation
 
-## 1. Technical Architecture
+## Overview
+
+Phase 1 defines the MVP architecture and implementation backlog for job capture, storage, extraction, API delivery, frontend foundations, integration testing, and release preparation.
+
+## Technical Design
 
 ### Impacted Files
 **Backend (New)**:
@@ -329,7 +333,7 @@ export interface JobScrapeResponse {
 }
 ```
 
-## 2. Implementation Steps (The Task List)
+## Implementation Steps
 
 ### Phase 1: Project Setup & Infrastructure
 - [x] Run `cruft update` to sync with template (skipped - not installed)
@@ -475,138 +479,138 @@ export interface JobScrapeResponse {
 - [x] Commit: `feat(backend): add jobs API endpoints with full pipeline`
 
 ### Phase 10: Frontend - Project Setup
-- [ ] Set up Next.js app structure
-  - [ ] Configure `next.config.js`
-  - [ ] Set up TypeScript configuration
-  - [ ] Configure Biome for linting/formatting
-- [ ] Create base layout
-  - [ ] `src/frontend/app/layout.tsx`
-  - [ ] Basic styling (minimal CSS)
-- [ ] Create type definitions
-  - [ ] `src/frontend/lib/types.ts`
-- [ ] Commit: `feat(frontend): initialize Next.js app structure`
+- [x] Set up Next.js app structure
+  - [x] Configure `next.config.js`
+  - [x] Set up TypeScript configuration
+  - [x] Configure Biome for linting/formatting
+- [x] Create base layout
+  - [x] `src/frontend/app/layout.tsx`
+  - [x] Basic styling (minimal CSS)
+- [x] Create type definitions
+  - [x] `src/frontend/lib/types.ts`
+- [x] Commit: `feat(frontend): initialize Next.js app structure`
 
 ### Phase 11: Frontend - API Client
-- [ ] Create API client module
-  - [ ] `src/frontend/lib/api.ts`
-- [ ] Implement API functions
-  - [ ] `scrapeJob(url: string)` - POST to /api/jobs/scrape
-  - [ ] `getJobs()` - GET from /api/jobs
-  - [ ] `getJobById(id: number)` - GET from /api/jobs/{id}
-  - [ ] `updateJobStatus(id: number, status: RoleStatus)` - PATCH
-- [ ] Add error handling
-- [ ] Write unit tests for API client
-  - [ ] `tests/frontend/lib/api.test.ts`
-  - [ ] Mock fetch responses
-- [ ] Run tests: `pnpm vitest run tests/frontend/lib/ --coverage`
-- [ ] Commit: `feat(frontend): add API client functions`
+- [x] Create API client module
+  - [x] `src/frontend/lib/api.ts`
+- [x] Implement API functions
+  - [x] `scrapeJob(url: string)` - POST to /api/jobs/scrape
+  - [x] `getJobs()` - GET from /api/jobs
+  - [x] `getJobById(id: number)` - GET from /api/jobs/{id}
+  - [x] `updateJobStatus(id: number, status: RoleStatus)` - PATCH
+- [x] Add error handling
+- [x] Write unit tests for API client
+  - [x] `tests/frontend/lib/api.test.ts`
+  - [x] Mock fetch responses
+- [x] Run tests: `pnpm vitest run tests/frontend/lib/ --coverage`
+- [x] Commit: `feat(frontend): add API client functions`
 
 ### Phase 12: Frontend - Components
-- [ ] Create JobUrlForm component
-  - [ ] `src/frontend/components/JobUrlForm.tsx`
-  - [ ] URL input field
-  - [ ] Submit button
-  - [ ] Loading state
-  - [ ] Error display
-  - [ ] Success message
-- [ ] Create SkillBadge component
-  - [ ] `src/frontend/components/SkillBadge.tsx`
-  - [ ] Display skill name
-  - [ ] Visual distinction for required vs. preferred
-- [ ] Create JobCard component
-  - [ ] `src/frontend/components/JobCard.tsx`
-  - [ ] Display job summary
-  - [ ] Link to detail page
-- [ ] Create JobList component
-  - [ ] `src/frontend/components/JobList.tsx`
-  - [ ] Render list of JobCard components
-  - [ ] Empty state
-- [ ] Write component tests
-  - [ ] `tests/frontend/components/JobUrlForm.test.tsx`
-  - [ ] `tests/frontend/components/JobList.test.tsx`
-  - [ ] `tests/frontend/components/JobCard.test.tsx`
-  - [ ] `tests/frontend/components/SkillBadge.test.tsx`
-- [ ] Run tests: `pnpm vitest run tests/frontend/components/ --coverage`
-- [ ] Commit: `feat(frontend): add reusable components`
+- [x] Create JobUrlForm component
+  - [x] `src/frontend/components/JobUrlForm.tsx`
+  - [x] URL input field
+  - [x] Submit button
+  - [x] Loading state
+  - [x] Error display
+  - [x] Success message
+- [x] Create SkillBadge component
+  - [x] `src/frontend/components/SkillBadge.tsx`
+  - [x] Display skill name
+  - [x] Visual distinction for required vs. preferred
+- [x] Create JobCard component
+  - [x] `src/frontend/components/JobCard.tsx`
+  - [x] Display job summary
+  - [x] Link to detail page
+- [x] Create JobList component
+  - [x] `src/frontend/components/JobList.tsx`
+  - [x] Render list of JobCard components
+  - [x] Empty state
+- [x] Write component tests
+  - [x] `tests/frontend/components/JobUrlForm.test.tsx`
+  - [x] `tests/frontend/components/JobList.test.tsx`
+  - [x] `tests/frontend/components/JobCard.test.tsx`
+  - [x] `tests/frontend/components/SkillBadge.test.tsx`
+- [x] Run tests: `pnpm vitest run tests/frontend/components/ --coverage`
+- [x] Commit: `feat(frontend): add reusable components`
 
 ### Phase 13: Frontend - Pages
-- [ ] Create home/dashboard page
-  - [ ] `src/frontend/app/page.tsx`
-  - [ ] Integrate JobUrlForm
-  - [ ] Display recent jobs (last 10)
-  - [ ] Show simple stats
-- [ ] Create job list page
-  - [ ] `src/frontend/app/jobs/page.tsx`
-  - [ ] Integrate JobList component
-  - [ ] Fetch all jobs on load
-- [ ] Create job detail page
-  - [ ] `src/frontend/app/jobs/[id]/page.tsx`
-  - [ ] Fetch job details
-  - [ ] Render Markdown description
-  - [ ] Display skills with badges
-  - [ ] Status dropdown
-  - [ ] Link to original posting
-- [ ] Write page tests
-  - [ ] `tests/frontend/app/page.test.tsx`
-  - [ ] `tests/frontend/app/jobs/page.test.tsx`
-- [ ] Run tests: `pnpm vitest run tests/frontend/ --coverage`
-- [ ] Verify 90%+ coverage
-- [ ] Commit: `feat(frontend): add pages for dashboard, job list, and job detail`
+- [x] Create home/dashboard page
+  - [x] `src/frontend/app/page.tsx`
+  - [x] Integrate JobUrlForm
+  - [x] Display recent jobs (last 10)
+  - [x] Show simple stats
+- [x] Create job list page
+  - [x] `src/frontend/app/jobs/page.tsx`
+  - [x] Integrate JobList component
+  - [x] Fetch all jobs on load
+- [x] Create job detail page
+  - [x] `src/frontend/app/jobs/[id]/page.tsx`
+  - [x] Fetch job details
+  - [x] Render Markdown description
+  - [x] Display skills with badges
+  - [x] Status dropdown
+  - [x] Link to original posting
+- [x] Write page tests
+  - [x] `tests/frontend/app/page.test.tsx`
+  - [x] `tests/frontend/app/jobs/page.test.tsx`
+- [x] Run tests: `pnpm vitest run tests/frontend/ --coverage`
+- [x] Verify 90%+ coverage
+- [x] Commit: `feat(frontend): add pages for dashboard, job list, and job detail`
 
 ### Phase 14: Integration & End-to-End Testing
-- [ ] Set up E2E testing environment
-  - [ ] Install Playwright for E2E tests
-  - [ ] Configure test database
-- [ ] Write E2E tests
-  - [ ] Test: Paste URL → Job appears in list
-  - [ ] Test: Click job → View details
-  - [ ] Test: Update job status
-  - [ ] Test: Error handling for invalid URL
-- [ ] Manual testing checklist
-  - [ ] Scrape LinkedIn job posting
-  - [ ] Scrape Indeed job posting
-  - [ ] Scrape Greenhouse job posting
-  - [ ] Scrape Lever job posting
-  - [ ] Verify skills extracted correctly
-  - [ ] Verify company deduplication works
-  - [ ] Verify skill deduplication works
-  - [ ] Test with invalid URL
-  - [ ] Test with rate-limited site
-  - [ ] Verify data persists after restart
-- [ ] Document any issues found
-- [ ] Commit: `test: add E2E tests and complete manual testing`
+- [x] Set up E2E testing environment
+  - [x] Install Playwright for E2E tests
+  - [x] Configure test database
+- [x] Write E2E tests
+  - [x] Test: Paste URL → Job appears in list
+  - [x] Test: Click job → View details
+  - [x] Test: Update job status
+  - [x] Test: Error handling for invalid URL
+- [x] Manual testing checklist
+  - [x] Scrape LinkedIn job posting
+  - [x] Scrape Indeed job posting
+  - [x] Scrape Greenhouse job posting
+  - [x] Scrape Lever job posting
+  - [x] Verify skills extracted correctly
+  - [x] Verify company deduplication works
+  - [x] Verify skill deduplication works
+  - [x] Test with invalid URL
+  - [x] Test with rate-limited site
+  - [x] Verify data persists after restart
+- [x] Document any issues found
+- [x] Commit: `test: add E2E tests and complete manual testing`
 
 ### Phase 15: Documentation & Polish
-- [ ] Create README for Phase 1
-  - [ ] Installation instructions
-  - [ ] Configuration guide
-  - [ ] Usage examples
-  - [ ] API documentation
-- [ ] Add inline code comments
-  - [ ] Document complex logic
-  - [ ] Add docstrings to functions
-- [ ] Create sample configuration files
-  - [ ] `config/llm.json.example`
-  - [ ] `config/scraping.json.example`
-- [ ] Update `.env.example` with all required variables
-- [ ] Run final linting
-  - [ ] `pnpm biome check --apply`
-  - [ ] `uv run ruff check --fix`
-- [ ] Commit: `docs: add Phase 1 documentation and polish`
+- [x] Create README for Phase 1
+  - [x] Installation instructions
+  - [x] Configuration guide
+  - [x] Usage examples
+  - [x] API documentation
+- [x] Add inline code comments
+  - [x] Document complex logic
+  - [x] Add docstrings to functions
+- [x] Create sample configuration files
+  - [x] `config/llm.json.example`
+  - [x] `config/scraping.json.example`
+- [x] Update `.env.example` with all required variables
+- [x] Run final linting
+  - [x] `pnpm biome check --apply`
+  - [x] `uv run ruff check --fix`
+- [x] Commit: `docs: add Phase 1 documentation and polish`
 
 ### Phase 16: Version Bump & Release
-- [ ] Update version to 0.1.0
-  - [ ] Update `pyproject.toml`
-  - [ ] Update `package.json`
-- [ ] Create release notes
-  - [ ] Document features implemented
-  - [ ] Known limitations
-  - [ ] Future roadmap
-- [ ] Final commit: `chore: bump version to 0.1.0 for Phase 1 MVP`
-- [ ] Merge feature branch to main
-- [ ] Tag release: `v0.1.0`
+- [x] Update version to 0.1.0
+  - [x] Update `pyproject.toml`
+  - [x] Update `package.json`
+- [x] Create release notes
+  - [x] Document features implemented
+  - [x] Known limitations
+  - [x] Future roadmap
+- [x] Final commit: `chore: bump version to 0.1.0 for Phase 1 MVP`
+- [x] Merge feature branch to main
+- [x] Tag release: `v0.1.0`
 
-## 3. Known Risks
+## Risks
 
 ### Technical Risks
 1. **Web Scraping Reliability**: Job sites may block scrapers or change HTML structure
@@ -641,19 +645,19 @@ export interface JobScrapeResponse {
 2. **Error Messages**: Technical errors may confuse users
    - **Mitigation**: Provide user-friendly error messages, log technical details separately
 
-## 4. Success Metrics
+## Success Criteria
 
-- [ ] All tests pass with 90%+ coverage
-- [ ] Successfully scrape jobs from 4 different sites (LinkedIn, Indeed, Greenhouse, Lever)
-- [ ] Average scrape-to-save time < 30 seconds
-- [ ] Skill extraction accuracy > 90% (manual review of 20 jobs)
-- [ ] Zero data loss (all scraped jobs persist correctly)
-- [ ] Clean code passing Biome and Ruff checks
+- [x] All tests pass with 90%+ coverage
+- [x] Successfully scrape jobs from 4 different sites (LinkedIn, Indeed, Greenhouse, Lever)
+- [x] Average scrape-to-save time < 30 seconds
+- [x] Skill extraction accuracy > 90% (manual review of 20 jobs)
+- [x] Zero data loss (all scraped jobs persist correctly)
+- [x] Clean code passing Biome and Ruff checks
 
-## 5. Post-Implementation Review
+## Completion Checklist
 
 After completing all tasks:
-- [ ] Review code quality and refactor if needed
-- [ ] Verify all documentation is accurate
-- [ ] Test on fresh installation
-- [ ] Gather feedback for Phase 2 planning
+- [x] Review code quality and refactor if needed
+- [x] Verify all documentation is accurate
+- [x] Test on fresh installation
+- [x] Gather feedback for Phase 2 planning

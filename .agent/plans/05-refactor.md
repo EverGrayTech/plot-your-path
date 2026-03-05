@@ -1,6 +1,6 @@
 # Plan: Pre-Phase Refactor & Debt Cleanup
 
-## Why this plan exists
+## Overview
 
 A code review against `SYSTEM_SPEC.md`, the existing implementation plans, and current backend code found several **high-impact debt items** that should be addressed before continuing toward later phases (frontend build-out, scoring engine, and agent orchestration).
 
@@ -8,7 +8,9 @@ The objective is to reduce divergence risk, enforce backend async/IO standards, 
 
 ---
 
-## Key Findings (What should be fixed now)
+## Technical Design
+
+### Key Findings (What should be fixed now)
 
 ## 1) Pipeline duplication across API and CLI (High)
 
@@ -67,7 +69,7 @@ This can trigger integrity errors in realistic LLM output.
 
 ---
 
-## Refactor Goals
+## Goals
 
 1. Single, reusable capture pipeline shared by CLI and API.
 2. Async-route compliance with non-blocking behavior expectations.
@@ -77,7 +79,7 @@ This can trigger integrity errors in realistic LLM output.
 
 ---
 
-## Proposed Architecture Changes
+### Proposed Architecture Changes
 
 ### New service
 - `src/backend/services/job_capture.py`
@@ -116,32 +118,32 @@ This can trigger integrity errors in realistic LLM output.
 
 ## Implementation Steps
 
-### Step 1 — Introduce capture domain result/exception types
-- Define typed result object and domain exceptions for expected failure modes.
+- [x] **Step 1 — Introduce capture domain result/exception types**
+  - [x] Define typed result object and domain exceptions for expected failure modes.
 
-### Step 2 — Extract shared pipeline into `JobCaptureService`
-- Move duplicated API/CLI logic into service with clear method boundaries.
+- [x] **Step 2 — Extract shared pipeline into `JobCaptureService`**
+  - [x] Move duplicated API/CLI logic into service with clear method boundaries.
 
-### Step 3 — Refactor API route to thin adapter
-- Keep async route non-blocking by offloading blocking operations appropriately.
+- [x] **Step 3 — Refactor API route to thin adapter**
+  - [x] Keep async route non-blocking by offloading blocking operations appropriately.
 
-### Step 4 — Refactor CLI to consume service
-- Preserve current flags and output behavior while removing persistence duplication.
+- [x] **Step 4 — Refactor CLI to consume service**
+  - [x] Preserve current flags and output behavior while removing persistence duplication.
 
-### Step 5 — Normalize file path strategy
-- Migrate both code paths to one persisted path format.
-- Add compatibility read path for legacy records.
+- [x] **Step 5 — Normalize file path strategy**
+  - [x] Migrate both code paths to one persisted path format.
+  - [x] Add compatibility read path for legacy records.
 
-### Step 6 — Harden skill linking
-- Deduplicate skills and enforce deterministic requirement-level precedence.
+- [x] **Step 6 — Harden skill linking**
+  - [x] Deduplicate skills and enforce deterministic requirement-level precedence.
 
-### Step 7 — Strengthen tests
-- Add service-focused tests for end-to-end pipeline behavior.
-- Add regression tests for:
-  - duplicate skills in same payload
-  - required/preferred overlap
-  - path format consistency between API and CLI
-  - rollback behavior on mid-pipeline failure
+- [ ] **Step 7 — Strengthen tests**
+  - [ ] Add service-focused tests for end-to-end pipeline behavior.
+  - [ ] Add regression tests for:
+    - [x] duplicate skills in same payload
+    - [x] required/preferred overlap
+    - [ ] path format consistency between API and CLI
+    - [ ] rollback behavior on mid-pipeline failure
 
 ---
 
@@ -161,8 +163,8 @@ This can trigger integrity errors in realistic LLM output.
 
 ## Success Criteria
 
-- [ ] API and CLI both use one shared capture service.
-- [ ] No blocking file/DB work occurs directly inside async route body.
-- [ ] Stored file paths are canonical and consistent across ingestion paths.
-- [ ] Duplicate/overlapping skills no longer raise integrity errors.
+- [x] API and CLI both use one shared capture service.
+- [x] No blocking file/DB work occurs directly inside async route body.
+- [x] Stored file paths are canonical and consistent across ingestion paths.
+- [x] Duplicate/overlapping skills no longer raise integrity errors.
 - [ ] Existing tests pass and new regression coverage is added for refactor targets.

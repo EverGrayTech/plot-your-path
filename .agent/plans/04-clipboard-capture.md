@@ -30,7 +30,9 @@ The URL is still recorded as-is (deduplication, source reference) but the scrape
 
 ---
 
-## Architecture Design
+## Technical Design
+
+### Architecture Design
 
 ### New invocation modes
 
@@ -76,7 +78,7 @@ No raw file is written since there is no HTML.  The cleaned Markdown is still sa
 
 ---
 
-## Affected Files
+### Affected Files
 
 | File | Change Type | Change |
 |------|-------------|---------|
@@ -90,7 +92,7 @@ No raw file is written since there is no HTML.  The cleaned Markdown is still sa
 
 ## Implementation Steps
 
-### Step 1 — Update `pyproject.toml`
+- [x] **Step 1 — Update `pyproject.toml`**
 
 Add `pyperclip` as a `clipboard` optional extra:
 
@@ -103,7 +105,7 @@ dev       = [...]
 
 Install with: `uv sync --extra clipboard`
 
-### Step 2 — Add `read_clipboard()` to `capture.py`
+- [x] **Step 2 — Add `read_clipboard()` to `capture.py`**
 
 ```python
 def read_clipboard() -> str:
@@ -161,7 +163,7 @@ def read_clipboard() -> str:
     return text.strip()
 ```
 
-### Step 3 — Update `main()` in `capture.py`
+- [x] **Step 3 — Update `main()` in `capture.py`**
 
 Replace bare `sys.argv` parsing with `argparse`:
 
@@ -185,13 +187,13 @@ clip_mode = args.clip
 ```
 
 In clip mode:
-- Skip the `UNSUPPORTED_DOMAINS` check (linkedin.com is fine as a URL record)
-- Call `read_clipboard()` to get `raw_text`
-- Pass `raw_text` directly to `llm.denoise_job_posting()` (skipping `ScraperService`)
-- Set `role.raw_html_path = "clipboard"` (sentinel — no file written)
-- Print a `📋 Clipboard mode` banner so the user sees the switch
+  - [x] Skip the `UNSUPPORTED_DOMAINS` check (linkedin.com is fine as a URL record)
+  - [x] Call `read_clipboard()` to get `raw_text`
+  - [x] Pass `raw_text` directly to `llm.denoise_job_posting()` (skipping `ScraperService`)
+  - [x] Set `role.raw_html_path = "clipboard"` (sentinel — no file written)
+  - [x] Print a `📋 Clipboard mode` banner so the user sees the switch
 
-### Step 4 — Smoke test
+- [x] **Step 4 — Smoke test**
 
 ```bash
 # 1. Open a LinkedIn job page, Ctrl+A, Ctrl+C
@@ -200,7 +202,7 @@ uv run python capture.py --clip "https://www.linkedin.com/jobs/view/12345"
 # Expected: skips scraper, runs LLM, persists to DB, prints summary
 ```
 
-### Step 5 — Commit
+- [x] **Step 5 — Commit**
 
 ```
 feat(capture): add --clip flag for clipboard-based job capture
@@ -226,10 +228,10 @@ on the clipboard text; the URL is recorded for deduplication as normal.
 
 ## Success Criteria
 
-- [ ] `uv run python capture.py --clip "https://www.linkedin.com/jobs/view/99999"` runs end-to-end after copying a LinkedIn job page
-- [ ] DB row is created with the LinkedIn URL as `role.url`
-- [ ] `raw_html_path` is set to `"clipboard"` (no file written for raw HTML)
-- [ ] Cleaned Markdown is saved to `~/Documents/plot_your_path/jobs/cleaned/`
-- [ ] `uv run python capture.py <url>` (no `--clip`) behaves exactly as before
-- [ ] Empty clipboard prints a human-readable error with install tips
-- [ ] Works in WSL (via `pyperclip`'s Windows clipboard bridge or `xclip` if X server running)
+- [x] `uv run python capture.py --clip "https://www.linkedin.com/jobs/view/99999"` runs end-to-end after copying a LinkedIn job page
+- [x] DB row is created with the LinkedIn URL as `role.url`
+- [x] `raw_html_path` is set to `"clipboard"` (no file written for raw HTML)
+- [x] Cleaned Markdown is saved to `~/Documents/plot_your_path/jobs/cleaned/`
+- [x] `uv run python capture.py <url>` (no `--clip`) behaves exactly as before
+- [x] Empty clipboard prints a human-readable error with install tips
+- [x] Works in WSL (via `pyperclip`'s Windows clipboard bridge or `xclip` if X server running)

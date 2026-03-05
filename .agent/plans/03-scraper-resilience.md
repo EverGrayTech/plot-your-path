@@ -1,6 +1,6 @@
 # Plan: Scraper Resilience — Decouple CLI from Playwright
 
-## Problem Statement
+## Overview
 
 Running `capture.py` in a WSL (or any headless Linux) environment fails because Playwright
 requires a separately-installed Chromium binary (`playwright install chromium`) and a full
@@ -16,7 +16,9 @@ behind authentication.
 
 ---
 
-## Root Causes
+## Technical Design
+
+### Root Causes
 
 | # | Root Cause | Impact |
 |---|-----------|--------|
@@ -39,7 +41,7 @@ behind authentication.
 
 ---
 
-## Architecture Design
+### Architecture Design
 
 ### Scraping Decision Tree (new)
 
@@ -88,7 +90,7 @@ Lazy-checked at call time — never at module import time.
 
 ---
 
-## Affected Files
+### Affected Files
 
 | File | Change Type | Change |
 |------|-------------|--------|
@@ -102,7 +104,7 @@ Lazy-checked at call time — never at module import time.
 
 ## Implementation Steps
 
-### Step 1 — Update `pyproject.toml`
+- [x] **Step 1 — Update `pyproject.toml`**
 
 Move `playwright>=1.48.0` from `dependencies` to a new optional extra:
 
@@ -115,7 +117,7 @@ dev = [...]
 Install with: `uv sync --extra browser && uv run playwright install chromium`
 Default install (`uv sync`) remains browser-free.
 
-### Step 2 — Update `config/scraping.json` + `ScrapingConfig`
+- [x] **Step 2 — Update `config/scraping.json` + `ScrapingConfig`**
 
 Add `min_content_chars` (threshold below which we consider a static scrape "too thin"):
 
@@ -131,14 +133,14 @@ Add `min_content_chars` (threshold below which we consider a static scrape "too 
 
 Add `min_content_chars: int = 500` to `ScrapingConfig`.
 
-### Step 3 — Refactor `scraper.py`
+- [x] **Step 3 — Refactor `scraper.py`**
 
-1. **Remove** the top-level `from playwright.async_api import Page, async_playwright` import.
-2. **Add** `UNSUPPORTED_DOMAINS` (LinkedIn) and `MIN_CONTENT_CHARS` constants.
-3. **Add** `playwright_available()` module-level helper that lazy-imports.
-4. **Update** `_needs_javascript()` → `_prefers_javascript()` or keep name but change semantics.
-5. **Update** `_scrape_with_playwright()` to do a lazy import of `async_playwright` inside the method body, with a clear `ImportError` → `ScraperError` conversion.
-6. **Update** `scrape()` to implement the new decision tree above.
+  - [x] **Remove** the top-level `from playwright.async_api import Page, async_playwright` import.
+  - [x] **Add** `UNSUPPORTED_DOMAINS` (LinkedIn) and `MIN_CONTENT_CHARS` constants.
+  - [x] **Add** `playwright_available()` module-level helper that lazy-imports.
+  - [x] **Update** `_needs_javascript()` → `_prefers_javascript()` or keep name but change semantics.
+  - [x] **Update** `_scrape_with_playwright()` to do a lazy import of `async_playwright` inside the method body, with a clear `ImportError` → `ScraperError` conversion.
+  - [x] **Update** `scrape()` to implement the new decision tree above.
 
 Key snippet for `scrape()`:
 
@@ -179,7 +181,7 @@ async def scrape(self, url: str) -> str:
     return await self._scrape_with_playwright(url)
 ```
 
-### Step 4 — Update `_scrape_with_playwright()`
+- [x] **Step 4 — Update `_scrape_with_playwright()`**
 
 Move the `async_playwright` import inside the method:
 
@@ -195,14 +197,14 @@ async def _scrape_with_playwright(self, url: str) -> str:
     # ... rest unchanged ...
 ```
 
-### Step 5 — Update tests
+- [x] **Step 5 — Update tests**
 
-- Update `test_needs_javascript_linkedin` → `test_linkedin_raises_unsupported` (scraping a LinkedIn URL should now raise `ScraperError`, not try Playwright)
-- Add `test_thin_content_falls_back_to_playwright_when_available`
-- Add `test_thin_content_raises_when_playwright_unavailable`
-- Add `test_playwright_available_when_installed` / `test_playwright_available_when_missing`
+  - [x] Update `test_needs_javascript_linkedin` → `test_linkedin_raises_unsupported` (scraping a LinkedIn URL should now raise `ScraperError`, not try Playwright)
+  - [x] Add `test_thin_content_falls_back_to_playwright_when_available`
+  - [x] Add `test_thin_content_raises_when_playwright_unavailable`
+  - [x] Add `test_playwright_available_when_installed` / `test_playwright_available_when_missing`
 
-### Step 6 — Commit
+- [x] **Step 6 — Commit**
 
 ```
 fix(scraper): decouple CLI from Playwright; make browser an optional extra
@@ -226,8 +228,8 @@ message pointing users to the direct ATS link.
 
 ## Success Criteria
 
-- [ ] `uv sync` (no extras) completes with zero Playwright-related output
-- [ ] `uv run python capture.py <greenhouse-or-lever-url>` works in WSL without any browser installed
-- [ ] `uv run python capture.py <linkedin-url>` prints a clear, human-readable error with actionable instructions
-- [ ] All existing tests pass; new tests cover the fallback and LinkedIn-rejection paths
-- [ ] ≥90% line coverage maintained
+- [x] `uv sync` (no extras) completes with zero Playwright-related output
+- [x] `uv run python capture.py <greenhouse-or-lever-url>` works in WSL without any browser installed
+- [x] `uv run python capture.py <linkedin-url>` prints a clear, human-readable error with actionable instructions
+- [x] All existing tests pass; new tests cover the fallback and LinkedIn-rejection paths
+- [x] ≥90% line coverage maintained
