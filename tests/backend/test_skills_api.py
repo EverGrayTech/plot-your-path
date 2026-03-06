@@ -76,7 +76,7 @@ class TestListSkills:
             url="https://example.com/jobs/1",
             raw_html_path="data/jobs/raw/acme/1.html",
             cleaned_md_path="data/jobs/cleaned/acme/1.md",
-            status="active",
+            status="open",
         )
         role_two = Role(
             company_id=company.id,
@@ -84,7 +84,7 @@ class TestListSkills:
             url="https://example.com/jobs/2",
             raw_html_path="data/jobs/raw/acme/2.html",
             cleaned_md_path="data/jobs/cleaned/acme/2.md",
-            status="active",
+            status="open",
         )
         db.add(role_one)
         db.add(role_two)
@@ -132,7 +132,7 @@ class TestGetSkill:
             url="https://example.com/jobs/1",
             raw_html_path="data/jobs/raw/acme/1.html",
             cleaned_md_path="data/jobs/cleaned/acme/1.md",
-            status="active",
+            status="open",
         )
         role_two = Role(
             company_id=company.id,
@@ -140,7 +140,7 @@ class TestGetSkill:
             url="https://example.com/jobs/2",
             raw_html_path="data/jobs/raw/acme/2.html",
             cleaned_md_path="data/jobs/cleaned/acme/2.md",
-            status="applied",
+            status="submitted",
         )
         db.add(role_one)
         db.add(role_two)

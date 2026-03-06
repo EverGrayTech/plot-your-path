@@ -23,7 +23,7 @@ class Role(Base):
         url: Original job posting URL (unique)
         raw_html_path: Path to raw HTML file
         cleaned_md_path: Path to cleaned Markdown file
-        status: Job status (active, applied, rejected, archived)
+        status: Job status (open, submitted, interviewing, rejected)
         created_at: Timestamp when record was created
     """
 
@@ -39,7 +39,7 @@ class Role(Base):
     url = Column(String, nullable=False, unique=True, index=True)
     raw_html_path = Column(String, nullable=False)
     cleaned_md_path = Column(String, nullable=False)
-    status = Column(String, default="active", nullable=False)
+    status = Column(String, default="open", nullable=False)
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
 
     def __repr__(self) -> str:

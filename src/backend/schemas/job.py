@@ -11,10 +11,18 @@ from backend.schemas.company import Company
 class RoleStatus(str, Enum):
     """Role status enumeration."""
 
-    ACTIVE = "active"
-    APPLIED = "applied"
+    OPEN = "open"
+    SUBMITTED = "submitted"
+    INTERVIEWING = "interviewing"
     REJECTED = "rejected"
-    ARCHIVED = "archived"
+
+
+class RoleStatusChange(BaseModel):
+    """Audit entry for a role status transition."""
+
+    from_status: RoleStatus | None
+    to_status: RoleStatus
+    changed_at: datetime
 
 
 class RequirementLevel(str, Enum):
@@ -94,3 +102,4 @@ class JobDetail(BaseModel):
     description_md: str
     created_at: datetime
     status: RoleStatus
+    status_history: list[RoleStatusChange]

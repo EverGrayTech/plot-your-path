@@ -13,7 +13,7 @@ describe("JobsPageClient", () => {
       salary_range: "$120,000 - $150,000 USD",
       created_at: "2026-03-05T10:00:00Z",
       skills_count: 3,
-      status: "active",
+      status: "open",
     },
     {
       id: 1,
@@ -22,7 +22,7 @@ describe("JobsPageClient", () => {
       salary_range: null,
       created_at: "2026-03-01T10:00:00Z",
       skills_count: 2,
-      status: "applied",
+      status: "submitted",
     },
   ];
 
@@ -51,7 +51,8 @@ describe("JobsPageClient", () => {
       },
       description_md: "",
       created_at: "2026-03-05T10:00:00Z",
-      status: "active",
+      status: "open",
+      status_history: [],
     });
 
     render(<JobsPageClient />);
@@ -104,7 +105,8 @@ describe("JobsPageClient", () => {
       skills: { required: [], preferred: [] },
       description_md: "",
       created_at: "2026-03-06T12:00:00Z",
-      status: "active",
+      status: "open",
+      status_history: [],
     });
 
     render(<JobsPageClient />);
@@ -158,7 +160,8 @@ describe("JobsPageClient", () => {
       },
       description_md: "",
       created_at: "2026-03-05T10:00:00Z",
-      status: "active",
+      status: "open",
+      status_history: [],
     });
 
     render(<JobsPageClient />);
@@ -192,7 +195,8 @@ describe("JobsPageClient", () => {
       },
       description_md: "",
       created_at: "2026-03-05T10:00:00Z",
-      status: "active",
+      status: "open",
+      status_history: [],
     });
     vi.spyOn(api, "getSkill").mockResolvedValue({
       id: 1,
@@ -204,7 +208,7 @@ describe("JobsPageClient", () => {
           id: 2,
           company: "Beta Co",
           title: "Engineer",
-          status: "active",
+          status: "open",
           created_at: "2026-03-05T10:00:00Z",
         },
       ],
@@ -245,7 +249,8 @@ describe("JobsPageClient", () => {
       },
       description_md: "",
       created_at: "2026-03-05T10:00:00Z",
-      status: "active",
+      status: "open",
+      status_history: [],
     });
     const getSkillSpy = vi.spyOn(api, "getSkill").mockResolvedValue({
       id: 2,
@@ -263,5 +268,80 @@ describe("JobsPageClient", () => {
 
     expect(getSkillSpy).toHaveBeenCalledWith(2);
     expect(await screen.findByRole("heading", { name: "Skill Detail" })).toBeInTheDocument();
+  });
+
+  it("updates status and renders status history", async () => {
+    vi.spyOn(api, "listJobs").mockResolvedValue(jobs);
+    vi.spyOn(api, "getJob")
+      .mockResolvedValueOnce({
+        id: 2,
+        company: {
+          id: 10,
+          name: "Beta Co",
+          slug: "beta-co",
+          website: null,
+          created_at: "2026-03-05T10:00:00Z",
+        },
+        title: "Engineer",
+        team_division: "Platform",
+        salary: { min: 120000, max: 150000, currency: "USD" },
+        url: "https://example.com/jobs/2",
+        skills: {
+          required: [{ id: 1, name: "Python", requirement_level: "required" }],
+          preferred: [{ id: 2, name: "FastAPI", requirement_level: "preferred" }],
+        },
+        description_md: "",
+        created_at: "2026-03-05T10:00:00Z",
+        status: "open",
+        status_history: [],
+      })
+      .mockResolvedValueOnce({
+        id: 2,
+        company: {
+          id: 10,
+          name: "Beta Co",
+          slug: "beta-co",
+          website: null,
+          created_at: "2026-03-05T10:00:00Z",
+        },
+        title: "Engineer",
+        team_division: "Platform",
+        salary: { min: 120000, max: 150000, currency: "USD" },
+        url: "https://example.com/jobs/2",
+        skills: {
+          required: [{ id: 1, name: "Python", requirement_level: "required" }],
+          preferred: [{ id: 2, name: "FastAPI", requirement_level: "preferred" }],
+        },
+        description_md: "",
+        created_at: "2026-03-05T10:00:00Z",
+        status: "submitted",
+        status_history: [
+          {
+            from_status: "open",
+            to_status: "submitted",
+            changed_at: "2026-03-06T12:00:00Z",
+          },
+        ],
+      });
+
+    vi.spyOn(api, "updateJobStatus").mockResolvedValue({
+      id: 2,
+      company: "Beta Co",
+      title: "Engineer",
+      salary_range: "$120,000 - $150,000 USD",
+      created_at: "2026-03-05T10:00:00Z",
+      skills_count: 3,
+      status: "submitted",
+    });
+
+    render(<JobsPageClient />);
+
+    await screen.findByText("Engineer");
+    fireEvent.click(screen.getByRole("button", { name: /Engineer — Beta Co/i }));
+    fireEvent.change(await screen.findByLabelText("Update status"), {
+      target: { value: "submitted" },
+    });
+
+    expect(await screen.findByText(/open → submitted/i)).toBeInTheDocument();
   });
 });

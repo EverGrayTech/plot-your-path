@@ -135,7 +135,7 @@ class JobCaptureService:
                 url=url,
                 raw_html_path="pending",
                 cleaned_md_path="pending",
-                status="active",
+                status="open",
             )
             self.db.add(role)
             self.db.flush()
