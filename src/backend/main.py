@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from backend.config import settings
 from backend.routers import jobs
+from backend.routers import skills
 
 app = FastAPI(
     title="Plot Your Path API",
@@ -23,3 +24,4 @@ app.add_middleware(
 
 # Mount routers
 app.include_router(jobs.router, prefix="/api")
+app.include_router(skills.router, prefix="/api")

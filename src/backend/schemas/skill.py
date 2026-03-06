@@ -36,3 +36,12 @@ class Skill(SkillBase):
 
     id: int
     created_at: datetime
+
+
+class SkillListItem(BaseModel):
+    """Schema for skills list item with usage summary."""
+
+    id: int
+    name: str
+    category: str | None
+    usage_count: int
