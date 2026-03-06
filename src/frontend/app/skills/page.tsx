@@ -1,10 +1,7 @@
 import React from "react";
 
+import { SkillsPageClient } from "../../components/SkillsPageClient";
+
 export default function SkillsPage() {
-  return (
-    <section>
-      <h1>Skills</h1>
-      <p>Skills view is planned for the next iteration.</p>
-    </section>
-  );
+  return <SkillsPageClient />;
 }
