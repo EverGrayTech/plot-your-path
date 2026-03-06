@@ -55,3 +55,47 @@ hostname -I
 ```
 
 Then open `http://<wsl-ip>:3000`.
+
+## Running tests
+
+This project has both backend (Python) and frontend (TypeScript) tests.
+
+### Backend tests (pytest)
+
+Make sure dev dependencies are installed:
+
+```bash
+uv sync --extra dev
+```
+
+Run all backend tests:
+
+```bash
+uv run pytest tests/backend
+```
+
+Run backend tests with coverage output (terminal + htmlcov/):
+
+```bash
+uv run pytest --cov=src/backend --cov-report=term-missing --cov-report=html tests/backend
+```
+
+### Frontend tests (vitest)
+
+Run all frontend tests:
+
+```bash
+pnpm test
+```
+
+Run frontend tests with coverage:
+
+```bash
+pnpm test:coverage
+```
+
+Run a single frontend test file (example):
+
+```bash
+pnpm vitest run tests/frontend/app/jobs.page.test.tsx
+```
