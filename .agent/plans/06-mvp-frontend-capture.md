@@ -93,35 +93,35 @@ Error handling branches:
 
 ## Implementation Steps
 
-- [ ] **Step 1 — Scaffold minimal frontend app shell**
-  - [ ] Add Next.js app route files/layout for single capture page.
-  - [ ] Create minimal styling structure for readable form/status states.
+- [x] **Step 1 — Scaffold minimal frontend app shell**
+  - [x] Add Next.js app route files/layout for single capture page.
+  - [x] Create minimal styling structure for readable form/status states.
 
-- [ ] **Step 2 — Build capture form UI and client state flow**
-  - [ ] Implement URL input + submit.
-  - [ ] Add conditional fallback textarea UX.
-  - [ ] Add success and error message regions.
+- [x] **Step 2 — Build capture form UI and client state flow**
+  - [x] Implement URL input + submit.
+  - [x] Add conditional fallback textarea UX.
+  - [x] Add success and error message regions.
 
-- [ ] **Step 3 — Add frontend API client integration**
-  - [ ] Implement typed request/response helpers in `src/frontend/lib/`.
-  - [ ] Parse structured backend errors, specifically `FALLBACK_TEXT_REQUIRED`.
+- [x] **Step 3 — Add frontend API client integration**
+  - [x] Implement typed request/response helpers in `src/frontend/lib/`.
+  - [x] Parse structured backend errors, specifically `FALLBACK_TEXT_REQUIRED`.
 
-- [ ] **Step 4 — Add MVP progress feedback behavior**
-  - [ ] Add staged progress text while request is in-flight.
-  - [ ] Ensure clean cancellation/cleanup of timers.
+- [x] **Step 4 — Add MVP progress feedback behavior**
+  - [x] Add staged progress text while request is in-flight.
+  - [x] Ensure clean cancellation/cleanup of timers.
 
-- [ ] **Step 5 — Update backend scrape contract for fallback flow**
-  - [ ] Extend request schema with optional `fallback_text`.
-  - [ ] Route to `capture_from_clipboard_text` when fallback text is present.
-  - [ ] Return structured `FALLBACK_TEXT_REQUIRED` error for recoverable scrape failures.
+- [x] **Step 5 — Update backend scrape contract for fallback flow**
+  - [x] Extend request schema with optional `fallback_text`.
+  - [x] Route to `capture_from_clipboard_text` when fallback text is present.
+  - [x] Return structured `FALLBACK_TEXT_REQUIRED` error for recoverable scrape failures.
 
-- [ ] **Step 6 — Add/adjust tests**
-  - [ ] Frontend tests for initial URL submit, fallback reveal, success rendering, and generic error state.
-  - [ ] Backend API tests for structured fallback error and fallback-text resubmission path.
+- [x] **Step 6 — Add/adjust tests**
+  - [x] Frontend tests for initial URL submit, fallback reveal, success rendering, and generic error state.
+  - [x] Backend API tests for structured fallback error and fallback-text resubmission path.
 
-- [ ] **Step 7 — Quality checks**
-  - [ ] Run Biome lint/format and frontend tests.
-  - [ ] Run backend tests impacted by API contract update.
+- [x] **Step 7 — Quality checks**
+  - [x] Run Biome lint/format and frontend tests.
+  - [x] Run backend tests impacted by API contract update.
 
 ---
 

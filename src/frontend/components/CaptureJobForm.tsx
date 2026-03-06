@@ -82,36 +82,39 @@ export function CaptureJobForm() {
 
   return (
     <section>
-      <form onSubmit={handleSubmit}>
-        <label htmlFor="job-url">Job URL</label>
-        <input
-          id="job-url"
-          name="job-url"
-          type="url"
-          required
-          value={url}
-          onChange={(event) => setUrl(event.target.value)}
-          placeholder="https://..."
-        />
+      {phase !== "success" ? (
+        <form onSubmit={handleSubmit}>
+          <label htmlFor="job-url">Job URL</label>
+          <input
+            id="job-url"
+            name="job-url"
+            type="url"
+            required
+            value={url}
+            onChange={(event) => setUrl(event.target.value)}
+            placeholder="https://..."
+          />
 
-        {needsFallbackText ? (
-          <>
-            <label htmlFor="fallback-text">Pasted job description text</label>
-            <textarea
-              id="fallback-text"
-              name="fallback-text"
-              rows={8}
-              value={jobText}
-              onChange={(event) => setJobText(event.target.value)}
-              placeholder="Paste the full job description text here"
-            />
-          </>
-        ) : null}
+          {needsFallbackText ? (
+            <>
+              <label htmlFor="fallback-text">Pasted job description text</label>
+              <textarea
+                id="fallback-text"
+                name="fallback-text"
+                rows={8}
+                value={jobText}
+                onChange={(event) => setJobText(event.target.value)}
+                placeholder="Paste the full job description text here"
+                style={{ width: "100%", boxSizing: "border-box" }}
+              />
+            </>
+          ) : null}
 
-        <button type="submit" disabled={submitDisabled}>
-          {needsFallbackText ? "Submit with pasted text" : "Capture job"}
-        </button>
-      </form>
+          <button type="submit" disabled={submitDisabled}>
+            {needsFallbackText ? "Submit with pasted text" : "Capture job"}
+          </button>
+        </form>
+      ) : null}
 
       {phase === "submitting" ? <p aria-live="polite">{progressSteps[progressIndex]}</p> : null}
 
