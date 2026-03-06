@@ -12,6 +12,7 @@ export function JobsPageClient() {
   const [jobs, setJobs] = useState<JobListItem[]>([]);
   const [loadingJobs, setLoadingJobs] = useState(true);
   const [listError, setListError] = useState<string | null>(null);
+  const [captureNotice, setCaptureNotice] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [sortMode, setSortMode] = useState<SortMode>("newest");
   const [showCaptureModal, setShowCaptureModal] = useState(false);
@@ -134,6 +135,8 @@ export function JobsPageClient() {
         </label>
       </div>
 
+      {captureNotice ? <p role="status">{captureNotice}</p> : null}
+
       {loadingJobs ? <p>Loading jobs...</p> : null}
       {listError ? <p role="alert">{listError}</p> : null}
 
@@ -160,7 +163,13 @@ export function JobsPageClient() {
       {showCaptureModal ? (
         <Modal onClose={() => setShowCaptureModal(false)} title="Capture Job">
           <CaptureJobForm
-            onCaptured={() => {
+            onCaptured={(result) => {
+              setCaptureNotice(
+                `Captured ${result.title} at ${result.company}. Filters were reset so it is visible.`,
+              );
+              setSearch("");
+              setSortMode("newest");
+              setSelectedRoleId(result.role_id);
               setShowCaptureModal(false);
               loadJobs();
             }}
