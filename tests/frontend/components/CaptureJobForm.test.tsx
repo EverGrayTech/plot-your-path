@@ -30,6 +30,8 @@ describe("CaptureJobForm", () => {
       "Captured Backend Engineer at TechCo",
     );
     expect(screen.getByText("Role ID: 101")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Job URL")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Capture job" })).not.toBeInTheDocument();
   });
 
   it("reveals fallback textarea when API requests fallback", async () => {
@@ -54,6 +56,7 @@ describe("CaptureJobForm", () => {
 
     expect(await screen.findByRole("alert")).toHaveTextContent("Unable to scrape this URL");
     expect(screen.getByLabelText("Pasted job description text")).toBeInTheDocument();
+    expect(screen.getByLabelText("Pasted job description text")).toHaveStyle({ width: "100%" });
     expect(screen.getByRole("button", { name: "Submit with pasted text" })).toBeInTheDocument();
   });
 
