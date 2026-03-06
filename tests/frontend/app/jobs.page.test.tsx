@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import React from "react";
 
 import { JobsPageClient } from "../../../src/frontend/components/JobsPageClient";
@@ -45,7 +45,10 @@ describe("JobsPageClient", () => {
       team_division: "Platform",
       salary: { min: 120000, max: 150000, currency: "USD" },
       url: "https://example.com/jobs/2",
-      skills: { required: ["Python"], preferred: ["FastAPI"] },
+      skills: {
+        required: [{ id: 1, name: "Python", requirement_level: "required" }],
+        preferred: [{ id: 2, name: "FastAPI", requirement_level: "preferred" }],
+      },
       description_md: "",
       created_at: "2026-03-05T10:00:00Z",
       status: "active",
@@ -149,7 +152,10 @@ describe("JobsPageClient", () => {
       team_division: "Platform",
       salary: { min: 120000, max: 150000, currency: "USD" },
       url: "https://example.com/jobs/2",
-      skills: { required: ["Python"], preferred: ["FastAPI"] },
+      skills: {
+        required: [{ id: 1, name: "Python", requirement_level: "required" }],
+        preferred: [{ id: 2, name: "FastAPI", requirement_level: "preferred" }],
+      },
       description_md: "",
       created_at: "2026-03-05T10:00:00Z",
       status: "active",
@@ -163,5 +169,99 @@ describe("JobsPageClient", () => {
     expect(await screen.findByRole("heading", { name: "Job Detail" })).toBeInTheDocument();
     expect(await screen.findByText("Required skills")).toBeInTheDocument();
     expect(await screen.findByText("Python")).toBeInTheDocument();
+  });
+
+  it("navigates from job skill to skill detail and back to referencing job", async () => {
+    vi.spyOn(api, "listJobs").mockResolvedValue(jobs);
+    vi.spyOn(api, "getJob").mockResolvedValue({
+      id: 2,
+      company: {
+        id: 10,
+        name: "Beta Co",
+        slug: "beta-co",
+        website: null,
+        created_at: "2026-03-05T10:00:00Z",
+      },
+      title: "Engineer",
+      team_division: "Platform",
+      salary: { min: 120000, max: 150000, currency: "USD" },
+      url: "https://example.com/jobs/2",
+      skills: {
+        required: [{ id: 1, name: "Python", requirement_level: "required" }],
+        preferred: [{ id: 2, name: "FastAPI", requirement_level: "preferred" }],
+      },
+      description_md: "",
+      created_at: "2026-03-05T10:00:00Z",
+      status: "active",
+    });
+    vi.spyOn(api, "getSkill").mockResolvedValue({
+      id: 1,
+      name: "Python",
+      category: "language",
+      usage_count: 1,
+      jobs: [
+        {
+          id: 2,
+          company: "Beta Co",
+          title: "Engineer",
+          status: "active",
+          created_at: "2026-03-05T10:00:00Z",
+        },
+      ],
+    });
+
+    render(<JobsPageClient />);
+
+    await screen.findByText("Engineer");
+    fireEvent.click(screen.getByRole("button", { name: /Engineer — Beta Co/i }));
+    fireEvent.click(await screen.findByRole("button", { name: "Python" }));
+
+    const skillHeading = await screen.findByRole("heading", { name: "Skill Detail" });
+    expect(skillHeading).toBeInTheDocument();
+    const skillModal = skillHeading.closest('[role="dialog"]') as HTMLElement;
+    fireEvent.click(within(skillModal).getByRole("button", { name: /Engineer — Beta Co/i }));
+
+    expect(await screen.findByRole("heading", { name: "Job Detail" })).toBeInTheDocument();
+  }, 10000);
+
+  it("supports preferred skill link navigation from job detail", async () => {
+    vi.spyOn(api, "listJobs").mockResolvedValue(jobs);
+    vi.spyOn(api, "getJob").mockResolvedValue({
+      id: 2,
+      company: {
+        id: 10,
+        name: "Beta Co",
+        slug: "beta-co",
+        website: null,
+        created_at: "2026-03-05T10:00:00Z",
+      },
+      title: "Engineer",
+      team_division: "Platform",
+      salary: { min: 120000, max: 150000, currency: "USD" },
+      url: "https://example.com/jobs/2",
+      skills: {
+        required: [{ id: 1, name: "Python", requirement_level: "required" }],
+        preferred: [{ id: 2, name: "FastAPI", requirement_level: "preferred" }],
+      },
+      description_md: "",
+      created_at: "2026-03-05T10:00:00Z",
+      status: "active",
+    });
+    const getSkillSpy = vi.spyOn(api, "getSkill").mockResolvedValue({
+      id: 2,
+      name: "FastAPI",
+      category: "tool",
+      usage_count: 1,
+      jobs: [],
+    });
+
+    render(<JobsPageClient />);
+
+    await screen.findByText("Engineer");
+    fireEvent.click(screen.getByRole("button", { name: /Engineer — Beta Co/i }));
+    fireEvent.click(await screen.findByRole("button", { name: "FastAPI" }));
+
+    expect(getSkillSpy).toHaveBeenCalledWith(2);
+    expect(await screen.findByRole("heading", { name: "Skill Detail" })).toBeInTheDocument();
   });
 });

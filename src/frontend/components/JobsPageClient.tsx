@@ -4,7 +4,14 @@ import React, { useEffect, useState } from "react";
 
 import { CaptureJobForm } from "./CaptureJobForm";
 import { Modal } from "./Modal";
-import { getJob, type JobDetail, type JobListItem, listJobs } from "../lib/api";
+import {
+  getJob,
+  getSkill,
+  type JobDetail,
+  type JobListItem,
+  listJobs,
+  type SkillDetail,
+} from "../lib/api";
 
 type SortMode = "newest" | "oldest" | "company_az";
 
@@ -20,6 +27,10 @@ export function JobsPageClient() {
   const [selectedJob, setSelectedJob] = useState<JobDetail | null>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
+  const [selectedSkillId, setSelectedSkillId] = useState<number | null>(null);
+  const [selectedSkill, setSelectedSkill] = useState<SkillDetail | null>(null);
+  const [loadingSkillDetail, setLoadingSkillDetail] = useState(false);
+  const [skillDetailError, setSkillDetailError] = useState<string | null>(null);
 
   async function loadJobs() {
     setLoadingJobs(true);
@@ -67,6 +78,32 @@ export function JobsPageClient() {
 
     fetchJobDetail();
   }, [selectedRoleId]);
+
+  useEffect(() => {
+    if (!selectedSkillId) {
+      return;
+    }
+
+    const fetchSkillDetail = async () => {
+      setLoadingSkillDetail(true);
+      setSelectedSkill(null);
+      setSkillDetailError(null);
+      try {
+        const response = await getSkill(selectedSkillId);
+        setSelectedSkill(response);
+      } catch (error) {
+        if (error instanceof Error) {
+          setSkillDetailError(error.message);
+        } else {
+          setSkillDetailError("Failed to load skill detail.");
+        }
+      } finally {
+        setLoadingSkillDetail(false);
+      }
+    };
+
+    fetchSkillDetail();
+  }, [selectedSkillId]);
 
   const filteredJobs = jobs.filter((job) => {
     const query = search.trim().toLowerCase();
@@ -209,14 +246,76 @@ export function JobsPageClient() {
               <h4>Required skills</h4>
               <ul>
                 {selectedJob.skills.required.map((skill) => (
-                  <li key={`required-${skill}`}>{skill}</li>
+                  <li key={`required-${skill.id}`}>
+                    <button
+                      onClick={() => {
+                        setSelectedRoleId(null);
+                        setSelectedSkillId(skill.id);
+                      }}
+                      style={{ textAlign: "left" }}
+                      type="button"
+                    >
+                      {skill.name}
+                    </button>
+                  </li>
                 ))}
               </ul>
 
               <h4>Preferred skills</h4>
               <ul>
                 {selectedJob.skills.preferred.map((skill) => (
-                  <li key={`preferred-${skill}`}>{skill}</li>
+                  <li key={`preferred-${skill.id}`}>
+                    <button
+                      onClick={() => {
+                        setSelectedRoleId(null);
+                        setSelectedSkillId(skill.id);
+                      }}
+                      style={{ textAlign: "left" }}
+                      type="button"
+                    >
+                      {skill.name}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </article>
+          ) : null}
+        </Modal>
+      ) : null}
+
+      {selectedSkillId ? (
+        <Modal
+          onClose={() => {
+            setSelectedSkillId(null);
+            setSelectedSkill(null);
+            setSkillDetailError(null);
+          }}
+          title="Skill Detail"
+        >
+          {loadingSkillDetail ? <p>Loading skill details...</p> : null}
+          {skillDetailError ? <p role="alert">{skillDetailError}</p> : null}
+
+          {selectedSkill ? (
+            <article>
+              <h3>{selectedSkill.name}</h3>
+              <p>Category: {selectedSkill.category ?? "Uncategorized"}</p>
+              <p>Used in {selectedSkill.usage_count} captured jobs.</p>
+
+              <h4>Referenced jobs</h4>
+              <ul>
+                {selectedSkill.jobs.map((job) => (
+                  <li key={job.id}>
+                    <button
+                      onClick={() => {
+                        setSelectedSkillId(null);
+                        setSelectedRoleId(job.id);
+                      }}
+                      style={{ textAlign: "left" }}
+                      type="button"
+                    >
+                      {job.title} — {job.company}
+                    </button>
+                  </li>
                 ))}
               </ul>
             </article>

@@ -64,6 +64,21 @@ class JobListItem(BaseModel):
     status: RoleStatus
 
 
+class JobSkillItem(BaseModel):
+    """Skill item linked to a job with requirement level context."""
+
+    id: int
+    name: str
+    requirement_level: RequirementLevel
+
+
+class JobSkills(BaseModel):
+    """Grouped required and preferred skills for a job."""
+
+    required: list[JobSkillItem]
+    preferred: list[JobSkillItem]
+
+
 class JobDetail(BaseModel):
     """Schema for detailed job view."""
 
@@ -75,7 +90,7 @@ class JobDetail(BaseModel):
     team_division: str | None
     salary: SalaryInfo
     url: str
-    skills: dict[str, list[str]]  # {"required": [...], "preferred": [...]}
+    skills: JobSkills
     description_md: str
     created_at: datetime
     status: RoleStatus

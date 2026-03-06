@@ -213,7 +213,7 @@ class SkillExtractorService:
         self.db.flush()
         return total_linked
 
-    def get_skills_for_role(self, role_id: int) -> dict[str, list[str]]:
+    def get_skills_for_role(self, role_id: int) -> dict[str, list[dict[str, int | str]]]:
         """
         Get all skills associated with a role.
 
@@ -221,7 +221,7 @@ class SkillExtractorService:
             role_id: ID of the role
 
         Returns:
-            Dictionary with 'required' and 'preferred' skill name lists
+            Dictionary with 'required' and 'preferred' skill item lists
         """
         role_skills = (
             self.db.query(RoleSkill, Skill)
@@ -230,13 +230,25 @@ class SkillExtractorService:
             .all()
         )
 
-        required: list[str] = []
-        preferred: list[str] = []
+        required: list[dict[str, int | str]] = []
+        preferred: list[dict[str, int | str]] = []
 
         for role_skill, skill in role_skills:
             if role_skill.requirement_level == "required":
-                required.append(skill.name)
+                required.append(
+                    {
+                        "id": skill.id,
+                        "name": skill.name,
+                        "requirement_level": "required",
+                    }
+                )
             else:
-                preferred.append(skill.name)
+                preferred.append(
+                    {
+                        "id": skill.id,
+                        "name": skill.name,
+                        "requirement_level": "preferred",
+                    }
+                )
 
         return {"required": required, "preferred": preferred}

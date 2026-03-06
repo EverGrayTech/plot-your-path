@@ -270,8 +270,10 @@ class TestGetJob:
         assert data["title"] == "Software Engineer"
         assert data["company"]["name"] == "Acme Corp"
         assert data["description_md"] == ""
-        assert "Python" in data["skills"]["required"]
-        assert "TypeScript" in data["skills"]["preferred"]
+        required_names = {item["name"] for item in data["skills"]["required"]}
+        preferred_names = {item["name"] for item in data["skills"]["preferred"]}
+        assert "Python" in required_names
+        assert "TypeScript" in preferred_names
         assert data["salary"]["min"] == 120000
         assert data["salary"]["max"] == 180000
 

@@ -5,6 +5,8 @@ from enum import Enum
 
 from pydantic import BaseModel, ConfigDict
 
+from backend.schemas.job import RoleStatus
+
 
 class SkillCategory(str, Enum):
     """Skill category enumeration."""
@@ -45,3 +47,23 @@ class SkillListItem(BaseModel):
     name: str
     category: str | None
     usage_count: int
+
+
+class SkillJobReference(BaseModel):
+    """Job summary that references a specific skill."""
+
+    id: int
+    company: str
+    title: str
+    status: RoleStatus
+    created_at: datetime
+
+
+class SkillDetail(BaseModel):
+    """Detailed skill view including referencing jobs."""
+
+    id: int
+    name: str
+    category: str | None
+    usage_count: int
+    jobs: list[SkillJobReference]
