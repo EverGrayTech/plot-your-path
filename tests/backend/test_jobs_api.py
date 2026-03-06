@@ -424,7 +424,33 @@ class TestScrapeJob:
             )
 
         assert response.status_code == 422
-        assert "Scraping failed" in response.json()["detail"]
+        detail = response.json()["detail"]
+        assert detail["code"] == "FALLBACK_TEXT_REQUIRED"
+        assert "Unable to scrape this URL" in detail["message"]
+
+    def test_scrape_with_fallback_text_uses_clipboard_path(self, client):
+        """Router uses clipboard capture path when fallback_text is provided."""
+        mock_service = MagicMock()
+        mock_service.capture_from_url = AsyncMock()
+        mock_service.capture_from_clipboard_text = AsyncMock(
+            return_value=self._capture_result(status="success")
+        )
+
+        with patch("backend.routers.jobs.JobCaptureService", return_value=mock_service):
+            response = client.post(
+                "/api/jobs/scrape",
+                json={
+                    "url": "https://blocked.example.com/job/1",
+                    "fallback_text": "Pasted job description text",
+                },
+            )
+
+        assert response.status_code == 200
+        mock_service.capture_from_url.assert_not_awaited()
+        mock_service.capture_from_clipboard_text.assert_awaited_once_with(
+            "https://blocked.example.com/job/1",
+            "Pasted job description text",
+        )
 
     def test_scrape_llm_denoise_error_returns_500(self, client):
         """JobCaptureLLMError during processing raises HTTP 500."""

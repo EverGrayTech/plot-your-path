@@ -210,11 +210,21 @@ def scrape_job(
         HTTPException 500: If an unexpected internal error occurs.
     """
     url = str(request.url)
+    fallback_text = request.fallback_text.strip() if request.fallback_text else None
     service = JobCaptureService(db)
     try:
-        result = asyncio.run(service.capture_from_url(url))
+        if fallback_text:
+            result = asyncio.run(service.capture_from_clipboard_text(url, fallback_text))
+        else:
+            result = asyncio.run(service.capture_from_url(url))
     except JobCaptureScrapingError as exc:
-        raise HTTPException(status_code=422, detail=f"Scraping failed: {exc}") from exc
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "code": "FALLBACK_TEXT_REQUIRED",
+                "message": f"Unable to scrape this URL. Paste the job text and resubmit. ({exc})",
+            },
+        ) from exc
     except JobCaptureLLMError as exc:
         raise HTTPException(status_code=500, detail=f"LLM processing failed: {exc}") from exc
     except JobCapturePersistenceError as exc:

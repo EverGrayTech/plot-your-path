@@ -28,6 +28,7 @@ class JobScrapeRequest(BaseModel):
     """Schema for job scraping request."""
 
     url: HttpUrl
+    fallback_text: str | None = None
 
 
 class JobScrapeResponse(BaseModel):

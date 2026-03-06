@@ -114,6 +114,15 @@ class TestJobSchemas:
         """Test JobScrapeRequest with valid URL."""
         request = JobScrapeRequest(url="https://linkedin.com/jobs/view/123")
         assert str(request.url) == "https://linkedin.com/jobs/view/123"
+        assert request.fallback_text is None
+
+    def test_job_scrape_request_with_fallback_text(self):
+        """Test JobScrapeRequest accepts optional fallback text."""
+        request = JobScrapeRequest(
+            url="https://linkedin.com/jobs/view/123",
+            fallback_text="Senior engineer role with Python and FastAPI.",
+        )
+        assert request.fallback_text == "Senior engineer role with Python and FastAPI."
 
     def test_job_scrape_request_invalid_url(self):
         """Test JobScrapeRequest with invalid URL."""
