@@ -17,6 +17,7 @@ from backend.main import app
 from backend.models.company import Company
 from backend.models.role import Role
 from backend.models.role_skill import RoleSkill
+from backend.models.role_status_change import RoleStatusChange
 from backend.models.skill import Skill
 
 # ---------------------------------------------------------------------------
@@ -96,7 +97,7 @@ def sample_role(db, sample_company):
         url="https://greenhouse.io/jobs/12345",
         raw_html_path="data/jobs/raw/acme-corp/1.html",
         cleaned_md_path="data/jobs/cleaned/acme-corp/1.md",
-        status="active",
+        status="open",
     )
     db.add(role)
     db.commit()
@@ -162,7 +163,7 @@ class TestListJobs:
         assert job["company"] == "Acme Corp"
         assert job["title"] == "Software Engineer"
         assert job["skills_count"] == 2
-        assert job["status"] == "active"
+        assert job["status"] == "open"
         assert "$120,000 - $180,000 USD" in job["salary_range"]
 
     def test_list_no_salary_returns_none(self, db, client, sample_company):
@@ -173,7 +174,7 @@ class TestListJobs:
             url="https://example.com/intern",
             raw_html_path="data/jobs/raw/acme-corp/2.html",
             cleaned_md_path="data/jobs/cleaned/acme-corp/2.md",
-            status="active",
+            status="open",
         )
         db.add(role)
         db.commit()
@@ -194,7 +195,7 @@ class TestListJobs:
             url="https://example.com/senior",
             raw_html_path="data/jobs/raw/acme-corp/3.html",
             cleaned_md_path="data/jobs/cleaned/acme-corp/3.md",
-            status="active",
+            status="open",
         )
         db.add(role)
         db.commit()
@@ -214,7 +215,7 @@ class TestListJobs:
             url="https://example.com/junior",
             raw_html_path="data/jobs/raw/acme-corp/4.html",
             cleaned_md_path="data/jobs/cleaned/acme-corp/4.md",
-            status="active",
+            status="open",
         )
         db.add(role)
         db.commit()
@@ -235,7 +236,7 @@ class TestListJobs:
             url="https://example.com/eu",
             raw_html_path="data/jobs/raw/acme-corp/5.html",
             cleaned_md_path="data/jobs/cleaned/acme-corp/5.md",
-            status="active",
+            status="open",
         )
         db.add(role)
         db.commit()
@@ -245,7 +246,6 @@ class TestListJobs:
         eu = next(j for j in data if j["title"] == "EU Engineer")
         assert "EUR" in eu["salary_range"]
         assert "$" not in eu["salary_range"]
-
 
 # ---------------------------------------------------------------------------
 # Tests: GET /api/jobs/{id}
@@ -276,6 +276,33 @@ class TestGetJob:
         assert "TypeScript" in preferred_names
         assert data["salary"]["min"] == 120000
         assert data["salary"]["max"] == 180000
+        assert data["status_history"] == []
+
+    def test_get_job_includes_status_history(self, client, db, sample_role):
+        db.add(
+            RoleStatusChange(
+                role_id=sample_role.id,
+                from_status="open",
+                to_status="submitted",
+            )
+        )
+        db.add(
+            RoleStatusChange(
+                role_id=sample_role.id,
+                from_status="submitted",
+                to_status="interviewing",
+            )
+        )
+        db.commit()
+
+        response = client.get(f"/api/jobs/{sample_role.id}")
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data["status_history"]) == 2
+        assert data["status_history"][0]["from_status"] == "open"
+        assert data["status_history"][0]["to_status"] == "submitted"
+        assert data["status_history"][1]["from_status"] == "submitted"
+        assert data["status_history"][1]["to_status"] == "interviewing"
 
     def test_get_job_with_file(self, client, db, sample_role, sample_skills):
         """Returns Markdown content when the cleaned file exists on disk."""
@@ -303,16 +330,41 @@ class TestUpdateJobStatus:
 
     def test_update_status_not_found(self, client):
         """Returns 404 when role does not exist."""
-        response = client.patch("/api/jobs/999/status", json={"status": "applied"})
+        response = client.patch("/api/jobs/999/status", json={"status": "submitted"})
         assert response.status_code == 404
 
     def test_update_status_success(self, client, sample_role):
         """Status is updated and new value returned in response."""
         response = client.patch(
-            f"/api/jobs/{sample_role.id}/status", json={"status": "applied"}
+            f"/api/jobs/{sample_role.id}/status", json={"status": "submitted"}
         )
         assert response.status_code == 200
-        assert response.json()["status"] == "applied"
+        assert response.json()["status"] == "submitted"
+
+    def test_update_status_records_change(self, client, db, sample_role):
+        response = client.patch(
+            f"/api/jobs/{sample_role.id}/status", json={"status": "submitted"}
+        )
+        assert response.status_code == 200
+
+        events = (
+            db.query(RoleStatusChange)
+            .filter(RoleStatusChange.role_id == sample_role.id)
+            .order_by(RoleStatusChange.id.asc())
+            .all()
+        )
+        assert len(events) == 1
+        assert events[0].from_status == "open"
+        assert events[0].to_status == "submitted"
+
+    def test_update_status_noop_does_not_record_change(self, client, db, sample_role):
+        response = client.patch(
+            f"/api/jobs/{sample_role.id}/status", json={"status": "open"}
+        )
+        assert response.status_code == 200
+
+        events = db.query(RoleStatusChange).filter(RoleStatusChange.role_id == sample_role.id).all()
+        assert events == []
 
     def test_update_status_invalid_value(self, client, sample_role):
         """Invalid status value returns 422 validation error."""
@@ -323,7 +375,7 @@ class TestUpdateJobStatus:
 
     def test_update_status_all_valid_values(self, client, sample_role):
         """All valid status values are accepted."""
-        for status in ("active", "applied", "rejected", "archived"):
+        for status in ("open", "submitted", "interviewing", "rejected"):
             response = client.patch(
                 f"/api/jobs/{sample_role.id}/status", json={"status": status}
             )

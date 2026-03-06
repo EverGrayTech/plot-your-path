@@ -100,10 +100,10 @@ class TestJobSchemas:
 
     def test_role_status_enum(self):
         """Test RoleStatus enum values."""
-        assert RoleStatus.ACTIVE == "active"
-        assert RoleStatus.APPLIED == "applied"
+        assert RoleStatus.OPEN == "open"
+        assert RoleStatus.SUBMITTED == "submitted"
+        assert RoleStatus.INTERVIEWING == "interviewing"
         assert RoleStatus.REJECTED == "rejected"
-        assert RoleStatus.ARCHIVED == "archived"
 
     def test_requirement_level_enum(self):
         """Test RequirementLevel enum values."""

@@ -151,7 +151,7 @@ async def test_capture_from_url_duplicate_returns_existing(db_session):
         url="https://example.com/jobs/dup",
         raw_html_path="jobs/raw/dupco/1.html",
         cleaned_md_path="jobs/cleaned/dupco/1.md",
-        status="active",
+        status="open",
     )
     db_session.add(role)
     db_session.commit()

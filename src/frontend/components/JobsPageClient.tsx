@@ -10,7 +10,9 @@ import {
   type JobDetail,
   type JobListItem,
   listJobs,
+  type RoleStatus,
   type SkillDetail,
+  updateJobStatus,
 } from "../lib/api";
 
 type SortMode = "newest" | "oldest" | "company_az";
@@ -27,6 +29,8 @@ export function JobsPageClient() {
   const [selectedJob, setSelectedJob] = useState<JobDetail | null>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [statusError, setStatusError] = useState<string | null>(null);
   const [selectedSkillId, setSelectedSkillId] = useState<number | null>(null);
   const [selectedSkill, setSelectedSkill] = useState<SkillDetail | null>(null);
   const [loadingSkillDetail, setLoadingSkillDetail] = useState(false);
@@ -78,6 +82,29 @@ export function JobsPageClient() {
 
     fetchJobDetail();
   }, [selectedRoleId]);
+
+  async function handleStatusChange(nextStatus: RoleStatus) {
+    if (!selectedJob) {
+      return;
+    }
+
+    setUpdatingStatus(true);
+    setStatusError(null);
+    try {
+      await updateJobStatus(selectedJob.id, nextStatus);
+      await loadJobs();
+      const refreshed = await getJob(selectedJob.id);
+      setSelectedJob(refreshed);
+    } catch (error) {
+      if (error instanceof Error) {
+        setStatusError(error.message);
+      } else {
+        setStatusError("Failed to update status.");
+      }
+    } finally {
+      setUpdatingStatus(false);
+    }
+  }
 
   useEffect(() => {
     if (!selectedSkillId) {
@@ -233,10 +260,39 @@ export function JobsPageClient() {
                 <strong>{selectedJob.company.name}</strong>
               </p>
               <p>Status: {selectedJob.status}</p>
+              <label style={{ display: "grid", gap: "0.25rem", marginBottom: "0.75rem" }}>
+                Update status
+                <select
+                  disabled={updatingStatus}
+                  onChange={(event) => handleStatusChange(event.target.value as RoleStatus)}
+                  value={selectedJob.status}
+                >
+                  <option value="open">Open</option>
+                  <option value="submitted">Submitted</option>
+                  <option value="interviewing">Interviewing</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+              </label>
+              {statusError ? <p role="alert">{statusError}</p> : null}
               <p>
                 Salary: {selectedJob.salary.min ?? "?"} - {selectedJob.salary.max ?? "?"}{" "}
                 {selectedJob.salary.currency}
               </p>
+
+              <h4>Status history</h4>
+              {selectedJob.status_history.length ? (
+                <ul>
+                  {selectedJob.status_history.map((entry, index) => (
+                    <li
+                      key={`${entry.changed_at}-${entry.to_status}-${index}`}
+                    >
+                      {entry.from_status ?? "none"} → {entry.to_status} ({new Date(entry.changed_at).toLocaleString()})
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>No status changes yet.</p>
+              )}
               <p>
                 <a href={selectedJob.url} rel="noreferrer" target="_blank">
                   View original posting

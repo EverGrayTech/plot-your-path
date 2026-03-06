@@ -7,6 +7,7 @@ from backend.schemas.job import (
     JobScrapeRequest,
     JobScrapeResponse,
     RequirementLevel,
+    RoleStatusChange,
     RoleStatus,
     SalaryInfo,
 )
@@ -21,6 +22,7 @@ __all__ = [
     "JobScrapeRequest",
     "JobScrapeResponse",
     "RequirementLevel",
+    "RoleStatusChange",
     "RoleStatus",
     "SalaryInfo",
     "Skill",

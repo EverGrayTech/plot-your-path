@@ -12,12 +12,14 @@ from backend.database import get_db
 from backend.models.company import Company
 from backend.models.role import Role
 from backend.models.role_skill import RoleSkill
+from backend.models.role_status_change import RoleStatusChange as RoleStatusChangeModel
 from backend.schemas.company import Company as CompanySchema
 from backend.schemas.job import (
     JobDetail,
     JobListItem,
     JobScrapeRequest,
     JobScrapeResponse,
+    RoleStatusChange,
     RoleStatus,
     SalaryInfo,
 )
@@ -59,6 +61,25 @@ def _build_salary_range(role: Role) -> str | None:
         return f"{symbol}{role.salary_min:,}+ {currency}"
     else:
         return f"Up to {symbol}{role.salary_max:,} {currency}"
+
+
+def _build_status_history(role_id: int, db: Session) -> list[RoleStatusChange]:
+    """Build status history in chronological order for a role."""
+    rows = (
+        db.query(RoleStatusChangeModel)
+        .filter(RoleStatusChangeModel.role_id == role_id)
+        .order_by(RoleStatusChangeModel.changed_at.asc(), RoleStatusChangeModel.id.asc())
+        .all()
+    )
+
+    return [
+        RoleStatusChange(
+            from_status=RoleStatus(row.from_status) if row.from_status else None,
+            to_status=RoleStatus(row.to_status),
+            changed_at=row.changed_at,
+        )
+        for row in rows
+    ]
 
 
 @router.get("/jobs", response_model=list[JobListItem])
@@ -137,6 +158,7 @@ def get_job(role_id: int, db: Session = Depends(get_db)) -> JobDetail:
         description_md=description_md,
         created_at=role.created_at,
         status=RoleStatus(role.status),
+        status_history=_build_status_history(role.id, db),
     )
 
 
@@ -163,7 +185,18 @@ def update_job_status(
     if not role:
         raise HTTPException(status_code=404, detail="Job not found")
 
+    previous_status = role.status
     role.status = status_update.status.value
+
+    if previous_status != role.status:
+        db.add(
+            RoleStatusChangeModel(
+                role_id=role.id,
+                from_status=previous_status,
+                to_status=role.status,
+            )
+        )
+
     db.commit()
     db.refresh(role)
 

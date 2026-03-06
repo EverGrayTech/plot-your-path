@@ -55,7 +55,7 @@ describe("SkillsPageClient", () => {
           id: 2,
           company: "Beta Co",
           title: "Engineer",
-          status: "active",
+          status: "open",
           created_at: "2026-03-05T10:00:00Z",
         },
       ],
@@ -79,7 +79,8 @@ describe("SkillsPageClient", () => {
       },
       description_md: "",
       created_at: "2026-03-05T10:00:00Z",
-      status: "active",
+      status: "open",
+      status_history: [],
     });
 
     render(<SkillsPageClient />);
