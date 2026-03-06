@@ -1,4 +1,5 @@
 import React, { type ReactNode } from "react";
+import Link from "next/link";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
@@ -12,6 +13,17 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             fontFamily: "sans-serif",
           }}
         >
+          <nav
+            aria-label="Primary"
+            style={{
+              display: "flex",
+              gap: "1rem",
+              marginBottom: "1.5rem",
+            }}
+          >
+            <Link href="/jobs">Jobs</Link>
+            <Link href="/skills">Skills</Link>
+          </nav>
           {children}
         </main>
       </body>

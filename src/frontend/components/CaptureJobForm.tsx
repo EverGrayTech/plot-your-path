@@ -13,7 +13,11 @@ const progressSteps = [
   "Saving role and skills...",
 ];
 
-export function CaptureJobForm() {
+interface CaptureJobFormProps {
+  onCaptured?: (result: JobScrapeResponse) => void;
+}
+
+export function CaptureJobForm({ onCaptured }: CaptureJobFormProps) {
   const [url, setUrl] = useState("");
   const [jobText, setJobText] = useState("");
   const [needsFallbackText, setNeedsFallbackText] = useState(false);
@@ -50,6 +54,7 @@ export function CaptureJobForm() {
       setNeedsFallbackText(false);
       setJobText("");
       setPhase("success");
+      onCaptured?.(response);
     } catch (error) {
       if (error instanceof ApiError && error.code === "FALLBACK_TEXT_REQUIRED") {
         setNeedsFallbackText(true);
@@ -125,7 +130,7 @@ export function CaptureJobForm() {
       ) : null}
 
       {phase === "success" && result ? (
-        <output aria-live="polite">
+        <output aria-live="polite" role="status">
           <p>
             Captured <strong>{result.title}</strong> at <strong>{result.company}</strong>.
           </p>
