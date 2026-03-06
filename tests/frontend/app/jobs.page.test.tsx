@@ -75,7 +75,7 @@ describe("JobsPageClient", () => {
     expect(listItems[1]).toHaveTextContent("Engineer");
   });
 
-  it("opens capture modal and refreshes list after success", async () => {
+  it("resets filters and refreshes list after capture so new job is visible", async () => {
     vi.spyOn(api, "listJobs").mockResolvedValue(jobs);
     vi.spyOn(api, "scrapeJob").mockResolvedValue({
       status: "success",
@@ -85,10 +85,35 @@ describe("JobsPageClient", () => {
       skills_extracted: 5,
       processing_time_seconds: 1.1,
     });
+    vi.spyOn(api, "getJob").mockResolvedValue({
+      id: 100,
+      company: {
+        id: 11,
+        name: "New Co",
+        slug: "new-co",
+        website: null,
+        created_at: "2026-03-06T12:00:00Z",
+      },
+      title: "New Role",
+      team_division: null,
+      salary: { min: null, max: null, currency: "USD" },
+      url: "https://example.com/jobs/new",
+      skills: { required: [], preferred: [] },
+      description_md: "",
+      created_at: "2026-03-06T12:00:00Z",
+      status: "active",
+    });
 
     render(<JobsPageClient />);
 
     await screen.findByText("Engineer");
+
+    fireEvent.change(screen.getByLabelText("Search jobs"), {
+      target: { value: "acme" },
+    });
+    fireEvent.change(screen.getByLabelText("Sort jobs"), {
+      target: { value: "oldest" },
+    });
 
     fireEvent.click(screen.getByRole("button", { name: "Add Job" }));
     expect(screen.getByRole("dialog")).toBeInTheDocument();
@@ -100,8 +125,14 @@ describe("JobsPageClient", () => {
 
     await waitFor(() => {
       expect(api.listJobs).toHaveBeenCalledTimes(2);
+      expect(screen.getByLabelText("Search jobs")).toHaveValue("");
+      expect(screen.getByLabelText("Sort jobs")).toHaveValue("newest");
     });
-  });
+
+    expect(
+      screen.getByText(/Captured New Role at New Co. Filters were reset so it is visible./i),
+    ).toBeInTheDocument();
+  }, 10000);
 
   it("opens job detail modal from row click", async () => {
     vi.spyOn(api, "listJobs").mockResolvedValue(jobs);
