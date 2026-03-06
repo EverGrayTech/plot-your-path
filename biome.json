@@ -28,13 +28,6 @@
     }
   },
   "files": {
-    "ignore": [
-      "node_modules",
-      ".next",
-      "dist",
-      "build",
-      "coverage",
-      ".git"
-    ]
+    "ignore": ["node_modules", ".next", "dist", "build", "coverage", ".git", ".venv", "htmlcov"]
   }
 }
