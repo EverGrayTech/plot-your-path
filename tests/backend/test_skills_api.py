@@ -111,3 +111,58 @@ class TestListSkills:
         assert usage_by_name["Python"] == 2
         assert usage_by_name["Docker"] == 1
         assert usage_by_name["GraphQL"] == 0
+
+
+class TestGetSkill:
+    """Tests for GET /api/skills/{skill_id}."""
+
+    def test_get_skill_not_found(self, client):
+        response = client.get("/api/skills/999")
+        assert response.status_code == 404
+        assert response.json()["detail"] == "Skill not found"
+
+    def test_get_skill_referencing_jobs(self, client, db):
+        company = Company(name="Acme", slug="acme")
+        db.add(company)
+        db.flush()
+
+        role_one = Role(
+            company_id=company.id,
+            title="Backend Engineer",
+            url="https://example.com/jobs/1",
+            raw_html_path="data/jobs/raw/acme/1.html",
+            cleaned_md_path="data/jobs/cleaned/acme/1.md",
+            status="active",
+        )
+        role_two = Role(
+            company_id=company.id,
+            title="Platform Engineer",
+            url="https://example.com/jobs/2",
+            raw_html_path="data/jobs/raw/acme/2.html",
+            cleaned_md_path="data/jobs/cleaned/acme/2.md",
+            status="applied",
+        )
+        db.add(role_one)
+        db.add(role_two)
+        db.flush()
+
+        python = Skill(name="Python", category="language")
+        db.add(python)
+        db.flush()
+
+        db.add(RoleSkill(role_id=role_one.id, skill_id=python.id, requirement_level="required"))
+        db.add(RoleSkill(role_id=role_two.id, skill_id=python.id, requirement_level="preferred"))
+        db.commit()
+
+        response = client.get(f"/api/skills/{python.id}")
+        assert response.status_code == 200
+        data = response.json()
+
+        assert data["id"] == python.id
+        assert data["name"] == "Python"
+        assert data["usage_count"] == 2
+        assert len(data["jobs"]) == 2
+        assert {item["title"] for item in data["jobs"]} == {
+            "Backend Engineer",
+            "Platform Engineer",
+        }

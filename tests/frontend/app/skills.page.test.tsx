@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import React from "react";
 
 import { SkillsPageClient } from "../../../src/frontend/components/SkillsPageClient";
@@ -43,8 +43,44 @@ describe("SkillsPageClient", () => {
     expect(listItems[2]).toHaveTextContent("Python");
   });
 
-  it("opens skill detail modal from row click", async () => {
+  it("opens skill detail modal and navigates to a referenced job", async () => {
     vi.spyOn(api, "listSkills").mockResolvedValue(skills);
+    vi.spyOn(api, "getSkill").mockResolvedValue({
+      id: 1,
+      name: "Python",
+      category: "language",
+      usage_count: 3,
+      jobs: [
+        {
+          id: 2,
+          company: "Beta Co",
+          title: "Engineer",
+          status: "active",
+          created_at: "2026-03-05T10:00:00Z",
+        },
+      ],
+    });
+    vi.spyOn(api, "getJob").mockResolvedValue({
+      id: 2,
+      company: {
+        id: 10,
+        name: "Beta Co",
+        slug: "beta-co",
+        website: null,
+        created_at: "2026-03-05T10:00:00Z",
+      },
+      title: "Engineer",
+      team_division: "Platform",
+      salary: { min: 120000, max: 150000, currency: "USD" },
+      url: "https://example.com/jobs/2",
+      skills: {
+        required: [{ id: 1, name: "Python", requirement_level: "required" }],
+        preferred: [{ id: 2, name: "FastAPI", requirement_level: "preferred" }],
+      },
+      description_md: "",
+      created_at: "2026-03-05T10:00:00Z",
+      status: "active",
+    });
 
     render(<SkillsPageClient />);
 
@@ -53,5 +89,9 @@ describe("SkillsPageClient", () => {
 
     expect(await screen.findByRole("heading", { name: "Skill Detail" })).toBeInTheDocument();
     expect(await screen.findByText("Used in 3 captured jobs.")).toBeInTheDocument();
-  });
+
+    const skillModal = await screen.findByRole("dialog");
+    fireEvent.click(within(skillModal).getByRole("button", { name: /Engineer — Beta Co/i }));
+    expect(await screen.findByRole("heading", { name: "Job Detail" })).toBeInTheDocument();
+  }, 10000);
 });
