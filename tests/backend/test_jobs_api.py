@@ -15,6 +15,7 @@ from backend.database import Base, get_db
 from backend.main import app
 from backend.models.company import Company
 from backend.models.role import Role
+from backend.models.role_fit_analysis import RoleFitAnalysis
 from backend.models.role_skill import RoleSkill
 from backend.models.role_status_change import RoleStatusChange
 from backend.models.skill import Skill
@@ -165,7 +166,33 @@ class TestListJobs:
         assert job["title"] == "Software Engineer"
         assert job["skills_count"] == 2
         assert job["status"] == "open"
+        assert job["fit_score"] is None
+        assert job["fit_recommendation"] is None
         assert "$120,000 - $180,000 USD" in job["salary_range"]
+
+    def test_list_includes_latest_fit_signal(self, client, db, sample_role, sample_skills):
+        db.add(
+            RoleFitAnalysis(
+                role_id=sample_role.id,
+                fit_score=82,
+                recommendation="go",
+                covered_required_skills=["Python"],
+                missing_required_skills=[],
+                covered_preferred_skills=[],
+                missing_preferred_skills=["TypeScript"],
+                rationale="Strong role fit.",
+                provider="openai",
+                model="gpt-4o",
+                version="fit-v1",
+            )
+        )
+        db.commit()
+
+        response = client.get("/api/jobs")
+        assert response.status_code == 200
+        data = response.json()
+        assert data[0]["fit_score"] == 82
+        assert data[0]["fit_recommendation"] == "go"
 
     def test_list_no_salary_returns_none(self, db, client, sample_company):
         """Jobs without salary info return null salary_range."""
@@ -279,6 +306,32 @@ class TestGetJob:
         assert data["salary"]["min"] == 120000
         assert data["salary"]["max"] == 180000
         assert data["status_history"] == []
+        assert data["latest_fit_analysis"] is None
+
+    def test_get_job_includes_latest_fit_analysis(self, client, db, sample_role, sample_skills):
+        db.add(
+            RoleFitAnalysis(
+                role_id=sample_role.id,
+                fit_score=55,
+                recommendation="maybe",
+                covered_required_skills=["Python"],
+                missing_required_skills=[],
+                covered_preferred_skills=[],
+                missing_preferred_skills=["TypeScript"],
+                rationale="Potential fit with minor gaps.",
+                provider="openai",
+                model="gpt-4o",
+                version="fit-v1",
+            )
+        )
+        db.commit()
+
+        response = client.get(f"/api/jobs/{sample_role.id}")
+        assert response.status_code == 200
+        analysis = response.json()["latest_fit_analysis"]
+        assert analysis is not None
+        assert analysis["fit_score"] == 55
+        assert analysis["recommendation"] == "maybe"
 
     def test_get_job_includes_status_history(self, client, db, sample_role):
         db.add(
@@ -344,6 +397,8 @@ class TestUpdateJobStatus:
         response = client.patch(f"/api/jobs/{sample_role.id}/status", json={"status": "submitted"})
         assert response.status_code == 200
         assert response.json()["status"] == "submitted"
+        assert response.json()["fit_score"] is None
+        assert response.json()["fit_recommendation"] is None
 
     def test_update_status_records_change(self, client, db, sample_role):
         response = client.patch(f"/api/jobs/{sample_role.id}/status", json={"status": "submitted"})
@@ -379,6 +434,37 @@ class TestUpdateJobStatus:
             response = client.patch(f"/api/jobs/{sample_role.id}/status", json={"status": status})
             assert response.status_code == 200
             assert response.json()["status"] == status
+
+
+class TestFitAnalysis:
+    """Tests for POST /api/jobs/{role_id}/fit-analysis."""
+
+    def test_fit_analysis_invalid_role_returns_404(self, client):
+        response = client.post("/api/jobs/999/fit-analysis")
+        assert response.status_code == 404
+        assert response.json()["detail"] == "Job not found"
+
+    def test_fit_analysis_generation_success(self, client, sample_role, sample_skills):
+        response = client.post(f"/api/jobs/{sample_role.id}/fit-analysis")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["role_id"] == sample_role.id
+        assert data["version"] == "fit-v1"
+        assert data["recommendation"] in {"go", "maybe", "no-go"}
+        assert isinstance(data["covered_required_skills"], list)
+        assert isinstance(data["missing_required_skills"], list)
+
+    def test_fit_analysis_malformed_model_output_returns_422(
+        self, client, sample_role, sample_skills
+    ):
+        with patch(
+            "backend.routers.jobs.FitAnalysisService.generate_for_role",
+            side_effect=RuntimeError("malformed model output"),
+        ):
+            response = client.post(f"/api/jobs/{sample_role.id}/fit-analysis")
+
+        assert response.status_code == 422
+        assert "Failed to generate fit analysis" in response.json()["detail"]
 
 
 # ---------------------------------------------------------------------------

@@ -32,6 +32,32 @@ class RequirementLevel(StrEnum):
     PREFERRED = "preferred"
 
 
+class FitRecommendation(StrEnum):
+    """Fit recommendation level."""
+
+    GO = "go"
+    MAYBE = "maybe"
+    NO_GO = "no-go"
+
+
+class FitAnalysis(BaseModel):
+    """Generated and persisted role-fit analysis payload."""
+
+    id: int
+    role_id: int
+    fit_score: int
+    recommendation: FitRecommendation
+    covered_required_skills: list[str]
+    missing_required_skills: list[str]
+    covered_preferred_skills: list[str]
+    missing_preferred_skills: list[str]
+    rationale: str
+    provider: str
+    model: str
+    version: str
+    created_at: datetime
+
+
 class JobScrapeRequest(BaseModel):
     """Schema for job scraping request."""
 
@@ -70,6 +96,8 @@ class JobListItem(BaseModel):
     created_at: datetime
     skills_count: int
     status: RoleStatus
+    fit_score: int | None = None
+    fit_recommendation: FitRecommendation | None = None
 
 
 class JobSkillItem(BaseModel):
@@ -103,3 +131,4 @@ class JobDetail(BaseModel):
     created_at: datetime
     status: RoleStatus
     status_history: list[RoleStatusChange]
+    latest_fit_analysis: FitAnalysis | None = None

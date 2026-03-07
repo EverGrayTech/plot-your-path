@@ -12,10 +12,12 @@ from sqlalchemy.orm import Session
 from backend.database import get_db
 from backend.models.company import Company
 from backend.models.role import Role
+from backend.models.role_fit_analysis import RoleFitAnalysis
 from backend.models.role_skill import RoleSkill
 from backend.models.role_status_change import RoleStatusChange as RoleStatusChangeModel
 from backend.schemas.company import Company as CompanySchema
 from backend.schemas.job import (
+    FitAnalysis,
     JobDetail,
     JobListItem,
     JobScrapeRequest,
@@ -24,6 +26,7 @@ from backend.schemas.job import (
     RoleStatusChange,
     SalaryInfo,
 )
+from backend.services.fit_analyzer import FitAnalysisService
 from backend.services.job_capture import (
     JobCaptureLLMError,
     JobCapturePersistenceError,
@@ -83,6 +86,25 @@ def _build_status_history(role_id: int, db: Session) -> list[RoleStatusChange]:
     ]
 
 
+def _to_fit_analysis_schema(analysis: RoleFitAnalysis) -> FitAnalysis:
+    """Convert ORM fit-analysis row to response schema."""
+    return FitAnalysis(
+        id=analysis.id,
+        role_id=analysis.role_id,
+        fit_score=analysis.fit_score,
+        recommendation=analysis.recommendation,
+        covered_required_skills=list(analysis.covered_required_skills or []),
+        missing_required_skills=list(analysis.missing_required_skills or []),
+        covered_preferred_skills=list(analysis.covered_preferred_skills or []),
+        missing_preferred_skills=list(analysis.missing_preferred_skills or []),
+        rationale=analysis.rationale,
+        provider=analysis.provider,
+        model=analysis.model,
+        version=analysis.version,
+        created_at=analysis.created_at,
+    )
+
+
 @router.get("/jobs", response_model=list[JobListItem])
 def list_jobs(db: Annotated[Session, Depends(get_db)]) -> list[JobListItem]:
     """
@@ -101,6 +123,12 @@ def list_jobs(db: Annotated[Session, Depends(get_db)]) -> list[JobListItem]:
     result: list[JobListItem] = []
     for role, company in rows:
         skills_count = db.query(RoleSkill).filter(RoleSkill.role_id == role.id).count()
+        latest_fit = (
+            db.query(RoleFitAnalysis)
+            .filter(RoleFitAnalysis.role_id == role.id)
+            .order_by(RoleFitAnalysis.created_at.desc(), RoleFitAnalysis.id.desc())
+            .first()
+        )
         result.append(
             JobListItem(
                 id=role.id,
@@ -110,6 +138,8 @@ def list_jobs(db: Annotated[Session, Depends(get_db)]) -> list[JobListItem]:
                 created_at=role.created_at,
                 skills_count=skills_count,
                 status=RoleStatus(role.status),
+                fit_score=latest_fit.fit_score if latest_fit else None,
+                fit_recommendation=latest_fit.recommendation if latest_fit else None,
             )
         )
     return result
@@ -143,6 +173,7 @@ def get_job(role_id: int, db: Annotated[Session, Depends(get_db)]) -> JobDetail:
     # Fetch associated skills
     extractor = SkillExtractorService(db)
     skills = extractor.get_skills_for_role(role_id)
+    latest_fit = FitAnalysisService(db).get_latest_for_role(role_id)
 
     return JobDetail(
         id=role.id,
@@ -160,7 +191,35 @@ def get_job(role_id: int, db: Annotated[Session, Depends(get_db)]) -> JobDetail:
         created_at=role.created_at,
         status=RoleStatus(role.status),
         status_history=_build_status_history(role.id, db),
+        latest_fit_analysis=_to_fit_analysis_schema(latest_fit) if latest_fit else None,
     )
+
+
+@router.post("/jobs/{role_id}/fit-analysis", response_model=FitAnalysis)
+def analyze_job_fit(role_id: int, db: Annotated[Session, Depends(get_db)]) -> FitAnalysis:
+    """
+    Generate and persist a deterministic fit analysis record for a role.
+
+    Args:
+        role_id: The numeric ID of the role.
+
+    Returns:
+        Newly persisted fit analysis payload.
+
+    Raises:
+        HTTPException 404: If the role does not exist.
+        HTTPException 422: If analysis output cannot be normalized.
+    """
+    service = FitAnalysisService(db)
+    try:
+        analysis = service.generate_for_role(role_id)
+        return _to_fit_analysis_schema(analysis)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(
+            status_code=422, detail=f"Failed to generate fit analysis: {exc}"
+        ) from exc
 
 
 @router.patch("/jobs/{role_id}/status", response_model=JobListItem)
@@ -212,6 +271,8 @@ def update_job_status(
         created_at=role.created_at,
         skills_count=skills_count,
         status=RoleStatus(role.status),
+        fit_score=None,
+        fit_recommendation=None,
     )
 
 

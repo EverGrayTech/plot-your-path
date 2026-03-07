@@ -2,6 +2,8 @@
 
 from backend.schemas.company import Company, CompanyBase, CompanyCreate
 from backend.schemas.job import (
+    FitAnalysis,
+    FitRecommendation,
     JobDetail,
     JobListItem,
     JobScrapeRequest,
@@ -17,6 +19,8 @@ __all__ = [
     "Company",
     "CompanyBase",
     "CompanyCreate",
+    "FitAnalysis",
+    "FitRecommendation",
     "JobDetail",
     "JobListItem",
     "JobScrapeRequest",

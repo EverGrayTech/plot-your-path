@@ -23,35 +23,35 @@ Replace the external chat step for initial role triage by adding a native, repea
 ## Implementation Checklist
 
 ### 1. Data Model + Contracts
-- [ ] Add persisted fit-analysis entity linked to `role_id`
-- [ ] Define API response schema for fit score, covered/missing skills, recommendation, and rationale
-- [ ] Include metadata fields: provider/model used, created timestamp, and version marker
+- [x] Add persisted fit-analysis entity linked to `role_id`
+- [x] Define API response schema for fit score, covered/missing skills, recommendation, and rationale
+- [x] Include metadata fields: provider/model used, created timestamp, and version marker
 
 ### 2. Backend Generation Flow
-- [ ] Add endpoint to generate fit analysis for a role
-- [ ] Implement deterministic required/preferred skill matching against profile/resume evidence
-- [ ] Build prompt assembly only for concise rationale/explanation layer (not core scoring math)
-- [ ] Validate/normalize output into strict response shape
-- [ ] Persist generated result and return latest record
+- [x] Add endpoint to generate fit analysis for a role
+- [x] Implement deterministic required/preferred skill matching against profile/resume evidence
+- [x] Build prompt assembly only for concise rationale/explanation layer (not core scoring math)
+- [x] Validate/normalize output into strict response shape
+- [x] Persist generated result and return latest record
 
 ### 3. Job Detail UI Integration
-- [ ] Add “Analyze Fit” action in Job Detail modal/page
-- [ ] Render latest fit analysis in a clear section (summary, strengths, gaps, recommendation)
-- [ ] Show loading/error/retry states with readable messaging
+- [x] Add “Analyze Fit” action in Job Detail modal/page
+- [x] Render latest fit analysis in a clear section (summary, strengths, gaps, recommendation)
+- [x] Show loading/error/retry states with readable messaging
 
 ### 4. List-Level Prioritization Signal
-- [ ] Surface latest recommendation badge on Jobs list rows where available
-- [ ] Add basic recommendation filter (`All`, `Go`, `Maybe`, `No-Go`, `Not analyzed`)
-- [ ] Expose fit score field for future smart-sort composition with desirability
-- [ ] Keep existing search/sort behavior intact
+- [x] Surface latest recommendation badge on Jobs list rows where available
+- [x] Add basic recommendation filter (`All`, `Go`, `Maybe`, `No-Go`, `Not analyzed`)
+- [x] Expose fit score field for future smart-sort composition with desirability
+- [x] Keep existing search/sort behavior intact
 
 ### 5. Tests + Verification
-- [ ] Add backend tests for generation success, invalid role, and malformed model output handling
-- [ ] Add frontend tests for analyze action, rendering states, and recommendation filter behavior
-/mnt- [ ] Verify no regression in existing jobs/skills flows
+- [x] Add backend tests for generation success, invalid role, and malformed model output handling
+- [x] Add frontend tests for analyze action, rendering states, and recommendation filter behavior
+- [x] Verify no regression in existing jobs/skills flows
 
 ## Acceptance Criteria
-- [ ] User can generate and view fit analysis for any captured job in-app
-- [ ] Analysis output is structured and includes fit score + recommendation + rationale
-- [ ] Jobs list can be filtered by recommendation state
-- [ ] Results persist and are visible after app restart
+- [x] User can generate and view fit analysis for any captured job in-app
+- [x] Analysis output is structured and includes fit score + recommendation + rationale
+- [x] Jobs list can be filtered by recommendation state
+- [x] Results persist and are visible after app restart
