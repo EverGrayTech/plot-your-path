@@ -95,80 +95,10 @@ By separating the Instructions (stored in SQL) from the Execution (the Agents), 
 - **Skills → Learnings**: Links market demand to personal supply
 
 ## 6. Development Phases
-
-### 1. MVP - Job Capture & Storage (PRIORITY)
-**Goal**: Capture job descriptions without losing data during active job search
-
-**Core Features**:
-- URL-based job input (LinkedIn, Indeed, Greenhouse, Lever)
-- Web scraping with LLM de-noising
-- Skill extraction (required vs. preferred)
-- SQLite database population
-- Simple web UI for input and viewing
-
-**Success Criteria**:
-- Capture a job posting from URL and persist all relevant data in under 30 seconds
-- Extract required/preferred skills with high practical accuracy for decision support
-- Preserve both raw and cleaned artifacts to ensure traceability and recovery
-- Handle expected failure modes (invalid URL, rate limits, blocked requests) gracefully
-- Keep workflow understandable for a non-technical solo user
-
-**Acceptance Checklist**:
-- [ ] URL capture flow validates input and returns clear feedback
-- [ ] Scraping stores raw HTML at deterministic paths
-- [ ] LLM cleaning produces normalized Markdown output
-- [ ] Skills are extracted and classified as required/preferred
-- [ ] Companies, roles, skills, and role-skill links are persisted without duplication
-- [ ] Core UI supports capture, listing, and detail review of saved roles
-- [ ] End-to-end tests pass with coverage requirements from `.rules/30-testing.md`
-
-### 2. Company Scoring Engine
-- **Goal**: Research and score companies across 8 desirability factors using configurable user weights
-- **Key Deliverables**:
-  - Configurable scoring factors and weights
-  - Automated score calculation with reasoning traces
-  - Stable/volatile cache strategy with manual refresh controls
-  - Company score breakdown UI
-
-### 3. Skill Gap Analysis & Recommendations
-- **Goal**: Compare role requirements against user capability and recommend Go/Maybe/No-Go
-- **Key Deliverables**:
-  - Resume/LinkedIn ingestion and skill extraction
-  - Learnings inventory and skill match percentage
-  - Gap severity classification and learning path suggestions
-  - Recommendation confidence and explanation
-
-### 4. Application Materials Generation
-- **Goal**: Generate tailored application artifacts from role context + STAR history
-- **Key Deliverables**:
-  - STAR story management and retrieval
-  - Role-specific resume/cover-letter generation
-  - Interview prep and follow-up templates
-  - Regeneration options and version history
-
-### 5. Career Path Exploration
-- **Goal**: Surface plausible career transitions and provide what-if planning
-- **Key Deliverables**:
-  - Suggested next-role pathways
-  - Gap-aware role transition planning
-  - Skill roadmap sequencing
-  - Salary and desirability trade-off analysis
-
-### 6. Personal Project Recommendations
-- **Goal**: Recommend practical projects that close high-value skill gaps
-- **Key Deliverables**:
-  - AI-ranked project suggestions from target-role gaps
-  - Reusable project templates
-  - Milestone/progress tracking
-  - Portfolio linkage and outcomes tracking
-
-### Recommended Implementation Order
-1. **Phase 1: Job Capture** (foundation)
-2. **Phase 3: Skill Gap Analysis** (highest decision value after capture)
-3. **Phase 2: Company Scoring** (better prioritization)
-4. **Phase 4: Application Materials** (application acceleration)
-5. **Phase 5: Career Path Exploration** (long-term planning)
-6. **Phase 6: Personal Projects** (targeted growth)
+Detailed roadmap execution lives in `.plans/`.
+- Use `.plans/*.md` for implementation-ready scope, sequencing, and acceptance criteria.
+  - `XX` plans are currently unscheduled/unprioritized.
+- Keep `SYSTEM_SPEC.md` focused on vision and architecture; avoid duplicating checklist-level execution detail here.
 
 ### Cross-Phase Product Considerations
 - **Authentication & Security**: Single-user first; keep secrets in env vars; keep sensitive career data local
