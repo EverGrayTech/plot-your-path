@@ -80,6 +80,34 @@ class TestNormalizeSkillName:
         assert SkillExtractorService.normalize_skill_name("MyCustomSkill") == "MyCustomSkill"
         assert SkillExtractorService.normalize_skill_name("Terraform") == "Terraform"
 
+    def test_normalize_agile_variants(self):
+        """Agile phrasing and typo variants should collapse to Agile."""
+        assert SkillExtractorService.normalize_skill_name("Agile") == "Agile"
+        assert SkillExtractorService.normalize_skill_name("Agile Methodologies") == "Agile"
+        assert SkillExtractorService.normalize_skill_name("Agile Methodolgy") == "Agile"
+
+    def test_normalize_ai_variants(self):
+        """AI related variants should collapse to AI."""
+        assert SkillExtractorService.normalize_skill_name("AI") == "AI"
+        assert SkillExtractorService.normalize_skill_name("AI Knowledge") == "AI"
+        assert SkillExtractorService.normalize_skill_name("AI Development") == "AI"
+
+    def test_normalize_full_stack_variants(self):
+        """Hyphen/punctuation variants should map to one full-stack canonical value."""
+        assert (
+            SkillExtractorService.normalize_skill_name("Full Stack Development")
+            == "Full Stack Development"
+        )
+        assert (
+            SkillExtractorService.normalize_skill_name("Full-stack Development")
+            == "Full Stack Development"
+        )
+
+    def test_normalize_hiring_recruiting_variants(self):
+        """Hiring and recruiting variants should collapse to Hiring."""
+        assert SkillExtractorService.normalize_skill_name("Hiring") == "Hiring"
+        assert SkillExtractorService.normalize_skill_name("Recruiting") == "Hiring"
+
 
 class TestGetOrCreateSkill:
     """Tests for skill get-or-create logic."""
