@@ -14,6 +14,7 @@ from backend.models.role_skill import RoleSkill
 from backend.services.llm_service import LLMError, LLMService
 from backend.services.scraper import ScraperError, ScraperService
 from backend.services.skill_extractor import SkillExtractorService
+from backend.services.title_normalizer import normalize_job_title
 from backend.utils.file_storage import save_file
 from backend.utils.slug import create_slug
 
@@ -124,7 +125,8 @@ class JobCaptureService:
                 self.db.add(company)
                 self.db.flush()
 
-            title = (job_data.get("title") or "Unknown Title").strip() or "Unknown Title"
+            raw_title = (job_data.get("title") or "Unknown Title").strip() or "Unknown Title"
+            title = normalize_job_title(raw_title)
             role = Role(
                 company_id=company.id,
                 title=title,

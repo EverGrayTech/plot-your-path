@@ -43,7 +43,7 @@ async def test_capture_from_url_persists_canonical_paths(db_session):
     mock_llm.extract_job_data = AsyncMock(
         return_value={
             "company": "Acme",
-            "title": "Backend Engineer",
+            "title": "VP, Engineering",
             "team_division": "Platform",
             "salary_min": 120000,
             "salary_max": 150000,
@@ -60,8 +60,10 @@ async def test_capture_from_url_persists_canonical_paths(db_session):
         result = await service.capture_from_url("https://example.com/jobs/123")
 
     assert result.status == "success"
+    assert result.title == "Vice President — Engineering"
 
     role = db_session.query(Role).filter(Role.id == result.role_id).one()
+    assert role.title == "Vice President — Engineering"
     assert role.raw_html_path.startswith("jobs/raw/")
     assert role.cleaned_md_path.startswith("jobs/cleaned/")
     assert not role.raw_html_path.startswith("data/")
