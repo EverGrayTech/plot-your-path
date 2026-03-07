@@ -335,7 +335,7 @@ export interface JobScrapeResponse {
 
 ## Implementation Steps
 
-### Phase 1: Project Setup & Infrastructure
+### 1. Project Setup & Infrastructure
 - [x] Run `cruft update` to sync with template (skipped - not installed)
 - [x] Create feature branch `feature/mvp-phase1-job-capture`
 - [x] Initialize backend project structure with uv
@@ -355,7 +355,7 @@ export interface JobScrapeResponse {
   - [x] `data/jobs/cleaned/`
 - [x] Commit: `chore: initialize Phase 1 project structure`
 
-### Phase 2: Backend - Database Layer
+### 2. Backend - Database Layer
 - [x] Create SQLAlchemy database setup
   - [x] `src/backend/database.py` - Database engine and session
   - [x] `src/backend/models/__init__.py`
@@ -371,7 +371,7 @@ export interface JobScrapeResponse {
   - [x] Verify all tables exist with correct schema
 - [x] Commit: `feat(backend): add database models and initialization`
 
-### Phase 3: Backend - Pydantic Schemas
+### 3. Backend - Pydantic Schemas
 - [x] Create Pydantic schemas
   - [x] `src/backend/schemas/__init__.py`
   - [x] `src/backend/schemas/company.py`
@@ -382,7 +382,7 @@ export interface JobScrapeResponse {
 - [x] Run tests: `uv run pytest tests/backend/test_schemas.py --cov`
 - [x] Commit: `feat(backend): add Pydantic schemas for API validation`
 
-### Phase 4: Backend - Utility Functions
+### 4. Backend - Utility Functions
 - [x] Create utility modules
   - [x] `src/backend/utils/__init__.py`
   - [x] `src/backend/utils/slug.py` - Company name to slug conversion
@@ -392,7 +392,7 @@ export interface JobScrapeResponse {
 - [x] Run tests: `uv run pytest tests/backend/test_utils.py --cov`
 - [x] Commit: `feat(backend): add utility functions for slug and file storage`
 
-### Phase 5: Backend - Configuration Management
+### 5. Backend - Configuration Management
 - [x] Create configuration module
   - [x] `src/backend/config.py` - Load LLM and scraping configs
 - [x] Implement environment variable loading
@@ -403,7 +403,7 @@ export interface JobScrapeResponse {
 - [x] Run tests: `uv run pytest tests/backend/test_config.py --cov`
 - [x] Commit: `feat(backend): add configuration management`
 
-### Phase 6: Backend - Web Scraping Service
+### 6. Backend - Web Scraping Service
 - [x] Create scraper service
   - [x] `src/backend/services/__init__.py`
   - [x] `src/backend/services/scraper.py`
@@ -420,7 +420,7 @@ export interface JobScrapeResponse {
 - [x] Run tests: `uv run pytest tests/backend/test_scraper.py --cov`
 - [x] Commit: `feat(backend): add web scraping service`
 
-### Phase 7: Backend - LLM Service
+### 7. Backend - LLM Service
 - [x] Create LLM service
   - [x] `src/backend/services/llm_service.py`
 - [x] Implement multi-provider support
@@ -439,7 +439,7 @@ export interface JobScrapeResponse {
 - [x] Run tests: `uv run pytest tests/backend/test_llm_service.py --cov`
 - [x] Commit: `feat(backend): add LLM service with multi-provider support`
 
-### Phase 8: Backend - Skill Extraction Service
+### 8. Backend - Skill Extraction Service
 - [x] Create skill extractor service
   - [x] `src/backend/services/skill_extractor.py`
 - [x] Implement skill extraction logic
@@ -452,7 +452,7 @@ export interface JobScrapeResponse {
 - [x] Run tests: `uv run pytest tests/backend/test_skill_extractor.py --cov`
 - [x] Commit: `feat(backend): add skill extraction and deduplication service`
 
-### Phase 9: Backend - API Endpoints
+### 9. Backend - API Endpoints
 - [x] Create FastAPI application
   - [x] `src/backend/main.py` - App initialization, CORS, routers
 - [x] Create jobs router
@@ -478,7 +478,7 @@ export interface JobScrapeResponse {
 - [x] Verify 90%+ coverage (91% achieved, jobs.py at 100%)
 - [x] Commit: `feat(backend): add jobs API endpoints with full pipeline`
 
-### Phase 10: Frontend - Project Setup
+### 10. Frontend - Project Setup
 - [x] Set up Next.js app structure
   - [x] Configure `next.config.js`
   - [x] Set up TypeScript configuration
@@ -490,7 +490,7 @@ export interface JobScrapeResponse {
   - [x] `src/frontend/lib/types.ts`
 - [x] Commit: `feat(frontend): initialize Next.js app structure`
 
-### Phase 11: Frontend - API Client
+### 11. Frontend - API Client
 - [x] Create API client module
   - [x] `src/frontend/lib/api.ts`
 - [x] Implement API functions
@@ -505,7 +505,7 @@ export interface JobScrapeResponse {
 - [x] Run tests: `pnpm vitest run tests/frontend/lib/ --coverage`
 - [x] Commit: `feat(frontend): add API client functions`
 
-### Phase 12: Frontend - Components
+### 12. Frontend - Components
 - [x] Create JobUrlForm component
   - [x] `src/frontend/components/JobUrlForm.tsx`
   - [x] URL input field
@@ -533,7 +533,7 @@ export interface JobScrapeResponse {
 - [x] Run tests: `pnpm vitest run tests/frontend/components/ --coverage`
 - [x] Commit: `feat(frontend): add reusable components`
 
-### Phase 13: Frontend - Pages
+### 13. Frontend - Pages
 - [x] Create home/dashboard page
   - [x] `src/frontend/app/page.tsx`
   - [x] Integrate JobUrlForm
@@ -557,7 +557,7 @@ export interface JobScrapeResponse {
 - [x] Verify 90%+ coverage
 - [x] Commit: `feat(frontend): add pages for dashboard, job list, and job detail`
 
-### Phase 14: Integration & End-to-End Testing
+### 14. Integration & End-to-End Testing
 - [x] Set up E2E testing environment
   - [x] Install Playwright for E2E tests
   - [x] Configure test database
@@ -580,7 +580,7 @@ export interface JobScrapeResponse {
 - [x] Document any issues found
 - [x] Commit: `test: add E2E tests and complete manual testing`
 
-### Phase 15: Documentation & Polish
+### 15. Documentation & Polish
 - [x] Create README for Phase 1
   - [x] Installation instructions
   - [x] Configuration guide
@@ -598,7 +598,7 @@ export interface JobScrapeResponse {
   - [x] `uv run ruff check --fix`
 - [x] Commit: `docs: add Phase 1 documentation and polish`
 
-### Phase 16: Version Bump & Release
+### 16. Version Bump & Release
 - [x] Update version to 0.1.0
   - [x] Update `pyproject.toml`
   - [x] Update `package.json`

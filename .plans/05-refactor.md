@@ -12,7 +12,7 @@ The objective is to reduce divergence risk, enforce backend async/IO standards, 
 
 ### Key Findings (What should be fixed now)
 
-## 1) Pipeline duplication across API and CLI (High)
+## 1. Pipeline duplication across API and CLI (High)
 
 The job-capture pipeline is duplicated in:
 - `src/backend/routers/jobs.py` (`scrape_job`)
@@ -24,7 +24,7 @@ Both perform similar steps (dedupe → scrape/clip → LLM denoise/extract → c
 
 ---
 
-## 2) Blocking I/O in async route (High)
+## 2. Blocking I/O in async route (High)
 
 `POST /api/jobs/scrape` is async but performs blocking work directly:
 - synchronous SQLAlchemy session operations
@@ -36,7 +36,7 @@ This violates the backend rule: *never perform blocking I/O in async routes*.
 
 ---
 
-## 3) Inconsistent path persistence format (High)
+## 3. Inconsistent path persistence format (High)
 
 Path storage differs by execution path:
 - API stores relative paths (`data/jobs/...`)
@@ -48,7 +48,7 @@ Path storage differs by execution path:
 
 ---
 
-## 4) Skill linking can violate unique constraint (Medium)
+## 4. Skill linking can violate unique constraint (Medium)
 
 `RoleSkill` has unique `(role_id, skill_id)`, but `link_skills_to_role` can attempt duplicate inserts when:
 - skill repeats in a list
@@ -60,7 +60,7 @@ This can trigger integrity errors in realistic LLM output.
 
 ---
 
-## 5) Error handling and transaction boundaries are inconsistent (Medium)
+## 5. Error handling and transaction boundaries are inconsistent (Medium)
 
 - API path has no explicit rollback around all persistence steps.
 - CLI has broad `except Exception` + re-raise behavior that can produce noisy tracebacks without cleanup guarantees.
@@ -118,26 +118,26 @@ This can trigger integrity errors in realistic LLM output.
 
 ## Implementation Steps
 
-- [x] **Step 1 — Introduce capture domain result/exception types**
+### 1. Introduce capture domain result/exception types**
   - [x] Define typed result object and domain exceptions for expected failure modes.
 
-- [x] **Step 2 — Extract shared pipeline into `JobCaptureService`**
+### 2. Extract shared pipeline into `JobCaptureService`**
   - [x] Move duplicated API/CLI logic into service with clear method boundaries.
 
-- [x] **Step 3 — Refactor API route to thin adapter**
+### 3. Refactor API route to thin adapter**
   - [x] Keep async route non-blocking by offloading blocking operations appropriately.
 
-- [x] **Step 4 — Refactor CLI to consume service**
+### 4. Refactor CLI to consume service**
   - [x] Preserve current flags and output behavior while removing persistence duplication.
 
-- [x] **Step 5 — Normalize file path strategy**
+### 5. Normalize file path strategy**
   - [x] Migrate both code paths to one persisted path format.
   - [x] Add compatibility read path for legacy records.
 
-- [x] **Step 6 — Harden skill linking**
+### 6. Harden skill linking**
   - [x] Deduplicate skills and enforce deterministic requirement-level precedence.
 
-- [x] **Step 7 — Strengthen tests**
+### 7. Strengthen tests**
   - [x] Add service-focused tests for end-to-end pipeline behavior.
   - [x] Add regression tests for:
     - [x] duplicate skills in same payload

@@ -23,7 +23,7 @@ This plan follows the streamlined UX you requested:
 
 ## Technical Design
 
-## 1) Frontend Page (Next.js, single route)
+## 1. Frontend Page (Next.js, single route)
 
 Create one capture page as the MVP entry point:
 - URL input (required)
@@ -41,7 +41,7 @@ State model (client component):
 - `errorMessage`
 - `result`
 
-## 2) API Contract Enhancement (backend support for fallback)
+## 2. API Contract Enhancement (backend support for fallback)
 
 Extend capture flow so one API contract can support both attempts:
 
@@ -59,7 +59,7 @@ Extend capture flow so one API contract can support both attempts:
 
 This keeps frontend logic simple and avoids introducing a second endpoint for MVP.
 
-## 3) Frontend Progress Feedback (MVP-simple)
+## 3. Frontend Progress Feedback (MVP-simple)
 
 During request lifecycle, show staged progress text while awaiting backend:
 - `Validating URL...`
@@ -72,7 +72,7 @@ Implementation note:
 - Stop timer on success/error.
 - Keep copy honest ("working..."), but lightweight and reassuring.
 
-## 4) Error Handling UX
+## 4. Error Handling UX
 
 Error handling branches:
 
@@ -93,33 +93,33 @@ Error handling branches:
 
 ## Implementation Steps
 
-- [x] **Step 1 — Scaffold minimal frontend app shell**
+### 1. Scaffold minimal frontend app shell**
   - [x] Add Next.js app route files/layout for single capture page.
   - [x] Create minimal styling structure for readable form/status states.
 
-- [x] **Step 2 — Build capture form UI and client state flow**
+### 2. Build capture form UI and client state flow**
   - [x] Implement URL input + submit.
   - [x] Add conditional fallback textarea UX.
   - [x] Add success and error message regions.
 
-- [x] **Step 3 — Add frontend API client integration**
+### 3. Add frontend API client integration**
   - [x] Implement typed request/response helpers in `src/frontend/lib/`.
   - [x] Parse structured backend errors, specifically `FALLBACK_TEXT_REQUIRED`.
 
-- [x] **Step 4 — Add MVP progress feedback behavior**
+### 4. Add MVP progress feedback behavior**
   - [x] Add staged progress text while request is in-flight.
   - [x] Ensure clean cancellation/cleanup of timers.
 
-- [x] **Step 5 — Update backend scrape contract for fallback flow**
+### 5. Update backend scrape contract for fallback flow**
   - [x] Extend request schema with optional `fallback_text`.
   - [x] Route to `capture_from_clipboard_text` when fallback text is present.
   - [x] Return structured `FALLBACK_TEXT_REQUIRED` error for recoverable scrape failures.
 
-- [x] **Step 6 — Add/adjust tests**
+### 6. Add/adjust tests**
   - [x] Frontend tests for initial URL submit, fallback reveal, success rendering, and generic error state.
   - [x] Backend API tests for structured fallback error and fallback-text resubmission path.
 
-- [x] **Step 7 — Quality checks**
+### 7. Quality checks**
   - [x] Run Biome lint/format and frontend tests.
   - [x] Run backend tests impacted by API contract update.
 

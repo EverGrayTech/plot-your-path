@@ -77,15 +77,6 @@ Try _scrape_with_httpx()
 
 ### `playwright_available()` helper
 
-```python
-def playwright_available() -> bool:
-    try:
-        import playwright  # noqa: F401
-        return True
-    except ImportError:
-        return False
-```
-
 Lazy-checked at call time — never at module import time.
 
 ---
@@ -104,7 +95,7 @@ Lazy-checked at call time — never at module import time.
 
 ## Implementation Steps
 
-- [x] **Step 1 — Update `pyproject.toml`**
+### 1. Update `pyproject.toml`**
 
 Move `playwright>=1.48.0` from `dependencies` to a new optional extra:
 
@@ -117,7 +108,7 @@ dev = [...]
 Install with: `uv sync --extra browser && uv run playwright install chromium`
 Default install (`uv sync`) remains browser-free.
 
-- [x] **Step 2 — Update `config/scraping.json` + `ScrapingConfig`**
+### 2. Update `config/scraping.json` + `ScrapingConfig`**
 
 Add `min_content_chars` (threshold below which we consider a static scrape "too thin"):
 
@@ -133,7 +124,7 @@ Add `min_content_chars` (threshold below which we consider a static scrape "too 
 
 Add `min_content_chars: int = 500` to `ScrapingConfig`.
 
-- [x] **Step 3 — Refactor `scraper.py`**
+### 3. Refactor `scraper.py`**
 
   - [x] **Remove** the top-level `from playwright.async_api import Page, async_playwright` import.
   - [x] **Add** `UNSUPPORTED_DOMAINS` (LinkedIn) and `MIN_CONTENT_CHARS` constants.
@@ -142,69 +133,19 @@ Add `min_content_chars: int = 500` to `ScrapingConfig`.
   - [x] **Update** `_scrape_with_playwright()` to do a lazy import of `async_playwright` inside the method body, with a clear `ImportError` → `ScraperError` conversion.
   - [x] **Update** `scrape()` to implement the new decision tree above.
 
-Key snippet for `scrape()`:
 
-```python
-async def scrape(self, url: str) -> str:
-    if not self.is_valid_url(url):
-        raise ValueError(f"Invalid URL: {url}")
+### 4. Update `_scrape_with_playwright()`**
 
-    domain = self.get_domain(url)
+Move the `async_playwright` import inside the method.
 
-    if domain in self.UNSUPPORTED_DOMAINS:
-        raise ScraperError(
-            f"'{domain}' is not supported: LinkedIn requires authentication and "
-            "actively blocks automated access. Use the direct ATS link "
-            "(Greenhouse, Lever, Workday, etc.) listed in the job posting instead."
-        )
-
-    await asyncio.sleep(self.config.rate_limit_delay_seconds)
-
-    # Always try httpx first — it works for most ATS platforms
-    try:
-        html = await self._scrape_with_httpx(url)
-        text = self.extract_text_from_html(html)
-        if len(text) >= self.config.min_content_chars:
-            return html
-        # Content too thin — site likely needs JS rendering
-    except ScraperError:
-        html = ""  # Fall through to Playwright
-
-    if not self._scrape_with_playwright_available():
-        raise ScraperError(
-            "Scraped content was too thin (JavaScript rendering required) and "
-            "Playwright is not installed. Install it with:\n"
-            "  uv sync --extra browser\n"
-            "  uv run playwright install chromium"
-        )
-
-    return await self._scrape_with_playwright(url)
-```
-
-- [x] **Step 4 — Update `_scrape_with_playwright()`**
-
-Move the `async_playwright` import inside the method:
-
-```python
-async def _scrape_with_playwright(self, url: str) -> str:
-    try:
-        from playwright.async_api import async_playwright
-    except ImportError as e:
-        raise ScraperError(
-            "Playwright is not installed. Run: uv sync --extra browser && "
-            "uv run playwright install chromium"
-        ) from e
-    # ... rest unchanged ...
-```
-
-- [x] **Step 5 — Update tests**
+### 5. Update tests**
 
   - [x] Update `test_needs_javascript_linkedin` → `test_linkedin_raises_unsupported` (scraping a LinkedIn URL should now raise `ScraperError`, not try Playwright)
   - [x] Add `test_thin_content_falls_back_to_playwright_when_available`
   - [x] Add `test_thin_content_raises_when_playwright_unavailable`
   - [x] Add `test_playwright_available_when_installed` / `test_playwright_available_when_missing`
 
-- [x] **Step 6 — Commit**
+### 6. Commit**
 
 ```
 fix(scraper): decouple CLI from Playwright; make browser an optional extra
