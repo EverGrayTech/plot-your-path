@@ -2,7 +2,6 @@
 
 import os
 import tempfile
-from pathlib import Path
 
 import pytest
 
@@ -47,10 +46,10 @@ class TestFileStorageUtils:
         with tempfile.TemporaryDirectory() as tmpdir:
             filepath = os.path.join(tmpdir, "test.txt")
             content = "Hello, World!"
-            
+
             save_file(content, filepath)
             loaded_content = load_file(filepath)
-            
+
             assert loaded_content == content
 
     def test_save_file_creates_directories(self):
@@ -58,9 +57,9 @@ class TestFileStorageUtils:
         with tempfile.TemporaryDirectory() as tmpdir:
             filepath = os.path.join(tmpdir, "nested", "dir", "test.txt")
             content = "Test content"
-            
+
             save_file(content, filepath)
-            
+
             assert os.path.exists(filepath)
             assert load_file(filepath) == content
 
@@ -68,10 +67,10 @@ class TestFileStorageUtils:
         """Test that save_file overwrites existing files."""
         with tempfile.TemporaryDirectory() as tmpdir:
             filepath = os.path.join(tmpdir, "test.txt")
-            
+
             save_file("First content", filepath)
             save_file("Second content", filepath)
-            
+
             assert load_file(filepath) == "Second content"
 
     def test_load_file_not_found(self):
@@ -84,7 +83,7 @@ class TestFileStorageUtils:
         with tempfile.TemporaryDirectory() as tmpdir:
             filepath = os.path.join(tmpdir, "test.txt")
             save_file("content", filepath)
-            
+
             assert file_exists(filepath) is True
 
     def test_file_exists_false(self):
@@ -96,10 +95,10 @@ class TestFileStorageUtils:
         with tempfile.TemporaryDirectory() as tmpdir:
             filepath = os.path.join(tmpdir, "unicode.txt")
             content = "Hello 世界 🌍"
-            
+
             save_file(content, filepath)
             loaded_content = load_file(filepath)
-            
+
             assert loaded_content == content
 
     def test_save_file_multiline(self):
@@ -107,10 +106,10 @@ class TestFileStorageUtils:
         with tempfile.TemporaryDirectory() as tmpdir:
             filepath = os.path.join(tmpdir, "multiline.txt")
             content = "Line 1\nLine 2\nLine 3"
-            
+
             save_file(content, filepath)
             loaded_content = load_file(filepath)
-            
+
             assert loaded_content == content
 
     def test_to_storage_path_strips_legacy_prefix(self):

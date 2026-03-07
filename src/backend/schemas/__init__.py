@@ -7,8 +7,8 @@ from backend.schemas.job import (
     JobScrapeRequest,
     JobScrapeResponse,
     RequirementLevel,
-    RoleStatusChange,
     RoleStatus,
+    RoleStatusChange,
     SalaryInfo,
 )
 from backend.schemas.skill import Skill, SkillBase, SkillCategory, SkillCreate

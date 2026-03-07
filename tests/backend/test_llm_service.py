@@ -18,9 +18,7 @@ def openai_config():
 @pytest.fixture
 def anthropic_config():
     """Anthropic LLM config for testing."""
-    return LLMConfig(
-        provider="anthropic", model="claude-3-sonnet", api_key_env="ANTHROPIC_API_KEY"
-    )
+    return LLMConfig(provider="anthropic", model="claude-3-sonnet", api_key_env="ANTHROPIC_API_KEY")
 
 
 @pytest.fixture
@@ -48,16 +46,18 @@ SAMPLE_JOB_MARKDOWN = """
 - Open source contributions
 """
 
-SAMPLE_LLM_JSON_RESPONSE = json.dumps({
-    "title": "Senior Software Engineer - Backend",
-    "company": "Acme Corp",
-    "team_division": "Platform Engineering",
-    "salary_min": 150000,
-    "salary_max": 200000,
-    "salary_currency": "USD",
-    "required_skills": ["Python", "FastAPI", "Django", "PostgreSQL", "Docker", "Communication"],
-    "preferred_skills": ["Kubernetes", "Rust"],
-})
+SAMPLE_LLM_JSON_RESPONSE = json.dumps(
+    {
+        "title": "Senior Software Engineer - Backend",
+        "company": "Acme Corp",
+        "team_division": "Platform Engineering",
+        "salary_min": 150000,
+        "salary_max": 200000,
+        "salary_currency": "USD",
+        "required_skills": ["Python", "FastAPI", "Django", "PostgreSQL", "Docker", "Communication"],
+        "preferred_skills": ["Kubernetes", "Rust"],
+    }
+)
 
 
 class TestOpenAIProvider:
@@ -88,9 +88,7 @@ class TestOpenAIProvider:
 
         with patch("openai.AsyncOpenAI") as mock_client_class:
             mock_client = AsyncMock()
-            mock_client.chat.completions.create = AsyncMock(
-                side_effect=Exception("API Error")
-            )
+            mock_client.chat.completions.create = AsyncMock(side_effect=Exception("API Error"))
             mock_client_class.return_value = mock_client
 
             with pytest.raises(LLMError, match="OpenAI API call failed"):
@@ -258,9 +256,7 @@ class TestExtractJobData:
         """Test that JSON code fences are stripped."""
         monkeypatch.setenv("OPENAI_API_KEY", "test-key")
         service = LLMService(config=openai_config)
-        service.complete = AsyncMock(
-            return_value=f"```json\n{SAMPLE_LLM_JSON_RESPONSE}\n```"
-        )
+        service.complete = AsyncMock(return_value=f"```json\n{SAMPLE_LLM_JSON_RESPONSE}\n```")
 
         result = await service.extract_job_data(SAMPLE_JOB_MARKDOWN)
         assert result["title"] == "Senior Software Engineer - Backend"
@@ -281,11 +277,13 @@ class TestExtractJobData:
         monkeypatch.setenv("OPENAI_API_KEY", "test-key")
         service = LLMService(config=openai_config)
         # Missing 'required_skills' field
-        incomplete_json = json.dumps({
-            "title": "Engineer",
-            "company": "Acme",
-            "preferred_skills": [],
-        })
+        incomplete_json = json.dumps(
+            {
+                "title": "Engineer",
+                "company": "Acme",
+                "preferred_skills": [],
+            }
+        )
         service.complete = AsyncMock(return_value=incomplete_json)
 
         with pytest.raises(LLMError, match="missing required field"):

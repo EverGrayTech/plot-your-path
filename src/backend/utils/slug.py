@@ -6,13 +6,13 @@ from slugify import slugify
 def create_slug(text: str) -> str:
     """
     Create a URL-friendly slug from text.
-    
+
     Args:
         text: The text to convert to a slug
-        
+
     Returns:
         A lowercase, hyphenated slug
-        
+
     Examples:
         >>> create_slug("Acme Corporation")
         'acme-corporation'

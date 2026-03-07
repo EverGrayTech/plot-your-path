@@ -115,7 +115,9 @@ class JobCaptureService:
             raise JobCaptureLLMError(str(exc)) from exc
 
         try:
-            company_name = (job_data.get("company") or "Unknown Company").strip() or "Unknown Company"
+            company_name = (
+                job_data.get("company") or "Unknown Company"
+            ).strip() or "Unknown Company"
             company = self.db.query(Company).filter(Company.name.ilike(company_name)).first()
             if not company:
                 slug = create_slug(company_name)
@@ -174,7 +176,9 @@ class JobCaptureService:
             return None
 
         company = self.db.query(Company).filter(Company.id == existing_role.company_id).first()
-        skills_count = self.db.query(RoleSkill).filter(RoleSkill.role_id == existing_role.id).count()
+        skills_count = (
+            self.db.query(RoleSkill).filter(RoleSkill.role_id == existing_role.id).count()
+        )
         return JobCaptureResult(
             company=company.name if company else "Unknown",
             processing_time_seconds=round(time.time() - start, 3),

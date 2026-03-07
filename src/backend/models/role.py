@@ -1,7 +1,5 @@
 """Role database model."""
 
-from datetime import datetime
-
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.sql import func
 
@@ -11,7 +9,7 @@ from backend.database import Base
 class Role(Base):
     """
     Role model representing specific job openings.
-    
+
     Attributes:
         id: Primary key
         company_id: Foreign key to companies table

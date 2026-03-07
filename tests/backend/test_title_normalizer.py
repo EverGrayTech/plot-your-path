@@ -32,8 +32,7 @@ def test_unknown_rank_falls_back_to_cleaned_original() -> None:
 def test_normalize_sr_customer_solutions_manager() -> None:
     """Abbreviated senior manager-style titles should normalize rank generically."""
     assert (
-        normalize_job_title("Sr. Customer Solutions Manager")
-        == "Senior Customer Solutions Manager"
+        normalize_job_title("Sr. Customer Solutions Manager") == "Senior Customer Solutions Manager"
     )
 
 

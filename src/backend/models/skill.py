@@ -1,7 +1,5 @@
 """Skill database model."""
 
-from datetime import datetime
-
 from sqlalchemy import Column, DateTime, Integer, String
 from sqlalchemy.sql import func
 
@@ -11,7 +9,7 @@ from backend.database import Base
 class Skill(Base):
     """
     Skill model representing technical and soft skills.
-    
+
     Attributes:
         id: Primary key
         name: Skill name (unique)

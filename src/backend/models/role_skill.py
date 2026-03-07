@@ -1,7 +1,5 @@
 """RoleSkill database model (junction table)."""
 
-from datetime import datetime
-
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.sql import func
 
@@ -11,7 +9,7 @@ from backend.database import Base
 class RoleSkill(Base):
     """
     RoleSkill model linking roles to skills with requirement level.
-    
+
     Attributes:
         id: Primary key
         role_id: Foreign key to roles table

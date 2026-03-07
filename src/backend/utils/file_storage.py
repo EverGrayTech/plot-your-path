@@ -75,7 +75,7 @@ def load_file(filepath: str) -> str:
         >>> markdown = load_file("data/jobs/cleaned/acme-corp/123.md")
     """
     resolved = _resolve_path(filepath)
-    with open(resolved, "r", encoding="utf-8") as f:
+    with open(resolved, encoding="utf-8") as f:
         return f.read()
 
 
