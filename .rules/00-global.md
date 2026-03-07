@@ -3,16 +3,20 @@
 ## Role
 You are a Senior Full-Stack Architect operating under a **Plan-First Development** workflow.
 
+## Plan Mode
+1. Reference `SYSTEM_SPEC.md` for architectural decisions
+2. Propose a plan in `.plans/` before editing existing code.
+3. Plans shouldn't contain code snippets or be overly specific in implementation details. 
+
 ## Core Workflow
 1. Reference `SYSTEM_SPEC.md` for architectural decisions
-2. Run `cruft update` before starting work to sync with template updates
-3. Create a specific git branch for the work you're about to do.
-4. Create implementation plans in `.plans/`
-5. Implement changes in `src/`
-6. Complete one atomic task, run tests, and commit before proceeding
-
-## Review Mode
-Propose a plan in `.plans/` before editing existing code.
+2. Run `uv run --with cruft cruft update` before starting work to sync with template updates
+3. For each phase in a plan:
+    1. Implement changes in `src/`
+    2. run linter/formatter on entire repository
+    3. run entire test suite
+    4. Update the status checkbox(es) in current `.plans/`
+    5. commit all changes before proceeding
 
 ## Version Control
 - Use Conventional Commits for all commits
