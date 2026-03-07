@@ -101,49 +101,49 @@ DATA_ROOT=/home/rosea/Documents/plot_your_path
 
 ## Implementation Steps
 
-- [x] **Step 1 — Git branch**
+### 1. Git branch**
 ```
 git checkout -b feature/mvf-job-capture-cli
 ```
 
-- [x] **Step 2 — Update `config.py`**
+### 2. Update `config.py`**
   - [x] Add `data_root: str` field to `Settings`, expanding `~` to absolute path
   - [x] Derive `database_url` from `data_root` when not explicitly set
   - [x] Add `base_url: str | None = None` to `LLMConfig`
 
-- [x] **Step 3 — Update `llm_service.py`**
+### 3. Update `llm_service.py`**
   - [x] In `_call_openai()`, pass `base_url=self.config.base_url` to `AsyncOpenAI(...)` when set
   - [x] In `complete()`, treat `provider == "openrouter"` as an alias for `"openai"`
 
-- [x] **Step 4 — Update `file_storage.py`**
+### 4. Update `file_storage.py`**
   - [x] Read `DATA_ROOT` from `settings` (not hardcoded `data/`)
   - [x] `save_file()` and `load_file()` resolve paths relative to the configured data root when given a relative path
 
-- [x] **Step 5 — Update `config/llm.json`**
+### 5. Update `config/llm.json`**
   - [x] Set provider, base_url, api_key_env, and a default model for OpenRouter
 
-- [x] **Step 6 — Update `.env.example`**
+### 6. Update `.env.example`**
   - [x] Add `OPENROUTER_API_KEY`, `DATA_ROOT` with documentation comments
 
-- [x] **Step 7 — Create `.env`**
+### 7. Create `.env`**
   - [x] Set `OPENROUTER_API_KEY` and `DATA_ROOT=/home/rosea/Documents/plot_your_path`
   - [x] `.env` is gitignored; this stays local
 
-- [x] **Step 8 — Create `capture.py`**
+### 8. Create `capture.py`**
   - [x] Standalone async script at repo root
   - [x] Mirrors the `scrape_job()` router function directly (no HTTP layer)
   - [x] Prints step-by-step progress
   - [x] Reports final: company, title, role_id, skills_count, elapsed time
 
-- [x] **Step 9 — Bootstrap external data directory**
+### 9. Bootstrap external data directory**
   - [x] Create `~/Documents/plot_your_path/jobs/raw/` and `.../jobs/cleaned/`
   - [x] Run `uv run python src/backend/init_db.py` to initialize the SQLite DB at the configured path
 
-- [x] **Step 10 — Smoke test**
+### 10. Smoke test**
   - [x] Run: `uv run python capture.py <a real job url>`
   - [x] Verify: DB has a new row, files appear in `~/Documents/plot_your_path/jobs/`
 
-- [x] **Step 11 — Commit**
+### 11. Commit**
 ```
 feat(capture): add MVF CLI, OpenRouter support, and external data root
 ```

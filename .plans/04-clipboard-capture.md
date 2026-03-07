@@ -92,7 +92,7 @@ No raw file is written since there is no HTML.  The cleaned Markdown is still sa
 
 ## Implementation Steps
 
-- [x] **Step 1 — Update `pyproject.toml`**
+### 1. Update `pyproject.toml`**
 
 Add `pyperclip` as a `clipboard` optional extra:
 
@@ -105,86 +105,11 @@ dev       = [...]
 
 Install with: `uv sync --extra clipboard`
 
-- [x] **Step 2 — Add `read_clipboard()` to `capture.py`**
+### 2. Add `read_clipboard()` to `capture.py`**
 
-```python
-def read_clipboard() -> str:
-    """
-    Read text from the system clipboard.
+### 3. Update `main()` in `capture.py`**
 
-    Tries pyperclip first (cross-platform, handles WSL/Wayland).
-    Falls back to shelling out to xclip (Linux) or pbpaste (macOS).
-
-    Returns:
-        Clipboard text as a string.
-
-    Raises:
-        SystemExit: If the clipboard is empty or unreadable.
-    """
-    text = ""
-
-    # Attempt 1: pyperclip (optional dependency)
-    try:
-        import pyperclip
-        text = pyperclip.paste()
-    except ImportError:
-        pass
-    except Exception:
-        pass  # pyperclip may raise on headless systems with no clipboard
-
-    # Attempt 2: system commands
-    if not text:
-        import shutil, subprocess
-        if shutil.which("xclip"):
-            result = subprocess.run(
-                ["xclip", "-o", "-selection", "clipboard"],
-                capture_output=True, text=True
-            )
-            text = result.stdout
-        elif shutil.which("pbpaste"):
-            result = subprocess.run(["pbpaste"], capture_output=True, text=True)
-            text = result.stdout
-        elif shutil.which("wl-paste"):
-            result = subprocess.run(["wl-paste"], capture_output=True, text=True)
-            text = result.stdout
-
-    if not text or not text.strip():
-        print(
-            "❌  Clipboard is empty or unreadable.\n"
-            "    Tips:\n"
-            "      • Install pyperclip:  uv sync --extra clipboard\n"
-            "      • Linux (X11):        sudo apt install xclip\n"
-            "      • Linux (Wayland):    sudo apt install wl-clipboard\n"
-            "      • Copy the full job page before running this command.",
-            file=sys.stderr,
-        )
-        sys.exit(1)
-
-    return text.strip()
-```
-
-- [x] **Step 3 — Update `main()` in `capture.py`**
-
-Replace bare `sys.argv` parsing with `argparse`:
-
-```python
-import argparse
-
-parser = argparse.ArgumentParser(
-    prog="capture",
-    description="Capture a job posting into Plot Your Path.",
-)
-parser.add_argument("url", help="Canonical job posting URL (used for deduplication and records)")
-parser.add_argument(
-    "--clip",
-    action="store_true",
-    help="Read job text from clipboard instead of scraping the URL "
-         "(use for LinkedIn or any gated site — copy the page first)",
-)
-args = parser.parse_args()
-url = args.url.strip()
-clip_mode = args.clip
-```
+Replace bare `sys.argv` parsing with `argparse`.
 
 In clip mode:
   - [x] Skip the `UNSUPPORTED_DOMAINS` check (linkedin.com is fine as a URL record)
@@ -193,7 +118,7 @@ In clip mode:
   - [x] Set `role.raw_html_path = "clipboard"` (sentinel — no file written)
   - [x] Print a `📋 Clipboard mode` banner so the user sees the switch
 
-- [x] **Step 4 — Smoke test**
+### 4. Smoke test**
 
 ```bash
 # 1. Open a LinkedIn job page, Ctrl+A, Ctrl+C
@@ -202,7 +127,7 @@ uv run python capture.py --clip "https://www.linkedin.com/jobs/view/12345"
 # Expected: skips scraper, runs LLM, persists to DB, prints summary
 ```
 
-- [x] **Step 5 — Commit**
+### 5. Commit**
 
 ```
 feat(capture): add --clip flag for clipboard-based job capture

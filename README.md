@@ -6,7 +6,7 @@ Turn job goals into a clear direction by mapping skill gaps, readiness, and next
 
 These steps are optimized for running the app from **WSL** while viewing it in your browser.
 
-### 1) Install dependencies
+### 1. Install dependencies
 
 ```bash
 # Python/backend deps
@@ -16,7 +16,7 @@ uv sync
 pnpm install
 ```
 
-### 2) Configure environment
+### 2. Configure environment
 
 ```bash
 cp .env.example .env
@@ -27,13 +27,13 @@ Defaults already work for local development:
 - Backend API: `http://localhost:8000`
 - Frontend app: `http://localhost:3000`
 
-### 3) Start backend (terminal 1)
+### 3. Start backend (terminal 1)
 
 ```bash
 uv run uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-### 4) Start frontend (terminal 2)
+### 4. Start frontend (terminal 2)
 
 ```bash
 pnpm dev src/frontend --hostname 0.0.0.0 --port 3000
@@ -42,7 +42,7 @@ pnpm dev src/frontend --hostname 0.0.0.0 --port 3000
 Why this command: the Next.js app lives in `src/frontend`, so it must be passed
 as the Next.js app directory when running from the repository root.
 
-### 5) Open the app
+### 5. Open the app
 
 From Windows or WSL browser, open:
 

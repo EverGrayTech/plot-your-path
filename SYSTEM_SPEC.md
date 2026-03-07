@@ -9,10 +9,10 @@
   - As a life-long learner, I want to define interesting personal projects so that I grow and benefit from the fruits of my efforts.
 
 ## 2. Standards & Protocols
-> **Rule of Truth**: This project follows the modular standards defined in the `.agent/.clinerules/` directory.
-- **Workflow**: Follow the Spec-Driven Development (SDD) protocol in `.agent/.clinerules/00-global.md`.
-- **Linting/Formatting**: See `.agent/.clinerules/10-frontend.md` and `20-backend.md`.
-- **Quality**: See `.agent/.clinerules/30-testing.md`
+> **Rule of Truth**: This project follows the modular standards defined in the `.rules/` directory.
+- **Workflow**: Follow the plan-first workflow protocol in `.rules/00-global.md`.
+- **Linting/Formatting**: See `.rules/10-frontend.md` and `20-backend.md`.
+- **Quality**: See `.rules/30-testing.md`
 
 ## 3. Technology Stack
 
@@ -94,11 +94,9 @@ By separating the Instructions (stored in SQL) from the Execution (the Agents), 
 - **Role ↔ Skills**: Many-to-many (via Role_Skills)
 - **Skills → Learnings**: Links market demand to personal supply
 
-> **Detailed schemas**: See `.agent/specs/01-job_capture.md` and `.agent/specs/future_phases_roadmap.md`
-
 ## 6. Development Phases
 
-### Phase 1: MVP - Job Capture & Storage (PRIORITY)
+### 1. MVP - Job Capture & Storage (PRIORITY)
 **Goal**: Capture job descriptions without losing data during active job search
 
 **Core Features**:
@@ -108,34 +106,76 @@ By separating the Instructions (stored in SQL) from the Execution (the Agents), 
 - SQLite database population
 - Simple web UI for input and viewing
 
-> **Full specification**: See `.agent/specs/01-job_capture.md`
+**Success Criteria**:
+- Capture a job posting from URL and persist all relevant data in under 30 seconds
+- Extract required/preferred skills with high practical accuracy for decision support
+- Preserve both raw and cleaned artifacts to ensure traceability and recovery
+- Handle expected failure modes (invalid URL, rate limits, blocked requests) gracefully
+- Keep workflow understandable for a non-technical solo user
 
-### Phase 2: Company Scoring Engine
-- Automated research and scoring of 8 desirability factors
-- Smart caching (stable vs. volatile data)
-- User-configurable weights and instructions
+**Acceptance Checklist**:
+- [ ] URL capture flow validates input and returns clear feedback
+- [ ] Scraping stores raw HTML at deterministic paths
+- [ ] LLM cleaning produces normalized Markdown output
+- [ ] Skills are extracted and classified as required/preferred
+- [ ] Companies, roles, skills, and role-skill links are persisted without duplication
+- [ ] Core UI supports capture, listing, and detail review of saved roles
+- [ ] End-to-end tests pass with coverage requirements from `.rules/30-testing.md`
 
-### Phase 3: Skill Gap Analysis & Recommendations
-- Resume/LinkedIn import and AI extraction
-- Skill match calculation
-- AI-powered Go/No-Go recommendations
+### 2. Company Scoring Engine
+- **Goal**: Research and score companies across 8 desirability factors using configurable user weights
+- **Key Deliverables**:
+  - Configurable scoring factors and weights
+  - Automated score calculation with reasoning traces
+  - Stable/volatile cache strategy with manual refresh controls
+  - Company score breakdown UI
 
-### Phase 4: Application Materials Generation
-- ChromaDB integration for STAR stories
-- Generate resumes, cover letters, interview prep, follow-ups
-- Version history and regeneration
+### 3. Skill Gap Analysis & Recommendations
+- **Goal**: Compare role requirements against user capability and recommend Go/Maybe/No-Go
+- **Key Deliverables**:
+  - Resume/LinkedIn ingestion and skill extraction
+  - Learnings inventory and skill match percentage
+  - Gap severity classification and learning path suggestions
+  - Recommendation confidence and explanation
 
-### Phase 5: Career Path Exploration
-- Proactive career path suggestions
-- "What-if" exploration tool
-- Skill roadmaps and salary progression
+### 4. Application Materials Generation
+- **Goal**: Generate tailored application artifacts from role context + STAR history
+- **Key Deliverables**:
+  - STAR story management and retrieval
+  - Role-specific resume/cover-letter generation
+  - Interview prep and follow-up templates
+  - Regeneration options and version history
 
-### Phase 6: Personal Project Recommendations
-- AI-suggested projects based on skill gaps
-- Project templates library
-- Progress tracking and portfolio integration
+### 5. Career Path Exploration
+- **Goal**: Surface plausible career transitions and provide what-if planning
+- **Key Deliverables**:
+  - Suggested next-role pathways
+  - Gap-aware role transition planning
+  - Skill roadmap sequencing
+  - Salary and desirability trade-off analysis
 
-> **Detailed roadmap**: See `.agent/specs/future_phases_roadmap.md`
+### 6. Personal Project Recommendations
+- **Goal**: Recommend practical projects that close high-value skill gaps
+- **Key Deliverables**:
+  - AI-ranked project suggestions from target-role gaps
+  - Reusable project templates
+  - Milestone/progress tracking
+  - Portfolio linkage and outcomes tracking
+
+### Recommended Implementation Order
+1. **Phase 1: Job Capture** (foundation)
+2. **Phase 3: Skill Gap Analysis** (highest decision value after capture)
+3. **Phase 2: Company Scoring** (better prioritization)
+4. **Phase 4: Application Materials** (application acceleration)
+5. **Phase 5: Career Path Exploration** (long-term planning)
+6. **Phase 6: Personal Projects** (targeted growth)
+
+### Cross-Phase Product Considerations
+- **Authentication & Security**: Single-user first; keep secrets in env vars; keep sensitive career data local
+- **Data Portability**: Support backup/restore and export to standard formats
+- **Performance**: Use pagination, lazy loading, and async/background processing for long-running LLM work
+- **Reliability**: Implement retries, graceful degradation when providers fail, and user-readable errors
+- **Extensibility**: Keep architecture open to new data sources, scoring factors, and future integrations
 
 ## 7. User Experience Principles
 - **Single User Focus**: One profile per installation (no multi-user complexity)
