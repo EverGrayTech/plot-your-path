@@ -7,6 +7,61 @@ from sqlalchemy.orm import Session
 from backend.models.role_skill import RoleSkill
 from backend.models.skill import Skill
 
+KNOWN_CANONICALIZATIONS: dict[str, str] = {
+    "python": "Python",
+    "javascript": "JavaScript",
+    "typescript": "TypeScript",
+    "react": "React",
+    "reactjs": "React",
+    "vue": "Vue.js",
+    "vuejs": "Vue.js",
+    "angular": "Angular",
+    "nodejs": "Node.js",
+    "fastapi": "FastAPI",
+    "django": "Django",
+    "flask": "Flask",
+    "postgresql": "PostgreSQL",
+    "mysql": "MySQL",
+    "mongodb": "MongoDB",
+    "redis": "Redis",
+    "docker": "Docker",
+    "kubernetes": "Kubernetes",
+    "aws": "AWS",
+    "gcp": "GCP",
+    "azure": "Azure",
+    "git": "Git",
+    "graphql": "GraphQL",
+    "rest": "REST",
+    "sql": "SQL",
+    "html": "HTML",
+    "css": "CSS",
+    "rust": "Rust",
+    "go": "Go",
+    "golang": "Go",
+    "java": "Java",
+    "c++": "C++",
+    "c#": "C#",
+    "ruby": "Ruby",
+    "scala": "Scala",
+    "kafka": "Apache Kafka",
+    "apache kafka": "Apache Kafka",
+    "spark": "Apache Spark",
+    "apache spark": "Apache Spark",
+    "agile": "Agile",
+    "agile methodology": "Agile",
+    "agile methodologies": "Agile",
+    "agile methodolgy": "Agile",
+    "ai": "AI",
+    "artificial intelligence": "AI",
+    "ai knowledge": "AI",
+    "ai development": "AI",
+    "full stack": "Full Stack Development",
+    "full stack development": "Full Stack Development",
+    "hiring": "Hiring",
+    "recruiting": "Hiring",
+    "recruitment": "Hiring",
+}
+
 
 class SkillExtractorService:
     """
@@ -52,54 +107,19 @@ class SkillExtractorService:
         # Strip whitespace
         name = name.strip()
 
-        # Special case normalizations (common skills with known correct casing)
-        KNOWN_CAPITALIZATIONS: dict[str, str] = {
-            "python": "Python",
-            "javascript": "JavaScript",
-            "typescript": "TypeScript",
-            "react": "React",
-            "react.js": "React",
-            "reactjs": "React",
-            "vue": "Vue.js",
-            "vue.js": "Vue.js",
-            "angular": "Angular",
-            "node.js": "Node.js",
-            "nodejs": "Node.js",
-            "fastapi": "FastAPI",
-            "django": "Django",
-            "flask": "Flask",
-            "postgresql": "PostgreSQL",
-            "mysql": "MySQL",
-            "mongodb": "MongoDB",
-            "redis": "Redis",
-            "docker": "Docker",
-            "kubernetes": "Kubernetes",
-            "aws": "AWS",
-            "gcp": "GCP",
-            "azure": "Azure",
-            "git": "Git",
-            "graphql": "GraphQL",
-            "rest": "REST",
-            "sql": "SQL",
-            "html": "HTML",
-            "css": "CSS",
-            "rust": "Rust",
-            "go": "Go",
-            "golang": "Go",
-            "java": "Java",
-            "c++": "C++",
-            "c#": "C#",
-            "ruby": "Ruby",
-            "scala": "Scala",
-            "kafka": "Apache Kafka",
-            "apache kafka": "Apache Kafka",
-            "spark": "Apache Spark",
-            "apache spark": "Apache Spark",
-        }
+        if not name:
+            return ""
 
-        lower_name = name.lower()
-        if lower_name in KNOWN_CAPITALIZATIONS:
-            return KNOWN_CAPITALIZATIONS[lower_name]
+        normalized_key = name.lower().strip()
+        normalized_key = normalized_key.replace("&", " and ")
+        normalized_key = normalized_key.replace("/", " ")
+        normalized_key = normalized_key.replace("-", " ")
+        normalized_key = normalized_key.replace("_", " ")
+        normalized_key = normalized_key.replace(".", "")
+        normalized_key = " ".join(normalized_key.split())
+
+        if normalized_key in KNOWN_CANONICALIZATIONS:
+            return KNOWN_CANONICALIZATIONS[normalized_key]
 
         # Default: title case for simple words, preserve for complex names
         return name
