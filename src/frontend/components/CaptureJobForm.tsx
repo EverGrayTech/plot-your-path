@@ -130,7 +130,7 @@ export function CaptureJobForm({ onCaptured }: CaptureJobFormProps) {
       ) : null}
 
       {phase === "success" && result ? (
-        <output aria-live="polite" role="status">
+        <output aria-live="polite">
           <p>
             Captured <strong>{result.title}</strong> at <strong>{result.company}</strong>.
           </p>

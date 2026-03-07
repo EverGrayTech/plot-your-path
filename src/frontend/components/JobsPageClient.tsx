@@ -2,20 +2,36 @@
 
 import React, { useEffect, useState } from "react";
 
-import { CaptureJobForm } from "./CaptureJobForm";
-import { Modal } from "./Modal";
 import {
-  getJob,
-  getSkill,
+  type FitRecommendation,
   type JobDetail,
   type JobListItem,
-  listJobs,
   type RoleStatus,
   type SkillDetail,
+  analyzeJobFit,
+  getJob,
+  getSkill,
+  listJobs,
   updateJobStatus,
 } from "../lib/api";
+import { CaptureJobForm } from "./CaptureJobForm";
+import { Modal } from "./Modal";
 
 type SortMode = "newest" | "oldest" | "company_az";
+type RecommendationFilter = "all" | "go" | "maybe" | "no-go" | "not_analyzed";
+
+function recommendationLabel(value: FitRecommendation | null): string {
+  if (value === "go") {
+    return "Go";
+  }
+  if (value === "maybe") {
+    return "Maybe";
+  }
+  if (value === "no-go") {
+    return "No-Go";
+  }
+  return "Not analyzed";
+}
 
 export function JobsPageClient() {
   const [jobs, setJobs] = useState<JobListItem[]>([]);
@@ -24,6 +40,7 @@ export function JobsPageClient() {
   const [captureNotice, setCaptureNotice] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [sortMode, setSortMode] = useState<SortMode>("newest");
+  const [recommendationFilter, setRecommendationFilter] = useState<RecommendationFilter>("all");
   const [showCaptureModal, setShowCaptureModal] = useState(false);
   const [selectedRoleId, setSelectedRoleId] = useState<number | null>(null);
   const [selectedJob, setSelectedJob] = useState<JobDetail | null>(null);
@@ -31,6 +48,8 @@ export function JobsPageClient() {
   const [detailError, setDetailError] = useState<string | null>(null);
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [statusError, setStatusError] = useState<string | null>(null);
+  const [analyzingFit, setAnalyzingFit] = useState(false);
+  const [fitError, setFitError] = useState<string | null>(null);
   const [selectedSkillId, setSelectedSkillId] = useState<number | null>(null);
   const [selectedSkill, setSelectedSkill] = useState<SkillDetail | null>(null);
   const [loadingSkillDetail, setLoadingSkillDetail] = useState(false);
@@ -53,6 +72,7 @@ export function JobsPageClient() {
     }
   }
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: initial mount load only
   useEffect(() => {
     loadJobs();
   }, []);
@@ -106,6 +126,36 @@ export function JobsPageClient() {
     }
   }
 
+  async function handleAnalyzeFit() {
+    if (!selectedJob) {
+      return;
+    }
+
+    setAnalyzingFit(true);
+    setFitError(null);
+    try {
+      const response = await analyzeJobFit(selectedJob.id);
+      setSelectedJob((previous) => {
+        if (!previous) {
+          return previous;
+        }
+        return {
+          ...previous,
+          latest_fit_analysis: response,
+        };
+      });
+      await loadJobs();
+    } catch (error) {
+      if (error instanceof Error) {
+        setFitError(error.message);
+      } else {
+        setFitError("Failed to analyze fit.");
+      }
+    } finally {
+      setAnalyzingFit(false);
+    }
+  }
+
   useEffect(() => {
     if (!selectedSkillId) {
       return;
@@ -134,13 +184,22 @@ export function JobsPageClient() {
 
   const filteredJobs = jobs.filter((job) => {
     const query = search.trim().toLowerCase();
-    if (!query) {
+    const matchesSearch =
+      !query ||
+      job.company.toLowerCase().includes(query) ||
+      job.title.toLowerCase().includes(query);
+
+    if (!matchesSearch) {
+      return false;
+    }
+
+    if (recommendationFilter === "all") {
       return true;
     }
-    return (
-      job.company.toLowerCase().includes(query) ||
-      job.title.toLowerCase().includes(query)
-    );
+    if (recommendationFilter === "not_analyzed") {
+      return job.fit_recommendation === null;
+    }
+    return job.fit_recommendation === recommendationFilter;
   });
 
   const sortedJobs = [...filteredJobs].sort((left, right) => {
@@ -175,7 +234,13 @@ export function JobsPageClient() {
 
       <p>Capture and review roles from your job search.</p>
 
-      <div style={{ display: "grid", gap: "0.75rem", gridTemplateColumns: "2fr 1fr" }}>
+      <div
+        style={{
+          display: "grid",
+          gap: "0.75rem",
+          gridTemplateColumns: "2fr 1fr 1fr",
+        }}
+      >
         <label style={{ display: "grid", gap: "0.25rem" }}>
           Search jobs
           <input
@@ -197,9 +262,25 @@ export function JobsPageClient() {
             <option value="company_az">Company A→Z</option>
           </select>
         </label>
+
+        <label style={{ display: "grid", gap: "0.25rem" }}>
+          Recommendation
+          <select
+            onChange={(event) =>
+              setRecommendationFilter(event.target.value as RecommendationFilter)
+            }
+            value={recommendationFilter}
+          >
+            <option value="all">All</option>
+            <option value="go">Go</option>
+            <option value="maybe">Maybe</option>
+            <option value="no-go">No-Go</option>
+            <option value="not_analyzed">Not analyzed</option>
+          </select>
+        </label>
       </div>
 
-      {captureNotice ? <p role="status">{captureNotice}</p> : null}
+      {captureNotice ? <output aria-live="polite">{captureNotice}</output> : null}
 
       {loadingJobs ? <p>Loading jobs...</p> : null}
       {listError ? <p role="alert">{listError}</p> : null}
@@ -216,7 +297,9 @@ export function JobsPageClient() {
                 <strong>{job.title}</strong> — {job.company}
                 <br />
                 <small>
-                  {job.salary_range ?? "No salary"} • {job.status} • {job.skills_count} skills
+                  {job.salary_range ?? "No salary"} • {job.status} • {job.skills_count} skills •{" "}
+                  {recommendationLabel(job.fit_recommendation)}
+                  {job.fit_score !== null ? ` (${job.fit_score}%)` : ""}
                 </small>
               </button>
             </li>
@@ -233,6 +316,7 @@ export function JobsPageClient() {
               );
               setSearch("");
               setSortMode("newest");
+              setRecommendationFilter("all");
               setSelectedRoleId(result.role_id);
               setShowCaptureModal(false);
               loadJobs();
@@ -247,6 +331,7 @@ export function JobsPageClient() {
             setSelectedRoleId(null);
             setSelectedJob(null);
             setDetailError(null);
+            setFitError(null);
           }}
           title="Job Detail"
         >
@@ -274,19 +359,70 @@ export function JobsPageClient() {
                 </select>
               </label>
               {statusError ? <p role="alert">{statusError}</p> : null}
+              {fitError ? <p role="alert">{fitError}</p> : null}
               <p>
                 Salary: {selectedJob.salary.min ?? "?"} - {selectedJob.salary.max ?? "?"}{" "}
                 {selectedJob.salary.currency}
               </p>
 
+              <section>
+                <h4>Fit analysis</h4>
+                <button disabled={analyzingFit} onClick={handleAnalyzeFit} type="button">
+                  {analyzingFit ? "Analyzing..." : "Analyze Fit"}
+                </button>
+                {selectedJob.latest_fit_analysis ? (
+                  <div style={{ marginTop: "0.5rem" }}>
+                    <p>
+                      <strong>Recommendation:</strong>{" "}
+                      {recommendationLabel(selectedJob.latest_fit_analysis.recommendation)}
+                    </p>
+                    <p>
+                      <strong>Fit score:</strong> {selectedJob.latest_fit_analysis.fit_score}%
+                    </p>
+                    <p>
+                      <strong>Strengths:</strong>{" "}
+                      {selectedJob.latest_fit_analysis.covered_required_skills.concat(
+                        selectedJob.latest_fit_analysis.covered_preferred_skills,
+                      ).length
+                        ? selectedJob.latest_fit_analysis.covered_required_skills
+                            .concat(selectedJob.latest_fit_analysis.covered_preferred_skills)
+                            .join(", ")
+                        : "None identified"}
+                    </p>
+                    <p>
+                      <strong>Gaps:</strong>{" "}
+                      {selectedJob.latest_fit_analysis.missing_required_skills.concat(
+                        selectedJob.latest_fit_analysis.missing_preferred_skills,
+                      ).length
+                        ? selectedJob.latest_fit_analysis.missing_required_skills
+                            .concat(selectedJob.latest_fit_analysis.missing_preferred_skills)
+                            .join(", ")
+                        : "No explicit gaps"}
+                    </p>
+                    <p>
+                      <strong>Rationale:</strong> {selectedJob.latest_fit_analysis.rationale}
+                    </p>
+                    <p>
+                      <small>
+                        Generated{" "}
+                        {new Date(selectedJob.latest_fit_analysis.created_at).toLocaleString()} with{" "}
+                        {selectedJob.latest_fit_analysis.provider}/
+                        {selectedJob.latest_fit_analysis.model}
+                      </small>
+                    </p>
+                  </div>
+                ) : (
+                  <p>No fit analysis generated yet.</p>
+                )}
+              </section>
+
               <h4>Status history</h4>
               {selectedJob.status_history.length ? (
                 <ul>
                   {selectedJob.status_history.map((entry, index) => (
-                    <li
-                      key={`${entry.changed_at}-${entry.to_status}-${index}`}
-                    >
-                      {entry.from_status ?? "none"} → {entry.to_status} ({new Date(entry.changed_at).toLocaleString()})
+                    <li key={`${entry.changed_at}-${entry.to_status}-${index}`}>
+                      {entry.from_status ?? "none"} → {entry.to_status} (
+                      {new Date(entry.changed_at).toLocaleString()})
                     </li>
                   ))}
                 </ul>

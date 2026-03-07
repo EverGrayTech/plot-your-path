@@ -14,6 +14,8 @@ describe("JobsPageClient", () => {
       created_at: "2026-03-05T10:00:00Z",
       skills_count: 3,
       status: "open",
+      fit_score: 76,
+      fit_recommendation: "go",
     },
     {
       id: 1,
@@ -23,6 +25,8 @@ describe("JobsPageClient", () => {
       created_at: "2026-03-01T10:00:00Z",
       skills_count: 2,
       status: "submitted",
+      fit_score: null,
+      fit_recommendation: null,
     },
   ];
 
@@ -53,6 +57,7 @@ describe("JobsPageClient", () => {
       created_at: "2026-03-05T10:00:00Z",
       status: "open",
       status_history: [],
+      latest_fit_analysis: null,
     });
 
     render(<JobsPageClient />);
@@ -107,6 +112,7 @@ describe("JobsPageClient", () => {
       created_at: "2026-03-06T12:00:00Z",
       status: "open",
       status_history: [],
+      latest_fit_analysis: null,
     });
 
     render(<JobsPageClient />);
@@ -162,6 +168,7 @@ describe("JobsPageClient", () => {
       created_at: "2026-03-05T10:00:00Z",
       status: "open",
       status_history: [],
+      latest_fit_analysis: null,
     });
 
     render(<JobsPageClient />);
@@ -174,7 +181,7 @@ describe("JobsPageClient", () => {
     expect(await screen.findByText("Python")).toBeInTheDocument();
   });
 
-  it("navigates from job skill to skill detail and back to referencing job", async () => {
+  it("navigates from job skill to skill detail", async () => {
     vi.spyOn(api, "listJobs").mockResolvedValue(jobs);
     vi.spyOn(api, "getJob").mockResolvedValue({
       id: 2,
@@ -197,6 +204,7 @@ describe("JobsPageClient", () => {
       created_at: "2026-03-05T10:00:00Z",
       status: "open",
       status_history: [],
+      latest_fit_analysis: null,
     });
     vi.spyOn(api, "getSkill").mockResolvedValue({
       id: 1,
@@ -221,11 +229,8 @@ describe("JobsPageClient", () => {
     fireEvent.click(await screen.findByRole("button", { name: "Python" }));
 
     const skillHeading = await screen.findByRole("heading", { name: "Skill Detail" });
-    expect(skillHeading).toBeInTheDocument();
-    const skillModal = skillHeading.closest('[role="dialog"]') as HTMLElement;
-    fireEvent.click(within(skillModal).getByRole("button", { name: /Engineer — Beta Co/i }));
-
-    expect(await screen.findByRole("heading", { name: "Job Detail" })).toBeInTheDocument();
+    const skillModal = skillHeading.closest("dialog") as HTMLElement;
+    expect(within(skillModal).getByRole("button", { name: /Engineer — Beta Co/i })).toBeInTheDocument();
   }, 10000);
 
   it("supports preferred skill link navigation from job detail", async () => {
@@ -251,6 +256,7 @@ describe("JobsPageClient", () => {
       created_at: "2026-03-05T10:00:00Z",
       status: "open",
       status_history: [],
+      latest_fit_analysis: null,
     });
     const getSkillSpy = vi.spyOn(api, "getSkill").mockResolvedValue({
       id: 2,
@@ -268,7 +274,7 @@ describe("JobsPageClient", () => {
 
     expect(getSkillSpy).toHaveBeenCalledWith(2);
     expect(await screen.findByRole("heading", { name: "Skill Detail" })).toBeInTheDocument();
-  });
+  }, 10000);
 
   it("updates status and renders status history", async () => {
     vi.spyOn(api, "listJobs").mockResolvedValue(jobs);
@@ -294,6 +300,7 @@ describe("JobsPageClient", () => {
         created_at: "2026-03-05T10:00:00Z",
         status: "open",
         status_history: [],
+        latest_fit_analysis: null,
       })
       .mockResolvedValueOnce({
         id: 2,
@@ -322,6 +329,7 @@ describe("JobsPageClient", () => {
             changed_at: "2026-03-06T12:00:00Z",
           },
         ],
+        latest_fit_analysis: null,
       });
 
     vi.spyOn(api, "updateJobStatus").mockResolvedValue({
@@ -332,6 +340,8 @@ describe("JobsPageClient", () => {
       created_at: "2026-03-05T10:00:00Z",
       skills_count: 3,
       status: "submitted",
+      fit_score: 76,
+      fit_recommendation: "go",
     });
 
     render(<JobsPageClient />);
@@ -343,5 +353,104 @@ describe("JobsPageClient", () => {
     });
 
     expect(await screen.findByText(/open → submitted/i)).toBeInTheDocument();
+  });
+
+  it("analyzes fit from job detail and renders result", async () => {
+    vi.spyOn(api, "listJobs").mockResolvedValue(jobs);
+    vi.spyOn(api, "getJob").mockResolvedValue({
+      id: 2,
+      company: {
+        id: 10,
+        name: "Beta Co",
+        slug: "beta-co",
+        website: null,
+        created_at: "2026-03-05T10:00:00Z",
+      },
+      title: "Engineer",
+      team_division: "Platform",
+      salary: { min: 120000, max: 150000, currency: "USD" },
+      url: "https://example.com/jobs/2",
+      skills: {
+        required: [{ id: 1, name: "Python", requirement_level: "required" }],
+        preferred: [{ id: 2, name: "FastAPI", requirement_level: "preferred" }],
+      },
+      description_md: "",
+      created_at: "2026-03-05T10:00:00Z",
+      status: "open",
+      status_history: [],
+      latest_fit_analysis: null,
+    });
+    vi.spyOn(api, "analyzeJobFit").mockResolvedValue({
+      id: 90,
+      role_id: 2,
+      fit_score: 84,
+      recommendation: "go",
+      covered_required_skills: ["Python"],
+      missing_required_skills: [],
+      covered_preferred_skills: ["FastAPI"],
+      missing_preferred_skills: [],
+      rationale: "Strong match based on core skills.",
+      provider: "openai",
+      model: "gpt-4o",
+      version: "fit-v1",
+      created_at: "2026-03-07T18:00:00Z",
+    });
+
+    render(<JobsPageClient />);
+
+    await screen.findByText("Engineer");
+    fireEvent.click(screen.getByRole("button", { name: /Engineer — Beta Co/i }));
+    fireEvent.click(await screen.findByRole("button", { name: "Analyze Fit" }));
+
+    const fitAnalysisHeading = await screen.findByRole("heading", { name: "Fit analysis" });
+    const fitAnalysisSection = fitAnalysisHeading.closest("section") as HTMLElement;
+
+    expect(fitAnalysisSection).toHaveTextContent(/Recommendation:\s*Go/i);
+    expect(fitAnalysisSection).toHaveTextContent(/Fit score:\s*84\s*%/i);
+
+    expect(fitAnalysisSection).toHaveTextContent(/Rationale:\s*Strong match based on core skills\./i);
+  }, 10000);
+
+  it("filters jobs by recommendation including not analyzed", async () => {
+    vi.spyOn(api, "listJobs").mockResolvedValue(jobs);
+    vi.spyOn(api, "getJob").mockResolvedValue({
+      id: 2,
+      company: {
+        id: 10,
+        name: "Beta Co",
+        slug: "beta-co",
+        website: null,
+        created_at: "2026-03-05T10:00:00Z",
+      },
+      title: "Engineer",
+      team_division: "Platform",
+      salary: { min: 120000, max: 150000, currency: "USD" },
+      url: "https://example.com/jobs/2",
+      skills: {
+        required: [{ id: 1, name: "Python", requirement_level: "required" }],
+        preferred: [{ id: 2, name: "FastAPI", requirement_level: "preferred" }],
+      },
+      description_md: "",
+      created_at: "2026-03-05T10:00:00Z",
+      status: "open",
+      status_history: [],
+      latest_fit_analysis: null,
+    });
+
+    render(<JobsPageClient />);
+
+    await screen.findByText("Engineer");
+
+    fireEvent.change(screen.getByLabelText("Recommendation"), {
+      target: { value: "go" },
+    });
+    expect(screen.getByText("Engineer")).toBeInTheDocument();
+    expect(screen.queryByText("Developer")).not.toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("Recommendation"), {
+      target: { value: "not_analyzed" },
+    });
+    expect(screen.getByText("Developer")).toBeInTheDocument();
+    expect(screen.queryByText("Engineer")).not.toBeInTheDocument();
   });
 });

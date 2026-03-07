@@ -88,6 +88,9 @@ class Settings(BaseSettings):
     # Database — auto-derived from data_root if not explicitly set
     database_url: str | None = Field(default=None)
 
+    # Candidate profile source used for role-fit analysis (relative to data_root by default)
+    candidate_profile_path: str = Field(default="resume.md")
+
     # Backend Server
     backend_host: str = Field(default="0.0.0.0")
     backend_port: int = Field(default=8000)

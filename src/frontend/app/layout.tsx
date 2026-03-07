@@ -1,5 +1,5 @@
-import React, { type ReactNode } from "react";
 import Link from "next/link";
+import React, { type ReactNode } from "react";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (

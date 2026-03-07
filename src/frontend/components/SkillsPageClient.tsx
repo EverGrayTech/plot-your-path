@@ -2,15 +2,15 @@
 
 import React, { useEffect, useState } from "react";
 
-import { Modal } from "./Modal";
 import {
-  getJob,
-  getSkill,
   type JobDetail,
-  listSkills,
   type SkillDetail,
   type SkillListItem,
+  getJob,
+  getSkill,
+  listSkills,
 } from "../lib/api";
+import { Modal } from "./Modal";
 
 type SkillSortMode = "most_used" | "least_used" | "name_az";
 

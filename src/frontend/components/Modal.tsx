@@ -10,12 +10,14 @@ interface ModalProps {
 
 export function Modal({ children, onClose, title }: ModalProps) {
   return (
-    <div
+    <dialog
       aria-modal="true"
-      role="dialog"
+      open
       style={{
         background: "rgba(0, 0, 0, 0.45)",
+        border: "none",
         inset: 0,
+        margin: 0,
         padding: "2rem 1rem",
         position: "fixed",
         zIndex: 1000,
@@ -47,6 +49,6 @@ export function Modal({ children, onClose, title }: ModalProps) {
         </header>
         {children}
       </div>
-    </div>
+    </dialog>
   );
 }
