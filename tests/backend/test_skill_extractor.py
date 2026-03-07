@@ -266,8 +266,8 @@ class TestGetSkillsForRole:
         session.flush()
 
         skills = extractor.get_skills_for_role(role_id)
-        assert "Python" in skills["required"]
-        assert "FastAPI" in skills["required"]
-        assert "Docker" in skills["preferred"]
+        assert "Python" in [skill["name"] for skill in skills["required"]]
+        assert "FastAPI" in [skill["name"] for skill in skills["required"]]
+        assert "Docker" in [skill["name"] for skill in skills["preferred"]]
         assert len(skills["required"]) == 2
         assert len(skills["preferred"]) == 1
