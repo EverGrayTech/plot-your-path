@@ -1,5 +1,7 @@
 """Skills API router - list and detail for captured skills."""
 
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -16,7 +18,7 @@ router = APIRouter()
 
 
 @router.get("/skills", response_model=list[SkillListItem])
-def list_skills(db: Session = Depends(get_db)) -> list[SkillListItem]:
+def list_skills(db: Annotated[Session, Depends(get_db)]) -> list[SkillListItem]:
     """List captured skills with usage count across roles."""
     rows = (
         db.query(
@@ -42,7 +44,7 @@ def list_skills(db: Session = Depends(get_db)) -> list[SkillListItem]:
 
 
 @router.get("/skills/{skill_id}", response_model=SkillDetail)
-def get_skill(skill_id: int, db: Session = Depends(get_db)) -> SkillDetail:
+def get_skill(skill_id: int, db: Annotated[Session, Depends(get_db)]) -> SkillDetail:
     """Get detailed information for a single skill including referencing jobs."""
     skill = db.query(Skill).filter(Skill.id == skill_id).first()
     if not skill:

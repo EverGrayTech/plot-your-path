@@ -1,14 +1,14 @@
 """Skill Pydantic schemas."""
 
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 
 from pydantic import BaseModel, ConfigDict
 
 from backend.schemas.job import RoleStatus
 
 
-class SkillCategory(str, Enum):
+class SkillCategory(StrEnum):
     """Skill category enumeration."""
 
     TECHNICAL = "technical"

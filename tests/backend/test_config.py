@@ -155,6 +155,4 @@ class TestSettings:
         settings = Settings()
         # API keys should be None if not set
         assert settings.openai_api_key is None or isinstance(settings.openai_api_key, str)
-        assert settings.anthropic_api_key is None or isinstance(
-            settings.anthropic_api_key, str
-        )
+        assert settings.anthropic_api_key is None or isinstance(settings.anthropic_api_key, str)

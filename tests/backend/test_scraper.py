@@ -31,6 +31,7 @@ def scraper(fast_config):
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _rich_html(word_count: int = 200) -> str:
     """Return HTML whose visible text exceeds the default min_content_chars."""
     return "<html><body><p>" + ("word " * word_count) + "</p></body></html>"
@@ -44,6 +45,7 @@ def _thin_html() -> str:
 # ---------------------------------------------------------------------------
 # URL validation
 # ---------------------------------------------------------------------------
+
 
 class TestUrlValidation:
     """Tests for URL validation."""
@@ -76,6 +78,7 @@ class TestUrlValidation:
 # ---------------------------------------------------------------------------
 # Domain detection
 # ---------------------------------------------------------------------------
+
 
 class TestDomainDetection:
     """Tests for domain detection."""
@@ -112,6 +115,7 @@ class TestDomainDetection:
 # Static scraping (httpx)
 # ---------------------------------------------------------------------------
 
+
 class TestStaticScraping:
     """Tests for static site scraping with httpx."""
 
@@ -147,9 +151,7 @@ class TestStaticScraping:
 
         with patch("httpx.AsyncClient") as mock_client_class:
             mock_client = AsyncMock()
-            mock_client.get = AsyncMock(
-                side_effect=httpx_module.RequestError("Connection failed")
-            )
+            mock_client.get = AsyncMock(side_effect=httpx_module.RequestError("Connection failed"))
             mock_client.__aenter__ = AsyncMock(return_value=mock_client)
             mock_client.__aexit__ = AsyncMock(return_value=None)
             mock_client_class.return_value = mock_client
@@ -163,6 +165,7 @@ class TestStaticScraping:
 # ---------------------------------------------------------------------------
 # scrape() routing logic
 # ---------------------------------------------------------------------------
+
 
 class TestScrapeMethod:
     """Tests for the main scrape() routing / decision logic."""
@@ -284,6 +287,7 @@ class TestScrapeMethod:
 # playwright_available() helper
 # ---------------------------------------------------------------------------
 
+
 class TestPlaywrightAvailability:
     """Tests for the playwright_available() module-level helper."""
 
@@ -301,6 +305,7 @@ class TestPlaywrightAvailability:
 # ---------------------------------------------------------------------------
 # HTML text extraction
 # ---------------------------------------------------------------------------
+
 
 class TestHtmlExtraction:
     """Tests for HTML text extraction."""

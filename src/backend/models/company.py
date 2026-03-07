@@ -1,7 +1,5 @@
 """Company database model."""
 
-from datetime import datetime
-
 from sqlalchemy import Column, DateTime, Integer, String
 from sqlalchemy.sql import func
 
@@ -11,7 +9,7 @@ from backend.database import Base
 class Company(Base):
     """
     Company model representing potential employers.
-    
+
     Attributes:
         id: Primary key
         name: Company name (unique)

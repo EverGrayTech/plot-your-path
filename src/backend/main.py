@@ -4,8 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.config import settings
-from backend.routers import jobs
-from backend.routers import skills
+from backend.routers import jobs, skills
 
 app = FastAPI(
     title="Plot Your Path API",

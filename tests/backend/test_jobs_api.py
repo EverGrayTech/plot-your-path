@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from datetime import datetime
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -116,7 +115,9 @@ def sample_skills(db, sample_role):
     db.add(ts_skill)
     db.flush()
 
-    db.add(RoleSkill(role_id=sample_role.id, skill_id=python_skill.id, requirement_level="required"))
+    db.add(
+        RoleSkill(role_id=sample_role.id, skill_id=python_skill.id, requirement_level="required")
+    )
     db.add(RoleSkill(role_id=sample_role.id, skill_id=ts_skill.id, requirement_level="preferred"))
     db.commit()
     return [python_skill, ts_skill]
@@ -247,6 +248,7 @@ class TestListJobs:
         assert "EUR" in eu["salary_range"]
         assert "$" not in eu["salary_range"]
 
+
 # ---------------------------------------------------------------------------
 # Tests: GET /api/jobs/{id}
 # ---------------------------------------------------------------------------
@@ -306,8 +308,12 @@ class TestGetJob:
 
     def test_get_job_with_file(self, client, db, sample_role, sample_skills):
         """Returns Markdown content when the cleaned file exists on disk."""
-        with patch("backend.routers.jobs.file_exists", return_value=True), \
-             patch("backend.routers.jobs.load_file", return_value="# Backend Engineer\n\nGreat role!"):
+        with (
+            patch("backend.routers.jobs.file_exists", return_value=True),
+            patch(
+                "backend.routers.jobs.load_file", return_value="# Backend Engineer\n\nGreat role!"
+            ),
+        ):
             response = client.get(f"/api/jobs/{sample_role.id}")
 
         assert response.status_code == 200
@@ -335,16 +341,12 @@ class TestUpdateJobStatus:
 
     def test_update_status_success(self, client, sample_role):
         """Status is updated and new value returned in response."""
-        response = client.patch(
-            f"/api/jobs/{sample_role.id}/status", json={"status": "submitted"}
-        )
+        response = client.patch(f"/api/jobs/{sample_role.id}/status", json={"status": "submitted"})
         assert response.status_code == 200
         assert response.json()["status"] == "submitted"
 
     def test_update_status_records_change(self, client, db, sample_role):
-        response = client.patch(
-            f"/api/jobs/{sample_role.id}/status", json={"status": "submitted"}
-        )
+        response = client.patch(f"/api/jobs/{sample_role.id}/status", json={"status": "submitted"})
         assert response.status_code == 200
 
         events = (
@@ -358,9 +360,7 @@ class TestUpdateJobStatus:
         assert events[0].to_status == "submitted"
 
     def test_update_status_noop_does_not_record_change(self, client, db, sample_role):
-        response = client.patch(
-            f"/api/jobs/{sample_role.id}/status", json={"status": "open"}
-        )
+        response = client.patch(f"/api/jobs/{sample_role.id}/status", json={"status": "open"})
         assert response.status_code == 200
 
         events = db.query(RoleStatusChange).filter(RoleStatusChange.role_id == sample_role.id).all()
@@ -376,9 +376,7 @@ class TestUpdateJobStatus:
     def test_update_status_all_valid_values(self, client, sample_role):
         """All valid status values are accepted."""
         for status in ("open", "submitted", "interviewing", "rejected"):
-            response = client.patch(
-                f"/api/jobs/{sample_role.id}/status", json={"status": status}
-            )
+            response = client.patch(f"/api/jobs/{sample_role.id}/status", json={"status": status})
             assert response.status_code == 200
             assert response.json()["status"] == status
 
@@ -467,9 +465,7 @@ class TestScrapeJob:
         from backend.services.job_capture import JobCaptureScrapingError
 
         mock_service = MagicMock()
-        mock_service.capture_from_url = AsyncMock(
-            side_effect=JobCaptureScrapingError("blocked")
-        )
+        mock_service.capture_from_url = AsyncMock(side_effect=JobCaptureScrapingError("blocked"))
 
         with patch("backend.routers.jobs.JobCaptureService", return_value=mock_service):
             response = client.post(
@@ -511,9 +507,7 @@ class TestScrapeJob:
         from backend.services.job_capture import JobCaptureLLMError
 
         mock_service = MagicMock()
-        mock_service.capture_from_url = AsyncMock(
-            side_effect=JobCaptureLLMError("timeout")
-        )
+        mock_service.capture_from_url = AsyncMock(side_effect=JobCaptureLLMError("timeout"))
 
         with patch("backend.routers.jobs.JobCaptureService", return_value=mock_service):
             response = client.post(

@@ -177,9 +177,7 @@ class ScraperService:
                     browser = await p.chromium.launch(headless=True)
                     try:
                         page = await browser.new_page()
-                        await page.set_extra_http_headers(
-                            {"User-Agent": self.config.user_agent}
-                        )
+                        await page.set_extra_http_headers({"User-Agent": self.config.user_agent})
                         await page.goto(
                             url,
                             timeout=self.config.timeout_seconds * 1000,

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -19,8 +20,8 @@ from backend.schemas.job import (
     JobListItem,
     JobScrapeRequest,
     JobScrapeResponse,
-    RoleStatusChange,
     RoleStatus,
+    RoleStatusChange,
     SalaryInfo,
 )
 from backend.services.job_capture import (
@@ -83,7 +84,7 @@ def _build_status_history(role_id: int, db: Session) -> list[RoleStatusChange]:
 
 
 @router.get("/jobs", response_model=list[JobListItem])
-def list_jobs(db: Session = Depends(get_db)) -> list[JobListItem]:
+def list_jobs(db: Annotated[Session, Depends(get_db)]) -> list[JobListItem]:
     """
     List all captured job postings.
 
@@ -115,7 +116,7 @@ def list_jobs(db: Session = Depends(get_db)) -> list[JobListItem]:
 
 
 @router.get("/jobs/{role_id}", response_model=JobDetail)
-def get_job(role_id: int, db: Session = Depends(get_db)) -> JobDetail:
+def get_job(role_id: int, db: Annotated[Session, Depends(get_db)]) -> JobDetail:
     """
     Get detailed information for a specific job posting.
 
@@ -166,7 +167,7 @@ def get_job(role_id: int, db: Session = Depends(get_db)) -> JobDetail:
 def update_job_status(
     role_id: int,
     status_update: StatusUpdate,
-    db: Session = Depends(get_db),
+    db: Annotated[Session, Depends(get_db)],
 ) -> JobListItem:
     """
     Update the status of a job posting.
@@ -217,7 +218,7 @@ def update_job_status(
 @router.post("/jobs/scrape", response_model=JobScrapeResponse)
 def scrape_job(
     request: JobScrapeRequest,
-    db: Session = Depends(get_db),
+    db: Annotated[Session, Depends(get_db)],
 ) -> JobScrapeResponse:
     """
     Scrape a job posting URL and persist all extracted data.

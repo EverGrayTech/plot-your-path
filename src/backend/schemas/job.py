@@ -1,14 +1,14 @@
 """Job-related Pydantic schemas."""
 
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 
 from pydantic import BaseModel, ConfigDict, HttpUrl
 
 from backend.schemas.company import Company
 
 
-class RoleStatus(str, Enum):
+class RoleStatus(StrEnum):
     """Role status enumeration."""
 
     OPEN = "open"
@@ -25,7 +25,7 @@ class RoleStatusChange(BaseModel):
     changed_at: datetime
 
 
-class RequirementLevel(str, Enum):
+class RequirementLevel(StrEnum):
     """Skill requirement level enumeration."""
 
     REQUIRED = "required"

@@ -140,11 +140,7 @@ class SkillExtractorService:
         normalized_name = self.normalize_skill_name(name)
 
         # Look up by exact normalized name (case-insensitive)
-        existing = (
-            self.db.query(Skill)
-            .filter(Skill.name.ilike(normalized_name))
-            .first()
-        )
+        existing = self.db.query(Skill).filter(Skill.name.ilike(normalized_name)).first()
 
         if existing:
             return existing

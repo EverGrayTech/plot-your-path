@@ -43,7 +43,9 @@ RANK_TITLES: tuple[str, ...] = (
 
 
 def _clean_title(value: str) -> str:
-    return " ".join([RANK_ALIASES.get(i.lower(), i) for i in re.sub(r"[^0-z&]+", " ", value).strip().split()])
+    return " ".join(
+        [RANK_ALIASES.get(i.lower(), i) for i in re.sub(r"[^0-z&]+", " ", value).strip().split()]
+    )
 
 
 def _extract_rank_and_remainder(title: str) -> tuple[str, str] | None:
@@ -57,7 +59,7 @@ def _extract_rank_and_remainder(title: str) -> tuple[str, str] | None:
             department = department[3:]
 
         return rank, department
-    
+
 
 def normalize_job_title(title: str) -> str:
     """

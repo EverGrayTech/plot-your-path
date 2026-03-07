@@ -30,7 +30,7 @@ class LLMConfig(BaseSettings):
         Returns:
             LLMConfig instance
         """
-        with open(filepath, "r") as f:
+        with open(filepath) as f:
             data = json.load(f)
         return cls(**data)
 
@@ -72,7 +72,7 @@ class ScrapingConfig(BaseSettings):
         Returns:
             ScrapingConfig instance
         """
-        with open(filepath, "r") as f:
+        with open(filepath) as f:
             data = json.load(f)
         return cls(**data)
 
