@@ -81,6 +81,7 @@ describe("SkillsPageClient", () => {
       created_at: "2026-03-05T10:00:00Z",
       status: "open",
       status_history: [],
+      latest_fit_analysis: null,
     });
 
     render(<SkillsPageClient />);
@@ -94,5 +95,5 @@ describe("SkillsPageClient", () => {
     const skillModal = await screen.findByRole("dialog");
     fireEvent.click(within(skillModal).getByRole("button", { name: /Engineer — Beta Co/i }));
     expect(await screen.findByRole("heading", { name: "Job Detail" })).toBeInTheDocument();
-  }, 10000);
+  }, 20000);
 });

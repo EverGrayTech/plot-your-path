@@ -40,6 +40,13 @@ class FitRecommendation(StrEnum):
     NO_GO = "no-go"
 
 
+class ApplicationArtifactType(StrEnum):
+    """Supported generated application artifact types."""
+
+    APPLICATION_QA = "application_qa"
+    COVER_LETTER = "cover_letter"
+
+
 class FitAnalysis(BaseModel):
     """Generated and persisted role-fit analysis payload."""
 
@@ -55,6 +62,27 @@ class FitAnalysis(BaseModel):
     provider: str
     model: str
     version: str
+    created_at: datetime
+
+
+class ApplicationMaterialQARequest(BaseModel):
+    """Request payload for generating application Q&A draft."""
+
+    questions: list[str]
+
+
+class ApplicationMaterial(BaseModel):
+    """Generated application material payload."""
+
+    id: int
+    role_id: int
+    artifact_type: ApplicationArtifactType
+    version: int
+    content: str
+    questions: list[str] | None
+    provider: str
+    model: str
+    prompt_version: str
     created_at: datetime
 
 

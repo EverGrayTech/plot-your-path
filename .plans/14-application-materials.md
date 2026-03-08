@@ -25,35 +25,35 @@ Replace the external chat workflow for application writing by generating role-ta
 ## Implementation Checklist
 
 ### 1. Data Model + Storage
-- [ ] Add application-material entity linked to role with artifact type + version metadata
-- [ ] Store generated artifacts under deterministic file paths in `data/applications/{role_id}/`
-- [ ] Persist DB metadata for retrieval, filtering, and audit
+- [x] Add application-material entity linked to role with artifact type + version metadata
+- [x] Store generated artifacts under deterministic file paths in `data/applications/{role_id}/`
+- [x] Persist DB metadata for retrieval, filtering, and audit
 
 ### 2. Backend APIs
-- [ ] Add endpoint to generate cover-letter draft for a role
-- [ ] Add endpoint to generate Q&A drafts from user-provided question list
-- [ ] Add endpoint(s) to list/get saved artifact versions per role
-- [ ] Add validation for missing prerequisites (no fit analysis, missing profile source, empty question set)
+- [x] Add endpoint to generate cover-letter draft for a role
+- [x] Add endpoint to generate Q&A drafts from user-provided question list
+- [x] Add endpoint(s) to list/get saved artifact versions per role
+- [x] Add validation for missing prerequisites (no fit analysis, missing profile source, empty question set)
 
 ### 3. Prompt + Response Contracts
-- [ ] Define strict structured output contract per artifact type
-- [ ] Build prompt templates grounded in role details + fit-analysis findings
-- [ ] Enforce safe fallbacks if model output is malformed/partial
+- [x] Define strict structured output contract per artifact type
+- [x] Build prompt templates grounded in role details + fit-analysis findings
+- [x] Enforce safe fallbacks if model output is malformed/partial
 
 ### 4. Frontend Workflow
-- [ ] Add “Application Materials” section in Job Detail
-- [ ] Add generate actions for cover letter and Q&A with clear loading/error states
-- [ ] Add editable draft viewer with copy/export affordances
-- [ ] Add version selector for previously generated drafts
-- [ ] Keep extension points ready for future interview-prep pack integration
+- [x] Add “Application Materials” section in Job Detail
+- [x] Add generate actions for cover letter and Q&A with clear loading/error states
+- [x] Add editable draft viewer with copy/export affordances
+- [x] Add version selector for previously generated drafts
+- [x] Keep extension points ready for future interview-prep pack integration
 
 ### 5. Tests + Verification
-- [ ] Add backend tests for generation, persistence, retrieval, and validation failures
-- [ ] Add frontend tests for generate flows, draft rendering, and version switching
-- [ ] Run regression verification for existing jobs/skills/fit-analysis flows
+- [x] Add backend tests for generation, persistence, retrieval, and validation failures
+- [x] Add frontend tests for generate flows, draft rendering, and version switching
+- [x] Run regression verification for existing jobs/skills/fit-analysis flows
 
 ## Acceptance Criteria
-- [ ] User can generate role-specific cover letter draft in-app
-- [ ] User can generate draft answers for pasted application questions
-- [ ] Generated artifacts persist with retrievable version history
-- [ ] Workflow is usable end-to-end without external chat tooling
+- [x] User can generate role-specific cover letter draft in-app
+- [x] User can generate draft answers for pasted application questions
+- [x] Generated artifacts persist with retrievable version history
+- [x] Workflow is usable end-to-end without external chat tooling
