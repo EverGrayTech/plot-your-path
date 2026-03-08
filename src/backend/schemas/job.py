@@ -134,6 +134,49 @@ class ApplicationArtifactType(StrEnum):
 
     APPLICATION_QA = "application_qa"
     COVER_LETTER = "cover_letter"
+    INTERVIEW_PREP_PACK = "interview_prep_pack"
+
+
+class InterviewPrepSectionKey(StrEnum):
+    """Interview prep pack section keys."""
+
+    LIKELY_QUESTIONS = "likely_questions"
+    STAR_STORIES = "star_stories"
+    TALKING_POINTS = "talking_points"
+
+
+class InterviewPrepPackSections(BaseModel):
+    """Editable section payload for an interview prep pack."""
+
+    likely_questions: list[str]
+    talking_points: list[str]
+    star_stories: list[str]
+
+
+class InterviewPrepPack(BaseModel):
+    """Generated interview prep pack payload."""
+
+    id: int
+    role_id: int
+    artifact_type: ApplicationArtifactType
+    version: int
+    sections: InterviewPrepPackSections
+    provider: str
+    model: str
+    prompt_version: str
+    created_at: datetime
+
+
+class InterviewPrepPackEditRequest(BaseModel):
+    """Request payload for editing interview prep pack sections."""
+
+    sections: InterviewPrepPackSections
+
+
+class InterviewPrepPackRegenerateRequest(BaseModel):
+    """Request payload for regenerating one interview prep section."""
+
+    section: InterviewPrepSectionKey
 
 
 class FitAnalysis(BaseModel):

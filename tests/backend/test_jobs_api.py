@@ -880,6 +880,147 @@ class TestApplicationMaterials:
         assert response.status_code == 404
         assert response.json()["detail"] == "Application material not found"
 
+    def test_generate_interview_prep_pack_success(self, client, sample_role):
+        fake_material = SimpleNamespace(
+            id=201,
+            role_id=sample_role.id,
+            artifact_type="interview_prep_pack",
+            version=1,
+            content_path=f"applications/{sample_role.id}/interview_prep_pack-v1.md",
+            sections={
+                "likely_questions": ["Why this role?"],
+                "talking_points": ["Evidence-based fit summary"],
+                "star_stories": ["STAR draft about delivery"],
+            },
+            provider="openai",
+            model="gpt-4o",
+            prompt_version="interview-prep-pack-v1",
+            created_at=datetime.now(UTC),
+        )
+
+        with patch(
+            "backend.routers.jobs.ApplicationMaterialsService.generate_interview_prep_pack",
+            return_value=fake_material,
+        ):
+            response = client.post(f"/api/jobs/{sample_role.id}/interview-prep-pack")
+
+        assert response.status_code == 200
+        payload = response.json()
+        assert payload["artifact_type"] == "interview_prep_pack"
+        assert payload["sections"]["likely_questions"] == ["Why this role?"]
+
+    def test_list_interview_prep_pack_versions(self, client, sample_role):
+        v2 = SimpleNamespace(
+            id=302,
+            role_id=sample_role.id,
+            artifact_type="interview_prep_pack",
+            version=2,
+            content_path=f"applications/{sample_role.id}/interview_prep_pack-v2.md",
+            sections={
+                "likely_questions": ["Q2"],
+                "talking_points": ["T2"],
+                "star_stories": ["S2"],
+            },
+            provider="openai",
+            model="gpt-4o",
+            prompt_version="interview-prep-pack-v1",
+            created_at=datetime.now(UTC),
+        )
+        v1 = SimpleNamespace(
+            id=301,
+            role_id=sample_role.id,
+            artifact_type="interview_prep_pack",
+            version=1,
+            content_path=f"applications/{sample_role.id}/interview_prep_pack-v1.md",
+            sections={
+                "likely_questions": ["Q1"],
+                "talking_points": ["T1"],
+                "star_stories": ["S1"],
+            },
+            provider="openai",
+            model="gpt-4o",
+            prompt_version="interview-prep-pack-v1",
+            created_at=datetime.now(UTC),
+        )
+
+        with patch(
+            "backend.routers.jobs.ApplicationMaterialsService.list_interview_prep_packs",
+            return_value=[v2, v1],
+        ):
+            response = client.get(f"/api/jobs/{sample_role.id}/interview-prep-pack")
+
+        assert response.status_code == 200
+        payload = response.json()
+        assert [item["version"] for item in payload] == [2, 1]
+
+    def test_regenerate_interview_prep_section_success(self, client, sample_role):
+        fake_material = SimpleNamespace(
+            id=401,
+            role_id=sample_role.id,
+            artifact_type="interview_prep_pack",
+            version=3,
+            content_path=f"applications/{sample_role.id}/interview_prep_pack-v3.md",
+            sections={
+                "likely_questions": ["New question"],
+                "talking_points": ["Talking point"],
+                "star_stories": ["STAR"],
+            },
+            provider="openai",
+            model="gpt-4o",
+            prompt_version="interview-prep-pack-v1",
+            created_at=datetime.now(UTC),
+        )
+
+        with patch(
+            "backend.routers.jobs.ApplicationMaterialsService.regenerate_interview_prep_section",
+            return_value=fake_material,
+        ) as regenerate_mock:
+            response = client.post(
+                f"/api/jobs/{sample_role.id}/interview-prep-pack/regenerate",
+                json={"section": "likely_questions"},
+            )
+
+        assert response.status_code == 200
+        regenerate_mock.assert_called_once()
+        assert response.json()["version"] == 3
+
+    def test_update_interview_prep_pack_success(self, client, sample_role):
+        fake_material = SimpleNamespace(
+            id=501,
+            role_id=sample_role.id,
+            artifact_type="interview_prep_pack",
+            version=2,
+            content_path=f"applications/{sample_role.id}/interview_prep_pack-v2.md",
+            sections={
+                "likely_questions": ["Updated question"],
+                "talking_points": ["Updated talking point"],
+                "star_stories": ["Updated STAR"],
+            },
+            provider="openai",
+            model="gpt-4o",
+            prompt_version="interview-prep-pack-v1",
+            created_at=datetime.now(UTC),
+        )
+
+        with patch(
+            "backend.routers.jobs.ApplicationMaterialsService.update_interview_prep_pack",
+            return_value=fake_material,
+        ) as update_mock:
+            response = client.put(
+                f"/api/jobs/{sample_role.id}/interview-prep-pack/501",
+                json={
+                    "sections": {
+                        "likely_questions": ["Updated question"],
+                        "talking_points": ["Updated talking point"],
+                        "star_stories": ["Updated STAR"],
+                    }
+                },
+            )
+
+        assert response.status_code == 200
+        update_mock.assert_called_once()
+        assert response.json()["sections"]["talking_points"] == ["Updated talking point"]
+
 
 # ---------------------------------------------------------------------------
 # Tests: POST /api/jobs/scrape

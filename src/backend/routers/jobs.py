@@ -28,6 +28,11 @@ from backend.schemas.job import (
     ApplicationOps,
     ApplicationOpsUpdate,
     FitAnalysis,
+    InterviewPrepPack,
+    InterviewPrepPackEditRequest,
+    InterviewPrepPackRegenerateRequest,
+    InterviewPrepPackSections,
+    InterviewPrepSectionKey,
     InterviewStage,
     InterviewStageEvent,
     InterviewStageEventCreate,
@@ -217,6 +222,26 @@ def _to_application_material_schema(material: ApplicationMaterialModel) -> Appli
         version=material.version,
         content=content,
         questions=list(material.questions or []) or None,
+        provider=material.provider,
+        model=material.model,
+        prompt_version=material.prompt_version,
+        created_at=material.created_at,
+    )
+
+
+def _to_interview_prep_pack_schema(material: ApplicationMaterialModel) -> InterviewPrepPack:
+    """Convert ORM interview-prep row to response schema."""
+    sections = material.sections or {}
+    return InterviewPrepPack(
+        id=material.id,
+        role_id=material.role_id,
+        artifact_type=material.artifact_type,
+        version=material.version,
+        sections=InterviewPrepPackSections(
+            likely_questions=list(sections.get(InterviewPrepSectionKey.LIKELY_QUESTIONS.value, [])),
+            talking_points=list(sections.get(InterviewPrepSectionKey.TALKING_POINTS.value, [])),
+            star_stories=list(sections.get(InterviewPrepSectionKey.STAR_STORIES.value, [])),
+        ),
         provider=material.provider,
         model=material.model,
         prompt_version=material.prompt_version,
@@ -651,6 +676,112 @@ def list_application_materials(
     except LookupError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     return [_to_application_material_schema(item) for item in materials]
+
+
+@router.post("/jobs/{role_id}/interview-prep-pack", response_model=InterviewPrepPack)
+def generate_interview_prep_pack(
+    role_id: int,
+    db: Annotated[Session, Depends(get_db)],
+) -> InterviewPrepPack:
+    """Generate and persist interview prep pack for a role."""
+    service = ApplicationMaterialsService(db)
+    try:
+        material = service.generate_interview_prep_pack(role_id)
+        return _to_interview_prep_pack_schema(material)
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Failed to generate interview prep pack: {exc}",
+        ) from exc
+
+
+@router.get("/jobs/{role_id}/interview-prep-pack", response_model=list[InterviewPrepPack])
+def list_interview_prep_packs(
+    role_id: int,
+    db: Annotated[Session, Depends(get_db)],
+) -> list[InterviewPrepPack]:
+    """List saved interview prep pack versions for a role."""
+    service = ApplicationMaterialsService(db)
+    try:
+        materials = service.list_interview_prep_packs(role_id)
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    return [_to_interview_prep_pack_schema(item) for item in materials]
+
+
+@router.get("/jobs/{role_id}/interview-prep-pack/{material_id}", response_model=InterviewPrepPack)
+def get_interview_prep_pack(
+    role_id: int,
+    material_id: int,
+    db: Annotated[Session, Depends(get_db)],
+) -> InterviewPrepPack:
+    """Get a specific interview prep pack version for a role."""
+    service = ApplicationMaterialsService(db)
+    try:
+        material = service.get_interview_prep_pack(material_id, role_id)
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    return _to_interview_prep_pack_schema(material)
+
+
+@router.post(
+    "/jobs/{role_id}/interview-prep-pack/regenerate",
+    response_model=InterviewPrepPack,
+)
+def regenerate_interview_prep_section(
+    role_id: int,
+    payload: InterviewPrepPackRegenerateRequest,
+    db: Annotated[Session, Depends(get_db)],
+) -> InterviewPrepPack:
+    """Regenerate one section and persist as a new interview prep pack version."""
+    service = ApplicationMaterialsService(db)
+    try:
+        material = service.regenerate_interview_prep_section(role_id, payload.section)
+        return _to_interview_prep_pack_schema(material)
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Failed to regenerate interview prep section: {exc}",
+        ) from exc
+
+
+@router.put(
+    "/jobs/{role_id}/interview-prep-pack/{material_id}",
+    response_model=InterviewPrepPack,
+)
+def update_interview_prep_pack(
+    role_id: int,
+    material_id: int,
+    payload: InterviewPrepPackEditRequest,
+    db: Annotated[Session, Depends(get_db)],
+) -> InterviewPrepPack:
+    """Edit and persist interview prep pack sections in-place."""
+    service = ApplicationMaterialsService(db)
+    sections = {
+        InterviewPrepSectionKey.LIKELY_QUESTIONS.value: payload.sections.likely_questions,
+        InterviewPrepSectionKey.TALKING_POINTS.value: payload.sections.talking_points,
+        InterviewPrepSectionKey.STAR_STORIES.value: payload.sections.star_stories,
+    }
+    try:
+        material = service.update_interview_prep_pack(material_id, role_id, sections)
+        return _to_interview_prep_pack_schema(material)
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Failed to update interview prep pack: {exc}",
+        ) from exc
 
 
 @router.get(

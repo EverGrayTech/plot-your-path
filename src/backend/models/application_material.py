@@ -17,6 +17,7 @@ class ApplicationMaterial(Base):
     version = Column(Integer, nullable=False)
     content_path = Column(String, nullable=False)
     questions = Column(JSON, nullable=True)
+    sections = Column(JSON, nullable=True)
     provider = Column(String, nullable=False)
     model = Column(String, nullable=False)
     prompt_version = Column(String, nullable=False)

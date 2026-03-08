@@ -38,6 +38,7 @@ describe("JobsPageClient", () => {
 
   beforeEach(() => {
     vi.spyOn(api, "listApplicationMaterials").mockResolvedValue([]);
+    vi.spyOn(api, "listInterviewPrepPacks").mockResolvedValue([]);
   });
 
   it("loads jobs and applies search + sort controls", async () => {
@@ -667,4 +668,150 @@ describe("JobsPageClient", () => {
       within(pipelineDialog).getByRole("button", { name: /Developer — Acme Corp/i }),
     ).toBeInTheDocument();
   });
+
+  it("generates, edits, and regenerates interview prep pack sections", async () => {
+    vi.spyOn(api, "listJobs").mockResolvedValue(jobs);
+    vi.spyOn(api, "getJob").mockResolvedValue({
+      id: 2,
+      company: {
+        id: 10,
+        name: "Beta Co",
+        slug: "beta-co",
+        website: null,
+        created_at: "2026-03-05T10:00:00Z",
+      },
+      title: "Engineer",
+      team_division: "Platform",
+      salary: { min: 120000, max: 150000, currency: "USD" },
+      url: "https://example.com/jobs/2",
+      skills: {
+        required: [{ id: 1, name: "Python", requirement_level: "required" }],
+        preferred: [{ id: 2, name: "FastAPI", requirement_level: "preferred" }],
+      },
+      description_md: "",
+      created_at: "2026-03-05T10:00:00Z",
+      status: "open",
+      status_history: [],
+      latest_fit_analysis: null,
+      latest_desirability_score: null,
+    });
+
+    vi.spyOn(api, "generateInterviewPrepPack").mockResolvedValue({
+      id: 900,
+      role_id: 2,
+      artifact_type: "interview_prep_pack",
+      version: 1,
+      sections: {
+        likely_questions: ["Why this role?"],
+        talking_points: ["Strong fit to required skills"],
+        star_stories: ["STAR draft one"],
+      },
+      provider: "openai",
+      model: "gpt-4o",
+      prompt_version: "interview-prep-pack-v1",
+      created_at: "2026-03-07T18:10:00Z",
+    });
+
+    const listPrepSpy = vi
+      .spyOn(api, "listInterviewPrepPacks")
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([
+        {
+          id: 900,
+          role_id: 2,
+          artifact_type: "interview_prep_pack",
+          version: 1,
+          sections: {
+            likely_questions: ["Why this role?"],
+            talking_points: ["Strong fit to required skills"],
+            star_stories: ["STAR draft one"],
+          },
+          provider: "openai",
+          model: "gpt-4o",
+          prompt_version: "interview-prep-pack-v1",
+          created_at: "2026-03-07T18:10:00Z",
+        },
+      ])
+      .mockResolvedValueOnce([
+        {
+          id: 901,
+          role_id: 2,
+          artifact_type: "interview_prep_pack",
+          version: 2,
+          sections: {
+            likely_questions: ["Tell us about your impact."],
+            talking_points: ["Strong fit to required skills"],
+            star_stories: ["STAR draft one"],
+          },
+          provider: "openai",
+          model: "gpt-4o",
+          prompt_version: "interview-prep-pack-v1",
+          created_at: "2026-03-07T18:15:00Z",
+        },
+      ]);
+
+    const updatePrepSpy = vi.spyOn(api, "updateInterviewPrepPack").mockResolvedValue({
+      id: 900,
+      role_id: 2,
+      artifact_type: "interview_prep_pack",
+      version: 1,
+      sections: {
+        likely_questions: ["Why this role?", "How do you prioritize?"],
+        talking_points: ["Strong fit to required skills"],
+        star_stories: ["STAR draft one"],
+      },
+      provider: "openai",
+      model: "gpt-4o",
+      prompt_version: "interview-prep-pack-v1",
+      created_at: "2026-03-07T18:10:00Z",
+    });
+
+    const regenerateSpy = vi.spyOn(api, "regenerateInterviewPrepSection").mockResolvedValue({
+      id: 901,
+      role_id: 2,
+      artifact_type: "interview_prep_pack",
+      version: 2,
+      sections: {
+        likely_questions: ["Tell us about your impact."],
+        talking_points: ["Strong fit to required skills"],
+        star_stories: ["STAR draft one"],
+      },
+      provider: "openai",
+      model: "gpt-4o",
+      prompt_version: "interview-prep-pack-v1",
+      created_at: "2026-03-07T18:15:00Z",
+    });
+
+    render(<JobsPageClient />);
+
+    await screen.findByText("Engineer");
+    fireEvent.click(screen.getByRole("button", { name: /Engineer — Beta Co/i }));
+
+    fireEvent.click(await screen.findByRole("button", { name: "Generate Interview Prep Pack" }));
+
+    await waitFor(() => {
+      expect(listPrepSpy).toHaveBeenCalledTimes(2);
+    });
+    expect(await screen.findByDisplayValue("Why this role?")).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("Likely questions (one per line)"), {
+      target: { value: "Why this role?\nHow do you prioritize?" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save Interview Prep Edits" }));
+
+    await waitFor(() => {
+      expect(updatePrepSpy).toHaveBeenCalledWith(2, 900, {
+        likely_questions: ["Why this role?", "How do you prioritize?"],
+        talking_points: ["Strong fit to required skills"],
+        star_stories: ["STAR draft one"],
+      });
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Regenerate Questions" }));
+    await waitFor(() => {
+      expect(regenerateSpy).toHaveBeenCalledWith(2, "likely_questions");
+      expect(listPrepSpy).toHaveBeenCalledTimes(3);
+    });
+    expect(await screen.findByDisplayValue("Tell us about your impact.")).toBeInTheDocument();
+  }, 20000);
 });
