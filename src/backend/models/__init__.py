@@ -3,6 +3,7 @@
 from backend.models.ai_operation_setting import AIOperationSetting
 from backend.models.application_material import ApplicationMaterial
 from backend.models.application_ops import ApplicationOps
+from backend.models.career_evidence import CareerEvidence
 from backend.models.company import Company
 from backend.models.desirability_factor_config import DesirabilityFactorConfig
 from backend.models.desirability_score_result import DesirabilityScoreResult
@@ -17,6 +18,7 @@ __all__ = [
     "ApplicationMaterial",
     "ApplicationOps",
     "AIOperationSetting",
+    "CareerEvidence",
     "Company",
     "DesirabilityFactorConfig",
     "DesirabilityScoreResult",

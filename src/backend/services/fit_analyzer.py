@@ -3,20 +3,19 @@
 from __future__ import annotations
 
 import asyncio
-from pathlib import Path
 
 from sqlalchemy.orm import Session
 
-from backend.config import settings
 from backend.models.role import Role
 from backend.models.role_fit_analysis import RoleFitAnalysis
 from backend.models.role_skill import RoleSkill
 from backend.models.skill import Skill
 from backend.schemas.ai_settings import OperationFamily
+from backend.schemas.career_evidence import EvidenceQuery
 from backend.schemas.job import FitRecommendation
 from backend.services.ai_settings import AISettingsService
+from backend.services.career_evidence import CareerEvidenceService
 from backend.services.llm_service import LLMService
-from backend.utils.file_storage import file_exists, load_file
 
 FIT_ANALYSIS_VERSION = "fit-v1"
 
@@ -115,16 +114,16 @@ class FitAnalysisService:
 
         return covered_required, missing_required, covered_preferred, missing_preferred
 
-    def _load_profile_text(self) -> str:
-        """Load profile source text for matching (resume fallback supported)."""
-        candidate_profile_path = settings.candidate_profile_path
-        if file_exists(candidate_profile_path):
-            return load_file(candidate_profile_path)
-
-        fallback_resume_path = str(Path(settings.data_root) / "resume.md")
-        if file_exists(fallback_resume_path):
-            return load_file(fallback_resume_path)
-        return ""
+    def _load_profile_text(self, preferred_skills: list[str], required_skills: list[str]) -> str:
+        """Load profile source text from shared evidence with deterministic fallback."""
+        evidence_service = CareerEvidenceService(self.db)
+        return evidence_service.load_context_text(
+            EvidenceQuery(
+                skills=sorted(set(preferred_skills + required_skills)),
+                min_results=3,
+                limit=8,
+            )
+        )
 
     def generate_for_role(self, role_id: int) -> RoleFitAnalysis:
         """Generate and persist a new fit analysis record for a role."""
@@ -154,7 +153,7 @@ class FitAnalysisService:
             ]
         )
 
-        profile_text = self._load_profile_text()
+        profile_text = self._load_profile_text(preferred_skills, required_skills)
         (
             covered_required,
             missing_required,

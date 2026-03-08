@@ -5,6 +5,7 @@ from datetime import datetime
 import pytest
 from pydantic import ValidationError
 
+from backend.schemas.career_evidence import EvidenceQuery, EvidenceSourceType
 from backend.schemas.company import Company, CompanyBase, CompanyCreate
 from backend.schemas.job import (
     JobScrapeRequest,
@@ -155,3 +156,18 @@ class TestJobSchemas:
         salary = SalaryInfo(min=None, max=None, currency="USD")
         assert salary.min is None
         assert salary.max is None
+
+
+class TestCareerEvidenceSchemas:
+    """Tests for career-evidence retrieval schemas."""
+
+    def test_evidence_source_type_enum(self):
+        """Evidence source enum exposes locked source types."""
+        assert EvidenceSourceType.RESUME == "resume"
+        assert EvidenceSourceType.JOURNAL == "journal"
+        assert EvidenceSourceType.MANUAL == "manual"
+
+    def test_evidence_query_rejects_unknown_fields(self):
+        """EvidenceQuery should reject unknown keys for stable contract safety."""
+        with pytest.raises(ValidationError):
+            EvidenceQuery.model_validate({"skills": ["python"], "unknown": "value"})
