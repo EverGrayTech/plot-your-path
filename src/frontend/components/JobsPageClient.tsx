@@ -4,6 +4,8 @@ import React, { useEffect, useState } from "react";
 
 import {
   type ApplicationMaterial,
+  type AISetting,
+  type OperationFamily,
   type DesirabilityFactor,
   type FitRecommendation,
   type JobDetail,
@@ -11,6 +13,7 @@ import {
   type RoleStatus,
   type SkillDetail,
   analyzeJobFit,
+  clearAISettingToken,
   createDesirabilityFactor,
   deleteDesirabilityFactor,
   generateCoverLetter,
@@ -18,13 +21,17 @@ import {
   getJob,
   getSkill,
   listApplicationMaterials,
+  listAISettings,
   listDesirabilityFactors,
   listJobs,
   refreshDesirabilityScore,
   reorderDesirabilityFactors,
   scoreJobDesirability,
+  updateAISetting,
+  updateAISettingToken,
   updateDesirabilityFactor,
   updateJobStatus,
+  healthcheckAISetting,
 } from "../lib/api";
 import { CaptureJobForm } from "./CaptureJobForm";
 import { Modal } from "./Modal";
@@ -60,6 +67,7 @@ export function JobsPageClient() {
   const [desirabilityFilter, setDesirabilityFilter] = useState<DesirabilityFilter>("all");
   const [showCaptureModal, setShowCaptureModal] = useState(false);
   const [showFactorSettings, setShowFactorSettings] = useState(false);
+  const [showAISettings, setShowAISettings] = useState(false);
   const [selectedRoleId, setSelectedRoleId] = useState<number | null>(null);
   const [selectedJob, setSelectedJob] = useState<JobDetail | null>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
@@ -87,6 +95,17 @@ export function JobsPageClient() {
   const [newFactorName, setNewFactorName] = useState("");
   const [newFactorPrompt, setNewFactorPrompt] = useState("");
   const [newFactorWeight, setNewFactorWeight] = useState("0.10");
+  const [aiSettings, setAISettings] = useState<AISetting[]>([]);
+  const [aiSettingsLoading, setAISettingsLoading] = useState(false);
+  const [aiSettingsError, setAISettingsError] = useState<string | null>(null);
+  const [tokenInputs, setTokenInputs] = useState<Record<OperationFamily, string>>({
+    job_parsing: "",
+    desirability_scoring: "",
+    application_generation: "",
+  });
+  const [healthByFamily, setHealthByFamily] = useState<
+    Partial<Record<OperationFamily, string>>
+  >({});
 
   async function loadJobs() {
     setLoadingJobs(true);
@@ -352,6 +371,87 @@ export function JobsPageClient() {
     }
   }
 
+  async function loadAISettings() {
+    setAISettingsLoading(true);
+    setAISettingsError(null);
+    try {
+      const response = await listAISettings();
+      setAISettings(response);
+    } catch (error) {
+      if (error instanceof Error) {
+        setAISettingsError(error.message);
+      } else {
+        setAISettingsError("Failed to load AI settings.");
+      }
+    } finally {
+      setAISettingsLoading(false);
+    }
+  }
+
+  async function handleUpdateAIConfig(
+    family: OperationFamily,
+    payload: { provider?: string; model?: string; api_key_env?: string },
+  ) {
+    try {
+      await updateAISetting(family, payload);
+      await loadAISettings();
+    } catch (error) {
+      if (error instanceof Error) {
+        setAISettingsError(error.message);
+      } else {
+        setAISettingsError("Failed to update AI setting.");
+      }
+    }
+  }
+
+  async function handleUpdateToken(family: OperationFamily) {
+    const token = tokenInputs[family]?.trim() ?? "";
+    if (!token) {
+      setAISettingsError("Token cannot be empty.");
+      return;
+    }
+    try {
+      await updateAISettingToken(family, token);
+      setTokenInputs((previous) => ({ ...previous, [family]: "" }));
+      await loadAISettings();
+    } catch (error) {
+      if (error instanceof Error) {
+        setAISettingsError(error.message);
+      } else {
+        setAISettingsError("Failed to update token.");
+      }
+    }
+  }
+
+  async function handleClearToken(family: OperationFamily) {
+    try {
+      await clearAISettingToken(family);
+      await loadAISettings();
+    } catch (error) {
+      if (error instanceof Error) {
+        setAISettingsError(error.message);
+      } else {
+        setAISettingsError("Failed to clear token.");
+      }
+    }
+  }
+
+  async function handleHealthcheck(family: OperationFamily) {
+    try {
+      const response = await healthcheckAISetting(family);
+      setHealthByFamily((previous) => ({
+        ...previous,
+        [family]: response.ok ? "OK" : `Error: ${response.detail}`,
+      }));
+    } catch (error) {
+      if (error instanceof Error) {
+        setHealthByFamily((previous) => ({ ...previous, [family]: `Error: ${error.message}` }));
+      } else {
+        setHealthByFamily((previous) => ({ ...previous, [family]: "Error: health check failed" }));
+      }
+    }
+  }
+
   async function handleAddFactor() {
     const parsedWeight = Number(newFactorWeight);
     if (!newFactorName.trim() || !newFactorPrompt.trim() || Number.isNaN(parsedWeight)) {
@@ -542,6 +642,15 @@ export function JobsPageClient() {
           type="button"
         >
           Factor Settings
+        </button>
+        <button
+          onClick={() => {
+            setShowAISettings(true);
+            loadAISettings();
+          }}
+          type="button"
+        >
+          AI Settings
         </button>
       </header>
 
@@ -1049,6 +1158,99 @@ export function JobsPageClient() {
           <button onClick={handleAddFactor} type="button">
             Add factor
           </button>
+        </Modal>
+      ) : null}
+
+      {showAISettings ? (
+        <Modal
+          onClose={() => {
+            setShowAISettings(false);
+            setAISettingsError(null);
+            setHealthByFamily({});
+          }}
+          title="AI Settings"
+        >
+          {aiSettingsLoading ? <p>Loading AI settings...</p> : null}
+          {aiSettingsError ? <p role="alert">{aiSettingsError}</p> : null}
+
+          <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
+            {aiSettings.map((setting) => (
+              <li
+                key={setting.operation_family}
+                style={{ border: "1px solid #ddd", marginBottom: "0.75rem", padding: "0.75rem" }}
+              >
+                <p style={{ marginTop: 0 }}>
+                  <strong>{setting.operation_family}</strong>
+                </p>
+                <label style={{ display: "grid", gap: "0.25rem" }}>
+                  Provider
+                  <input
+                    defaultValue={setting.provider}
+                    onBlur={(event) => {
+                      if (event.target.value !== setting.provider) {
+                        handleUpdateAIConfig(setting.operation_family, {
+                          provider: event.target.value,
+                        });
+                      }
+                    }}
+                  />
+                </label>
+                <label style={{ display: "grid", gap: "0.25rem" }}>
+                  Model
+                  <input
+                    defaultValue={setting.model}
+                    onBlur={(event) => {
+                      if (event.target.value !== setting.model) {
+                        handleUpdateAIConfig(setting.operation_family, { model: event.target.value });
+                      }
+                    }}
+                  />
+                </label>
+                <label style={{ display: "grid", gap: "0.25rem" }}>
+                  API key env
+                  <input
+                    defaultValue={setting.api_key_env}
+                    onBlur={(event) => {
+                      if (event.target.value !== setting.api_key_env) {
+                        handleUpdateAIConfig(setting.operation_family, {
+                          api_key_env: event.target.value,
+                        });
+                      }
+                    }}
+                  />
+                </label>
+                <p>Runtime token: {setting.token_masked ?? "Not set"}</p>
+                <label style={{ display: "grid", gap: "0.25rem" }}>
+                  Update runtime token
+                  <input
+                    onChange={(event) =>
+                      setTokenInputs((previous) => ({
+                        ...previous,
+                        [setting.operation_family]: event.target.value,
+                      }))
+                    }
+                    placeholder="Paste token"
+                    type="password"
+                    value={tokenInputs[setting.operation_family] ?? ""}
+                  />
+                </label>
+                <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
+                  <button onClick={() => handleUpdateToken(setting.operation_family)} type="button">
+                    Save Token
+                  </button>
+                  <button onClick={() => handleClearToken(setting.operation_family)} type="button">
+                    Clear Token
+                  </button>
+                  <button onClick={() => handleHealthcheck(setting.operation_family)} type="button">
+                    Test Config
+                  </button>
+                </div>
+                {healthByFamily[setting.operation_family] ? (
+                  <p>{healthByFamily[setting.operation_family]}</p>
+                ) : null}
+              </li>
+            ))}
+          </ul>
         </Modal>
       ) : null}
 

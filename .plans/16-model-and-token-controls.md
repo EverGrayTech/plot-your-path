@@ -25,29 +25,29 @@ Expose user-controlled provider token and model selection by operation family so
 ## Implementation Checklist
 
 ### 1. Settings Data Model + Security
-- [ ] Add persisted AI settings model keyed by operation family
-- [ ] Add secure token storage approach (env ref/local encrypted store) with masking semantics
-- [ ] Add migration/default bootstrap behavior for existing installs
+- [x] Add persisted AI settings model keyed by operation family
+- [x] Add secure token storage approach (env ref/local encrypted store) with masking semantics
+- [x] Add migration/default bootstrap behavior for existing installs
 
 ### 2. Backend Settings APIs
-- [ ] Add endpoints to read/update model/provider selection per operation family
-- [ ] Add endpoints to register/update token sources safely
-- [ ] Add validation for unsupported provider/model combinations
+- [x] Add endpoints to read/update model/provider selection per operation family
+- [x] Add endpoints to register/update token sources safely
+- [x] Add validation for unsupported provider/model combinations
 
 ### 3. Frontend Settings UX
-- [ ] Add settings page/dialog for per-family provider/model controls
-- [ ] Add token input/source controls with masked display
-- [ ] Add test-call/health indicator per operation family
+- [x] Add settings page/dialog for per-family provider/model controls
+- [x] Add token input/source controls with masked display
+- [x] Add test-call/health indicator per operation family
 
 ### 4. Runtime Wiring
-- [ ] Route each operation family through selected provider/model configuration
-- [ ] Add clear fallback behavior when tokens/models are missing or invalid
+- [x] Route each operation family through selected provider/model configuration
+- [x] Add clear fallback behavior when tokens/models are missing or invalid
 
 ### 5. Tests + Verification
-- [ ] Add backend tests for secure settings persistence and validation
-- [ ] Add frontend tests for settings update flows and masked token behavior
+- [x] Add backend tests for secure settings persistence and validation
+- [x] Add frontend tests for settings update flows and masked token behavior
 
 ## Acceptance Criteria
-- [ ] User can set provider/model per operation family in-app
-- [ ] User can provide and manage own tokens securely
-- [ ] Job parsing, desirability, and application generation honor selected settings
+- [x] User can set provider/model per operation family in-app
+- [x] User can provide and manage own tokens securely
+- [x] Job parsing, desirability, and application generation honor selected settings
