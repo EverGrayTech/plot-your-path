@@ -15,7 +15,7 @@ Lay the groundwork for ongoing work-journal capture so future application materi
 - No automatic STAR conversion yet (prepared for next phase)
 
 ## Prerequisites
-- `XX-career-evidence.md`
+- `18-career-evidence.md`
 
 ## Implementation Checklist
 
