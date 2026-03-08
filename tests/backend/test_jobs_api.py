@@ -16,6 +16,8 @@ from backend.database import Base, get_db
 from backend.main import app
 from backend.models.application_material import ApplicationMaterial
 from backend.models.company import Company
+from backend.models.desirability_factor_config import DesirabilityFactorConfig
+from backend.models.desirability_score_result import DesirabilityScoreResult
 from backend.models.role import Role
 from backend.models.role_fit_analysis import RoleFitAnalysis
 from backend.models.role_skill import RoleSkill
@@ -170,6 +172,7 @@ class TestListJobs:
         assert job["status"] == "open"
         assert job["fit_score"] is None
         assert job["fit_recommendation"] is None
+        assert job["desirability_score"] is None
         assert "$120,000 - $180,000 USD" in job["salary_range"]
 
     def test_list_includes_latest_fit_signal(self, client, db, sample_role, sample_skills):
@@ -195,6 +198,34 @@ class TestListJobs:
         data = response.json()
         assert data[0]["fit_score"] == 82
         assert data[0]["fit_recommendation"] == "go"
+        assert data[0]["desirability_score"] is None
+
+    def test_list_includes_latest_desirability_signal(self, client, db, sample_role, sample_skills):
+        db.add(
+            DesirabilityScoreResult(
+                company_id=sample_role.company_id,
+                role_id=sample_role.id,
+                total_score=7.4,
+                factor_breakdown=[
+                    {
+                        "factor_id": 1,
+                        "factor_name": "Culture",
+                        "weight": 1.0,
+                        "score": 7,
+                        "reasoning": "Strong team satisfaction indicators.",
+                    }
+                ],
+                provider="openai",
+                model="gpt-4o",
+                version="desirability-v1",
+            )
+        )
+        db.commit()
+
+        response = client.get("/api/jobs")
+        assert response.status_code == 200
+        data = response.json()
+        assert data[0]["desirability_score"] == pytest.approx(7.4)
 
     def test_list_no_salary_returns_none(self, db, client, sample_company):
         """Jobs without salary info return null salary_range."""
@@ -309,6 +340,7 @@ class TestGetJob:
         assert data["salary"]["max"] == 180000
         assert data["status_history"] == []
         assert data["latest_fit_analysis"] is None
+        assert data["latest_desirability_score"] is None
 
     def test_get_job_includes_latest_fit_analysis(self, client, db, sample_role, sample_skills):
         db.add(
@@ -334,6 +366,42 @@ class TestGetJob:
         assert analysis is not None
         assert analysis["fit_score"] == 55
         assert analysis["recommendation"] == "maybe"
+
+    def test_get_job_includes_latest_desirability(self, client, db, sample_role, sample_skills):
+        db.add(
+            DesirabilityScoreResult(
+                company_id=sample_role.company_id,
+                role_id=sample_role.id,
+                total_score=6.9,
+                factor_breakdown=[
+                    {
+                        "factor_id": 1,
+                        "factor_name": "Culture",
+                        "weight": 0.5,
+                        "score": 7,
+                        "reasoning": "Positive culture evidence.",
+                    },
+                    {
+                        "factor_id": 2,
+                        "factor_name": "Reputation",
+                        "weight": 0.5,
+                        "score": 6,
+                        "reasoning": "Solid but mixed external brand signals.",
+                    },
+                ],
+                provider="openai",
+                model="gpt-4o",
+                version="desirability-v1",
+            )
+        )
+        db.commit()
+
+        response = client.get(f"/api/jobs/{sample_role.id}")
+        assert response.status_code == 200
+        payload = response.json()["latest_desirability_score"]
+        assert payload is not None
+        assert payload["total_score"] == pytest.approx(6.9)
+        assert len(payload["factor_breakdown"]) == 2
 
     def test_get_job_includes_status_history(self, client, db, sample_role):
         db.add(
@@ -467,6 +535,112 @@ class TestFitAnalysis:
 
         assert response.status_code == 422
         assert "Failed to generate fit analysis" in response.json()["detail"]
+
+
+class TestDesirabilityScoring:
+    """Tests for desirability score generation endpoints."""
+
+    def test_score_desirability_success(self, client, db, sample_role):
+        db.add(
+            DesirabilityFactorConfig(
+                name="Culture",
+                prompt="Evaluate culture.",
+                weight=1.0,
+                is_active=True,
+                display_order=0,
+            )
+        )
+        db.commit()
+
+        with patch(
+            "backend.services.desirability_scorer.DesirabilityScoringService._score_factor_async",
+            new=AsyncMock(return_value=(8, "Great culture signal.")),
+        ):
+            response = client.post(f"/api/jobs/{sample_role.id}/desirability-score")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["role_id"] == sample_role.id
+        assert data["total_score"] == pytest.approx(8.0)
+        assert data["version"] == "desirability-v1"
+
+    def test_refresh_desirability_recomputes(self, client, db, sample_role):
+        db.add(
+            DesirabilityFactorConfig(
+                name="Culture",
+                prompt="Evaluate culture.",
+                weight=1.0,
+                is_active=True,
+                display_order=0,
+            )
+        )
+        db.add(
+            DesirabilityScoreResult(
+                company_id=sample_role.company_id,
+                role_id=sample_role.id,
+                total_score=2.0,
+                factor_breakdown=[
+                    {
+                        "factor_id": 1,
+                        "factor_name": "Culture",
+                        "weight": 1.0,
+                        "score": 2,
+                        "reasoning": "Old score.",
+                    }
+                ],
+                provider="openai",
+                model="gpt-4o",
+                version="desirability-v1",
+            )
+        )
+        db.commit()
+
+        with patch(
+            "backend.services.desirability_scorer.DesirabilityScoringService._score_factor_async",
+            new=AsyncMock(return_value=(9, "Refreshed score.")),
+        ):
+            response = client.post(f"/api/jobs/{sample_role.id}/desirability-score/refresh")
+
+        assert response.status_code == 200
+        assert response.json()["total_score"] == pytest.approx(9.0)
+
+    def test_desirability_is_shared_across_roles_in_same_company(self, client, db, sample_role):
+        second_role = Role(
+            company_id=sample_role.company_id,
+            title="Staff Engineer",
+            team_division="Platform",
+            salary_min=180000,
+            salary_max=230000,
+            salary_currency="USD",
+            url="https://greenhouse.io/jobs/99999",
+            raw_html_path="data/jobs/raw/acme-corp/99999.html",
+            cleaned_md_path="data/jobs/cleaned/acme-corp/99999.md",
+            status="open",
+        )
+        db.add(second_role)
+        db.add(
+            DesirabilityFactorConfig(
+                name="Culture",
+                prompt="Evaluate culture.",
+                weight=1.0,
+                is_active=True,
+                display_order=0,
+            )
+        )
+        db.commit()
+        db.refresh(second_role)
+
+        with patch(
+            "backend.services.desirability_scorer.DesirabilityScoringService._score_factor_async",
+            new=AsyncMock(return_value=(7, "Shared company signal.")),
+        ):
+            first = client.post(f"/api/jobs/{sample_role.id}/desirability-score")
+        assert first.status_code == 200
+
+        second = client.post(f"/api/jobs/{second_role.id}/desirability-score")
+        assert second.status_code == 200
+        assert second.json()["id"] == first.json()["id"]
+        assert second.json()["total_score"] == pytest.approx(first.json()["total_score"])
 
 
 class TestApplicationMaterials:

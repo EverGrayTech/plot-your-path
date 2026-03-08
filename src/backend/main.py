@@ -1,14 +1,14 @@
 """FastAPI application entry point."""
 
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import AsyncIterator
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.config import settings
 from backend.database import Base, engine
-from backend.routers import jobs, skills
+from backend.routers import desirability, jobs, skills
 
 
 @asynccontextmanager
@@ -41,3 +41,4 @@ app.add_middleware(
 # Mount routers
 app.include_router(jobs.router, prefix="/api")
 app.include_router(skills.router, prefix="/api")
+app.include_router(desirability.router, prefix="/api")

@@ -4,25 +4,37 @@ import React, { useEffect, useState } from "react";
 
 import {
   type ApplicationMaterial,
+  type DesirabilityFactor,
   type FitRecommendation,
   type JobDetail,
   type JobListItem,
   type RoleStatus,
   type SkillDetail,
   analyzeJobFit,
+  createDesirabilityFactor,
+  deleteDesirabilityFactor,
   generateCoverLetter,
   generateQuestionAnswers,
   getJob,
   getSkill,
   listApplicationMaterials,
+  listDesirabilityFactors,
   listJobs,
+  refreshDesirabilityScore,
+  reorderDesirabilityFactors,
+  scoreJobDesirability,
+  updateDesirabilityFactor,
   updateJobStatus,
 } from "../lib/api";
 import { CaptureJobForm } from "./CaptureJobForm";
 import { Modal } from "./Modal";
 
-type SortMode = "newest" | "oldest" | "company_az";
+type SortMode = "newest" | "oldest" | "company_az" | "desirability_desc" | "smart_sort";
 type RecommendationFilter = "all" | "go" | "maybe" | "no-go" | "not_analyzed";
+type DesirabilityFilter = "all" | "scored" | "not_scored";
+
+const SMART_SORT_FIT_WEIGHT = 0.6;
+const SMART_SORT_DESIRABILITY_WEIGHT = 0.4;
 
 function recommendationLabel(value: FitRecommendation | null): string {
   if (value === "go") {
@@ -45,7 +57,9 @@ export function JobsPageClient() {
   const [search, setSearch] = useState("");
   const [sortMode, setSortMode] = useState<SortMode>("newest");
   const [recommendationFilter, setRecommendationFilter] = useState<RecommendationFilter>("all");
+  const [desirabilityFilter, setDesirabilityFilter] = useState<DesirabilityFilter>("all");
   const [showCaptureModal, setShowCaptureModal] = useState(false);
+  const [showFactorSettings, setShowFactorSettings] = useState(false);
   const [selectedRoleId, setSelectedRoleId] = useState<number | null>(null);
   const [selectedJob, setSelectedJob] = useState<JobDetail | null>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
@@ -63,8 +77,16 @@ export function JobsPageClient() {
   const [materialsError, setMaterialsError] = useState<string | null>(null);
   const [generatingCoverLetter, setGeneratingCoverLetter] = useState(false);
   const [generatingQA, setGeneratingQA] = useState(false);
+  const [scoringDesirability, setScoringDesirability] = useState(false);
+  const [desirabilityError, setDesirabilityError] = useState<string | null>(null);
   const [qaQuestionsInput, setQaQuestionsInput] = useState("");
   const [selectedMaterialId, setSelectedMaterialId] = useState<number | null>(null);
+  const [factors, setFactors] = useState<DesirabilityFactor[]>([]);
+  const [factorsLoading, setFactorsLoading] = useState(false);
+  const [factorsError, setFactorsError] = useState<string | null>(null);
+  const [newFactorName, setNewFactorName] = useState("");
+  const [newFactorPrompt, setNewFactorPrompt] = useState("");
+  const [newFactorWeight, setNewFactorWeight] = useState("0.10");
 
   async function loadJobs() {
     setLoadingJobs(true);
@@ -282,6 +304,145 @@ export function JobsPageClient() {
     }
   }
 
+  async function handleScoreDesirability(forceRefresh: boolean) {
+    if (!selectedJob) {
+      return;
+    }
+    setScoringDesirability(true);
+    setDesirabilityError(null);
+    try {
+      const score = forceRefresh
+        ? await refreshDesirabilityScore(selectedJob.id)
+        : await scoreJobDesirability(selectedJob.id);
+      setSelectedJob((previous) => {
+        if (!previous) {
+          return previous;
+        }
+        return {
+          ...previous,
+          latest_desirability_score: score,
+        };
+      });
+      await loadJobs();
+    } catch (error) {
+      if (error instanceof Error) {
+        setDesirabilityError(error.message);
+      } else {
+        setDesirabilityError("Failed to score desirability.");
+      }
+    } finally {
+      setScoringDesirability(false);
+    }
+  }
+
+  async function loadFactors() {
+    setFactorsLoading(true);
+    setFactorsError(null);
+    try {
+      const response = await listDesirabilityFactors();
+      setFactors(response);
+    } catch (error) {
+      if (error instanceof Error) {
+        setFactorsError(error.message);
+      } else {
+        setFactorsError("Failed to load factors.");
+      }
+    } finally {
+      setFactorsLoading(false);
+    }
+  }
+
+  async function handleAddFactor() {
+    const parsedWeight = Number(newFactorWeight);
+    if (!newFactorName.trim() || !newFactorPrompt.trim() || Number.isNaN(parsedWeight)) {
+      setFactorsError("Provide name, prompt, and numeric weight.");
+      return;
+    }
+
+    try {
+      await createDesirabilityFactor({
+        name: newFactorName.trim(),
+        prompt: newFactorPrompt.trim(),
+        weight: parsedWeight,
+        is_active: true,
+        display_order: factors.length,
+      });
+      setNewFactorName("");
+      setNewFactorPrompt("");
+      setNewFactorWeight("0.10");
+      await loadFactors();
+    } catch (error) {
+      if (error instanceof Error) {
+        setFactorsError(error.message);
+      } else {
+        setFactorsError("Failed to create factor.");
+      }
+    }
+  }
+
+  async function handleDeleteFactor(factorId: number) {
+    try {
+      await deleteDesirabilityFactor(factorId);
+      const ordered = factors.filter((factor) => factor.id !== factorId).map((factor) => factor.id);
+      if (ordered.length) {
+        await reorderDesirabilityFactors(ordered);
+      }
+      await loadFactors();
+    } catch (error) {
+      if (error instanceof Error) {
+        setFactorsError(error.message);
+      } else {
+        setFactorsError("Failed to delete factor.");
+      }
+    }
+  }
+
+  async function handleMoveFactor(factorId: number, direction: -1 | 1) {
+    const index = factors.findIndex((factor) => factor.id === factorId);
+    const nextIndex = index + direction;
+    if (index < 0 || nextIndex < 0 || nextIndex >= factors.length) {
+      return;
+    }
+    const copy = [...factors];
+    const [item] = copy.splice(index, 1);
+    copy.splice(nextIndex, 0, item);
+    try {
+      const reordered = await reorderDesirabilityFactors(copy.map((factor) => factor.id));
+      setFactors(reordered);
+    } catch (error) {
+      if (error instanceof Error) {
+        setFactorsError(error.message);
+      } else {
+        setFactorsError("Failed to reorder factors.");
+      }
+    }
+  }
+
+  async function handleUpdateFactor(
+    factorId: number,
+    field: "is_active" | "prompt" | "weight",
+    value: boolean | number | string,
+  ) {
+    try {
+      if (field === "is_active") {
+        await updateDesirabilityFactor(factorId, { is_active: Boolean(value) });
+      }
+      if (field === "prompt") {
+        await updateDesirabilityFactor(factorId, { prompt: String(value) });
+      }
+      if (field === "weight") {
+        await updateDesirabilityFactor(factorId, { weight: Number(value) });
+      }
+      await loadFactors();
+    } catch (error) {
+      if (error instanceof Error) {
+        setFactorsError(error.message);
+      } else {
+        setFactorsError("Failed to update factor.");
+      }
+    }
+  }
+
   const selectedMaterial =
     applicationMaterials.find((item) => item.id === selectedMaterialId) ?? null;
 
@@ -297,15 +458,55 @@ export function JobsPageClient() {
     }
 
     if (recommendationFilter === "all") {
-      return true;
+      if (desirabilityFilter === "all") {
+        return true;
+      }
+      if (desirabilityFilter === "scored") {
+        return job.desirability_score !== null;
+      }
+      return job.desirability_score === null;
     }
     if (recommendationFilter === "not_analyzed") {
-      return job.fit_recommendation === null;
+      if (job.fit_recommendation !== null) {
+        return false;
+      }
+      if (desirabilityFilter === "all") {
+        return true;
+      }
+      if (desirabilityFilter === "scored") {
+        return job.desirability_score !== null;
+      }
+      return job.desirability_score === null;
     }
-    return job.fit_recommendation === recommendationFilter;
+    if (job.fit_recommendation !== recommendationFilter) {
+      return false;
+    }
+    if (desirabilityFilter === "all") {
+      return true;
+    }
+    if (desirabilityFilter === "scored") {
+      return job.desirability_score !== null;
+    }
+    return job.desirability_score === null;
   });
 
   const sortedJobs = [...filteredJobs].sort((left, right) => {
+    if (sortMode === "desirability_desc") {
+      return (right.desirability_score ?? -1) - (left.desirability_score ?? -1);
+    }
+
+    if (sortMode === "smart_sort") {
+      const leftFit = left.fit_score ?? 0;
+      const rightFit = right.fit_score ?? 0;
+      const leftDesirability = (left.desirability_score ?? 0) * 10;
+      const rightDesirability = (right.desirability_score ?? 0) * 10;
+      const leftSmart =
+        leftFit * SMART_SORT_FIT_WEIGHT + leftDesirability * SMART_SORT_DESIRABILITY_WEIGHT;
+      const rightSmart =
+        rightFit * SMART_SORT_FIT_WEIGHT + rightDesirability * SMART_SORT_DESIRABILITY_WEIGHT;
+      return rightSmart - leftSmart;
+    }
+
     if (sortMode === "company_az") {
       return left.company.localeCompare(right.company);
     }
@@ -333,15 +534,28 @@ export function JobsPageClient() {
         <button onClick={() => setShowCaptureModal(true)} type="button">
           Add Job
         </button>
+        <button
+          onClick={() => {
+            setShowFactorSettings(true);
+            loadFactors();
+          }}
+          type="button"
+        >
+          Factor Settings
+        </button>
       </header>
 
       <p>Capture and review roles from your job search.</p>
+      <p>
+        Smart Sort default: {Math.round(SMART_SORT_FIT_WEIGHT * 100)}% fit +{" "}
+        {Math.round(SMART_SORT_DESIRABILITY_WEIGHT * 100)}% desirability.
+      </p>
 
       <div
         style={{
           display: "grid",
           gap: "0.75rem",
-          gridTemplateColumns: "2fr 1fr 1fr",
+          gridTemplateColumns: "2fr 1fr 1fr 1fr",
         }}
       >
         <label style={{ display: "grid", gap: "0.25rem" }}>
@@ -363,6 +577,8 @@ export function JobsPageClient() {
             <option value="newest">Newest</option>
             <option value="oldest">Oldest</option>
             <option value="company_az">Company A→Z</option>
+            <option value="desirability_desc">Desirability ↓</option>
+            <option value="smart_sort">Smart Sort</option>
           </select>
         </label>
 
@@ -379,6 +595,18 @@ export function JobsPageClient() {
             <option value="maybe">Maybe</option>
             <option value="no-go">No-Go</option>
             <option value="not_analyzed">Not analyzed</option>
+          </select>
+        </label>
+
+        <label style={{ display: "grid", gap: "0.25rem" }}>
+          Desirability
+          <select
+            onChange={(event) => setDesirabilityFilter(event.target.value as DesirabilityFilter)}
+            value={desirabilityFilter}
+          >
+            <option value="all">All</option>
+            <option value="scored">Scored only</option>
+            <option value="not_scored">Not scored</option>
           </select>
         </label>
       </div>
@@ -403,6 +631,11 @@ export function JobsPageClient() {
                   {job.salary_range ?? "No salary"} • {job.status} • {job.skills_count} skills •{" "}
                   {recommendationLabel(job.fit_recommendation)}
                   {job.fit_score !== null ? ` (${job.fit_score}%)` : ""}
+                  {" • "}
+                  Desirability:{" "}
+                  {job.desirability_score !== null
+                    ? job.desirability_score.toFixed(2)
+                    : "Not scored"}
                 </small>
               </button>
             </li>
@@ -420,6 +653,7 @@ export function JobsPageClient() {
               setSearch("");
               setSortMode("newest");
               setRecommendationFilter("all");
+              setDesirabilityFilter("all");
               setSelectedRoleId(result.role_id);
               setShowCaptureModal(false);
               loadJobs();
@@ -463,6 +697,7 @@ export function JobsPageClient() {
               </label>
               {statusError ? <p role="alert">{statusError}</p> : null}
               {fitError ? <p role="alert">{fitError}</p> : null}
+              {desirabilityError ? <p role="alert">{desirabilityError}</p> : null}
               <p>
                 Salary: {selectedJob.salary.min ?? "?"} - {selectedJob.salary.max ?? "?"}{" "}
                 {selectedJob.salary.currency}
@@ -516,6 +751,44 @@ export function JobsPageClient() {
                   </div>
                 ) : (
                   <p>No fit analysis generated yet.</p>
+                )}
+              </section>
+
+              <section>
+                <h4>Desirability score</h4>
+                <div style={{ display: "flex", gap: "0.5rem" }}>
+                  <button
+                    disabled={scoringDesirability}
+                    onClick={() => handleScoreDesirability(false)}
+                    type="button"
+                  >
+                    {scoringDesirability ? "Scoring..." : "Score Desirability"}
+                  </button>
+                  <button
+                    disabled={scoringDesirability}
+                    onClick={() => handleScoreDesirability(true)}
+                    type="button"
+                  >
+                    Refresh Score
+                  </button>
+                </div>
+                {selectedJob.latest_desirability_score ? (
+                  <div style={{ marginTop: "0.5rem" }}>
+                    <p>
+                      <strong>Total:</strong>{" "}
+                      {selectedJob.latest_desirability_score.total_score.toFixed(2)} / 10
+                    </p>
+                    <ul>
+                      {selectedJob.latest_desirability_score.factor_breakdown.map((factor) => (
+                        <li key={factor.factor_id}>
+                          <strong>{factor.factor_name}</strong> — score {factor.score}/10, weight{" "}
+                          {(factor.weight * 100).toFixed(1)}% — {factor.reasoning}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : (
+                  <p>No desirability score generated yet.</p>
                 )}
               </section>
 
@@ -667,6 +940,115 @@ export function JobsPageClient() {
               </ul>
             </article>
           ) : null}
+        </Modal>
+      ) : null}
+
+      {showFactorSettings ? (
+        <Modal
+          onClose={() => {
+            setShowFactorSettings(false);
+            setFactorsError(null);
+          }}
+          title="Desirability Factor Settings"
+        >
+          {factorsLoading ? <p>Loading factors...</p> : null}
+          {factorsError ? <p role="alert">{factorsError}</p> : null}
+
+          <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
+            {factors.map((factor, index) => (
+              <li
+                key={factor.id}
+                style={{ border: "1px solid #ddd", marginBottom: "0.5rem", padding: "0.5rem" }}
+              >
+                <p>
+                  <strong>{factor.name}</strong>
+                </p>
+                <label style={{ display: "grid", gap: "0.25rem" }}>
+                  Prompt
+                  <textarea
+                    defaultValue={factor.prompt}
+                    onBlur={(event) => {
+                      if (event.target.value !== factor.prompt) {
+                        handleUpdateFactor(factor.id, "prompt", event.target.value);
+                      }
+                    }}
+                    rows={2}
+                  />
+                </label>
+                <label style={{ display: "grid", gap: "0.25rem" }}>
+                  Weight
+                  <input
+                    defaultValue={factor.weight}
+                    min={0}
+                    onBlur={(event) =>
+                      handleUpdateFactor(factor.id, "weight", Number(event.target.value))
+                    }
+                    step={0.01}
+                    type="number"
+                  />
+                </label>
+                <label>
+                  <input
+                    checked={factor.is_active}
+                    onChange={(event) =>
+                      handleUpdateFactor(factor.id, "is_active", event.target.checked)
+                    }
+                    type="checkbox"
+                  />{" "}
+                  Active
+                </label>
+                <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
+                  <button
+                    disabled={index === 0}
+                    onClick={() => handleMoveFactor(factor.id, -1)}
+                    type="button"
+                  >
+                    Move up
+                  </button>
+                  <button
+                    disabled={index === factors.length - 1}
+                    onClick={() => handleMoveFactor(factor.id, 1)}
+                    type="button"
+                  >
+                    Move down
+                  </button>
+                  <button onClick={() => handleDeleteFactor(factor.id)} type="button">
+                    Delete
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          <h4>Add factor</h4>
+          <label style={{ display: "grid", gap: "0.25rem" }}>
+            Name
+            <input
+              onChange={(event) => setNewFactorName(event.target.value)}
+              value={newFactorName}
+            />
+          </label>
+          <label style={{ display: "grid", gap: "0.25rem" }}>
+            Prompt
+            <textarea
+              onChange={(event) => setNewFactorPrompt(event.target.value)}
+              rows={3}
+              value={newFactorPrompt}
+            />
+          </label>
+          <label style={{ display: "grid", gap: "0.25rem" }}>
+            Weight
+            <input
+              min={0}
+              onChange={(event) => setNewFactorWeight(event.target.value)}
+              step={0.01}
+              type="number"
+              value={newFactorWeight}
+            />
+          </label>
+          <button onClick={handleAddFactor} type="button">
+            Add factor
+          </button>
         </Modal>
       ) : null}
 

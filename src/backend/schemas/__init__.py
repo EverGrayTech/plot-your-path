@@ -1,6 +1,15 @@
 """Pydantic schemas package."""
 
 from backend.schemas.company import Company, CompanyBase, CompanyCreate
+from backend.schemas.desirability import (
+    DesirabilityFactor,
+    DesirabilityFactorBase,
+    DesirabilityFactorCreate,
+    DesirabilityFactorReorderRequest,
+    DesirabilityFactorScore,
+    DesirabilityFactorUpdate,
+    DesirabilityScore,
+)
 from backend.schemas.job import (
     ApplicationArtifactType,
     ApplicationMaterial,
@@ -22,6 +31,13 @@ __all__ = [
     "Company",
     "CompanyBase",
     "CompanyCreate",
+    "DesirabilityFactor",
+    "DesirabilityFactorBase",
+    "DesirabilityFactorCreate",
+    "DesirabilityFactorReorderRequest",
+    "DesirabilityFactorScore",
+    "DesirabilityFactorUpdate",
+    "DesirabilityScore",
     "ApplicationArtifactType",
     "ApplicationMaterial",
     "ApplicationMaterialQARequest",

@@ -6,6 +6,7 @@ from enum import StrEnum
 from pydantic import BaseModel, ConfigDict, HttpUrl
 
 from backend.schemas.company import Company
+from backend.schemas.desirability import DesirabilityScore
 
 
 class RoleStatus(StrEnum):
@@ -126,6 +127,7 @@ class JobListItem(BaseModel):
     status: RoleStatus
     fit_score: int | None = None
     fit_recommendation: FitRecommendation | None = None
+    desirability_score: float | None = None
 
 
 class JobSkillItem(BaseModel):
@@ -160,3 +162,4 @@ class JobDetail(BaseModel):
     status: RoleStatus
     status_history: list[RoleStatusChange]
     latest_fit_analysis: FitAnalysis | None = None
+    latest_desirability_score: DesirabilityScore | None = None
