@@ -17,7 +17,7 @@ Capture downstream outcomes (screen/reject/interview/offer) and tie them back to
 ## Prerequisites
 - `10-job-status-tracking.md`
 - `14-application-materials.md`
-- `XX-application-ops-tracking.md`
+- `17-application-ops-tracking.md`
 
 ## Implementation Checklist
 
