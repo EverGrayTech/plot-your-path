@@ -2,6 +2,9 @@
 
 from backend.schemas.company import Company, CompanyBase, CompanyCreate
 from backend.schemas.job import (
+    ApplicationArtifactType,
+    ApplicationMaterial,
+    ApplicationMaterialQARequest,
     FitAnalysis,
     FitRecommendation,
     JobDetail,
@@ -19,6 +22,9 @@ __all__ = [
     "Company",
     "CompanyBase",
     "CompanyCreate",
+    "ApplicationArtifactType",
+    "ApplicationMaterial",
+    "ApplicationMaterialQARequest",
     "FitAnalysis",
     "FitRecommendation",
     "JobDetail",

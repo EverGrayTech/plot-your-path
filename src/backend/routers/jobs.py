@@ -10,6 +10,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from backend.database import get_db
+from backend.models.application_material import ApplicationMaterial as ApplicationMaterialModel
 from backend.models.company import Company
 from backend.models.role import Role
 from backend.models.role_fit_analysis import RoleFitAnalysis
@@ -17,6 +18,8 @@ from backend.models.role_skill import RoleSkill
 from backend.models.role_status_change import RoleStatusChange as RoleStatusChangeModel
 from backend.schemas.company import Company as CompanySchema
 from backend.schemas.job import (
+    ApplicationMaterial,
+    ApplicationMaterialQARequest,
     FitAnalysis,
     JobDetail,
     JobListItem,
@@ -26,6 +29,7 @@ from backend.schemas.job import (
     RoleStatusChange,
     SalaryInfo,
 )
+from backend.services.application_materials import ApplicationMaterialsService
 from backend.services.fit_analyzer import FitAnalysisService
 from backend.services.job_capture import (
     JobCaptureLLMError,
@@ -102,6 +106,23 @@ def _to_fit_analysis_schema(analysis: RoleFitAnalysis) -> FitAnalysis:
         model=analysis.model,
         version=analysis.version,
         created_at=analysis.created_at,
+    )
+
+
+def _to_application_material_schema(material: ApplicationMaterialModel) -> ApplicationMaterial:
+    """Convert ORM application-material row to response schema."""
+    content = load_file(material.content_path) if file_exists(material.content_path) else ""
+    return ApplicationMaterial(
+        id=material.id,
+        role_id=material.role_id,
+        artifact_type=material.artifact_type,
+        version=material.version,
+        content=content,
+        questions=list(material.questions or []) or None,
+        provider=material.provider,
+        model=material.model,
+        prompt_version=material.prompt_version,
+        created_at=material.created_at,
     )
 
 
@@ -220,6 +241,85 @@ def analyze_job_fit(role_id: int, db: Annotated[Session, Depends(get_db)]) -> Fi
         raise HTTPException(
             status_code=422, detail=f"Failed to generate fit analysis: {exc}"
         ) from exc
+
+
+@router.post(
+    "/jobs/{role_id}/application-materials/cover-letter", response_model=ApplicationMaterial
+)
+def generate_cover_letter(
+    role_id: int,
+    db: Annotated[Session, Depends(get_db)],
+) -> ApplicationMaterial:
+    """Generate and persist a cover-letter draft for a role."""
+    service = ApplicationMaterialsService(db)
+    try:
+        material = service.generate_cover_letter(role_id)
+        return _to_application_material_schema(material)
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(
+            status_code=422, detail=f"Failed to generate cover letter: {exc}"
+        ) from exc
+
+
+@router.post(
+    "/jobs/{role_id}/application-materials/question-answers", response_model=ApplicationMaterial
+)
+def generate_question_answers(
+    role_id: int,
+    payload: ApplicationMaterialQARequest,
+    db: Annotated[Session, Depends(get_db)],
+) -> ApplicationMaterial:
+    """Generate and persist Q&A draft answers for a role."""
+    service = ApplicationMaterialsService(db)
+    try:
+        material = service.generate_question_answers(payload.questions, role_id)
+        return _to_application_material_schema(material)
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(
+            status_code=422, detail=f"Failed to generate question answers: {exc}"
+        ) from exc
+
+
+@router.get("/jobs/{role_id}/application-materials", response_model=list[ApplicationMaterial])
+def list_application_materials(
+    role_id: int,
+    db: Annotated[Session, Depends(get_db)],
+) -> list[ApplicationMaterial]:
+    """List saved application materials for a role."""
+    service = ApplicationMaterialsService(db)
+    try:
+        materials = service.list_for_role(role_id)
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    return [_to_application_material_schema(item) for item in materials]
+
+
+@router.get(
+    "/jobs/{role_id}/application-materials/{material_id}", response_model=ApplicationMaterial
+)
+def get_application_material(
+    role_id: int,
+    material_id: int,
+    db: Annotated[Session, Depends(get_db)],
+) -> ApplicationMaterial:
+    """Get a specific saved application material version for a role."""
+    material = (
+        db.query(ApplicationMaterialModel)
+        .filter(ApplicationMaterialModel.id == material_id)
+        .filter(ApplicationMaterialModel.role_id == role_id)
+        .first()
+    )
+    if material is None:
+        raise HTTPException(status_code=404, detail="Application material not found")
+    return _to_application_material_schema(material)
 
 
 @router.patch("/jobs/{role_id}/status", response_model=JobListItem)

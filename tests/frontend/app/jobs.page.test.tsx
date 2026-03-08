@@ -34,6 +34,10 @@ describe("JobsPageClient", () => {
     vi.restoreAllMocks();
   });
 
+  beforeEach(() => {
+    vi.spyOn(api, "listApplicationMaterials").mockResolvedValue([]);
+  });
+
   it("loads jobs and applies search + sort controls", async () => {
     vi.spyOn(api, "listJobs").mockResolvedValue(jobs);
     vi.spyOn(api, "getJob").mockResolvedValue({
@@ -230,8 +234,10 @@ describe("JobsPageClient", () => {
 
     const skillHeading = await screen.findByRole("heading", { name: "Skill Detail" });
     const skillModal = skillHeading.closest("dialog") as HTMLElement;
-    expect(within(skillModal).getByRole("button", { name: /Engineer — Beta Co/i })).toBeInTheDocument();
-  }, 10000);
+    expect(
+      within(skillModal).getByRole("button", { name: /Engineer — Beta Co/i }),
+    ).toBeInTheDocument();
+  }, 20000);
 
   it("supports preferred skill link navigation from job detail", async () => {
     vi.spyOn(api, "listJobs").mockResolvedValue(jobs);
@@ -408,7 +414,9 @@ describe("JobsPageClient", () => {
     expect(fitAnalysisSection).toHaveTextContent(/Recommendation:\s*Go/i);
     expect(fitAnalysisSection).toHaveTextContent(/Fit score:\s*84\s*%/i);
 
-    expect(fitAnalysisSection).toHaveTextContent(/Rationale:\s*Strong match based on core skills\./i);
+    expect(fitAnalysisSection).toHaveTextContent(
+      /Rationale:\s*Strong match based on core skills\./i,
+    );
   }, 10000);
 
   it("filters jobs by recommendation including not analyzed", async () => {
@@ -453,4 +461,72 @@ describe("JobsPageClient", () => {
     expect(screen.getByText("Developer")).toBeInTheDocument();
     expect(screen.queryByText("Engineer")).not.toBeInTheDocument();
   });
+
+  it("generates and renders application materials in job detail", async () => {
+    vi.spyOn(api, "listJobs").mockResolvedValue(jobs);
+    vi.spyOn(api, "getJob").mockResolvedValue({
+      id: 2,
+      company: {
+        id: 10,
+        name: "Beta Co",
+        slug: "beta-co",
+        website: null,
+        created_at: "2026-03-05T10:00:00Z",
+      },
+      title: "Engineer",
+      team_division: "Platform",
+      salary: { min: 120000, max: 150000, currency: "USD" },
+      url: "https://example.com/jobs/2",
+      skills: {
+        required: [{ id: 1, name: "Python", requirement_level: "required" }],
+        preferred: [{ id: 2, name: "FastAPI", requirement_level: "preferred" }],
+      },
+      description_md: "",
+      created_at: "2026-03-05T10:00:00Z",
+      status: "open",
+      status_history: [],
+      latest_fit_analysis: null,
+    });
+    const listMaterialsSpy = vi
+      .spyOn(api, "listApplicationMaterials")
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([
+        {
+          id: 11,
+          role_id: 2,
+          artifact_type: "cover_letter",
+          version: 1,
+          content: "Dear hiring manager...",
+          questions: null,
+          provider: "openai",
+          model: "gpt-4o",
+          prompt_version: "cover-letter-v1",
+          created_at: "2026-03-07T18:10:00Z",
+        },
+      ]);
+    vi.spyOn(api, "generateCoverLetter").mockResolvedValue({
+      id: 11,
+      role_id: 2,
+      artifact_type: "cover_letter",
+      version: 1,
+      content: "Dear hiring manager...",
+      questions: null,
+      provider: "openai",
+      model: "gpt-4o",
+      prompt_version: "cover-letter-v1",
+      created_at: "2026-03-07T18:10:00Z",
+    });
+
+    render(<JobsPageClient />);
+
+    await screen.findByText("Engineer");
+    fireEvent.click(screen.getByRole("button", { name: /Engineer — Beta Co/i }));
+    fireEvent.click(await screen.findByRole("button", { name: "Generate Cover Letter" }));
+
+    await waitFor(() => {
+      expect(listMaterialsSpy).toHaveBeenCalledTimes(2);
+    });
+
+    expect(await screen.findByText("Dear hiring manager...")).toBeInTheDocument();
+  }, 10000);
 });

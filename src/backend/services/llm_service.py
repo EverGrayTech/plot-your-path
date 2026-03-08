@@ -6,7 +6,7 @@ import json
 import re
 from typing import Any
 
-from backend.config import LLMConfig
+from backend.config import LLMConfig, llm_config
 
 # Prompts
 DENOISE_PROMPT = """You are a job posting parser. Convert the following raw text extracted from a job posting webpage into clean, well-structured Markdown.
@@ -68,7 +68,9 @@ class LLMService:
         Args:
             config: LLM configuration (uses defaults if not provided)
         """
-        self.config = config or LLMConfig()
+        # Use repository config/llm.json defaults when caller does not provide
+        # an explicit config, so every service shares the same provider/key path.
+        self.config = config or llm_config
 
     async def _call_openai(self, prompt: str) -> str:
         """

@@ -3,14 +3,18 @@
 import React, { useEffect, useState } from "react";
 
 import {
+  type ApplicationMaterial,
   type FitRecommendation,
   type JobDetail,
   type JobListItem,
   type RoleStatus,
   type SkillDetail,
   analyzeJobFit,
+  generateCoverLetter,
+  generateQuestionAnswers,
   getJob,
   getSkill,
+  listApplicationMaterials,
   listJobs,
   updateJobStatus,
 } from "../lib/api";
@@ -54,6 +58,13 @@ export function JobsPageClient() {
   const [selectedSkill, setSelectedSkill] = useState<SkillDetail | null>(null);
   const [loadingSkillDetail, setLoadingSkillDetail] = useState(false);
   const [skillDetailError, setSkillDetailError] = useState<string | null>(null);
+  const [applicationMaterials, setApplicationMaterials] = useState<ApplicationMaterial[]>([]);
+  const [loadingMaterials, setLoadingMaterials] = useState(false);
+  const [materialsError, setMaterialsError] = useState<string | null>(null);
+  const [generatingCoverLetter, setGeneratingCoverLetter] = useState(false);
+  const [generatingQA, setGeneratingQA] = useState(false);
+  const [qaQuestionsInput, setQaQuestionsInput] = useState("");
+  const [selectedMaterialId, setSelectedMaterialId] = useState<number | null>(null);
 
   async function loadJobs() {
     setLoadingJobs(true);
@@ -181,6 +192,98 @@ export function JobsPageClient() {
 
     fetchSkillDetail();
   }, [selectedSkillId]);
+
+  useEffect(() => {
+    if (!selectedRoleId) {
+      setApplicationMaterials([]);
+      setSelectedMaterialId(null);
+      setMaterialsError(null);
+      return;
+    }
+
+    const fetchMaterials = async () => {
+      setLoadingMaterials(true);
+      setMaterialsError(null);
+      try {
+        const response = await listApplicationMaterials(selectedRoleId);
+        setApplicationMaterials(response);
+        setSelectedMaterialId((previous) => {
+          if (previous && response.some((item) => item.id === previous)) {
+            return previous;
+          }
+          return response[0]?.id ?? null;
+        });
+      } catch (error) {
+        if (error instanceof Error) {
+          setMaterialsError(error.message);
+        } else {
+          setMaterialsError("Failed to load application materials.");
+        }
+      } finally {
+        setLoadingMaterials(false);
+      }
+    };
+
+    fetchMaterials();
+  }, [selectedRoleId]);
+
+  async function handleGenerateCoverLetter() {
+    if (!selectedJob) {
+      return;
+    }
+    setGeneratingCoverLetter(true);
+    setMaterialsError(null);
+    try {
+      const created = await generateCoverLetter(selectedJob.id);
+      const refreshed = await listApplicationMaterials(selectedJob.id);
+      setApplicationMaterials(refreshed);
+      setSelectedMaterialId(created.id);
+    } catch (error) {
+      if (error instanceof Error) {
+        setMaterialsError(error.message);
+      } else {
+        setMaterialsError("Failed to generate cover letter.");
+      }
+    } finally {
+      setGeneratingCoverLetter(false);
+    }
+  }
+
+  async function handleGenerateQA() {
+    if (!selectedJob) {
+      return;
+    }
+
+    const questions = qaQuestionsInput
+      .split("\n")
+      .map((question) => question.trim())
+      .filter(Boolean);
+
+    if (questions.length === 0) {
+      setMaterialsError("Add at least one application question before generating Q&A drafts.");
+      return;
+    }
+
+    setGeneratingQA(true);
+    setMaterialsError(null);
+    try {
+      const created = await generateQuestionAnswers(selectedJob.id, questions);
+      const refreshed = await listApplicationMaterials(selectedJob.id);
+      setApplicationMaterials(refreshed);
+      setSelectedMaterialId(created.id);
+    } catch (error) {
+      if (error instanceof Error) {
+        setMaterialsError(error.message);
+      } else {
+        setMaterialsError("Failed to generate application Q&A.");
+      }
+    } finally {
+      setGeneratingQA(false);
+    }
+  }
+
+  const selectedMaterial =
+    applicationMaterials.find((item) => item.id === selectedMaterialId) ?? null;
 
   const filteredJobs = jobs.filter((job) => {
     const query = search.trim().toLowerCase();
@@ -413,6 +516,98 @@ export function JobsPageClient() {
                   </div>
                 ) : (
                   <p>No fit analysis generated yet.</p>
+                )}
+              </section>
+
+              <section>
+                <h4>Application Materials</h4>
+                <div style={{ display: "grid", gap: "0.5rem" }}>
+                  <button
+                    disabled={generatingCoverLetter}
+                    onClick={handleGenerateCoverLetter}
+                    type="button"
+                  >
+                    {generatingCoverLetter ? "Generating cover letter..." : "Generate Cover Letter"}
+                  </button>
+
+                  <label
+                    htmlFor="application-questions"
+                    style={{ display: "grid", gap: "0.25rem" }}
+                  >
+                    Application questions (one per line)
+                  </label>
+                  <textarea
+                    id="application-questions"
+                    onChange={(event) => setQaQuestionsInput(event.target.value)}
+                    placeholder="Why are you interested in this role?"
+                    rows={4}
+                    value={qaQuestionsInput}
+                  />
+                  <button disabled={generatingQA} onClick={handleGenerateQA} type="button">
+                    {generatingQA ? "Generating Q&A..." : "Generate Q&A Drafts"}
+                  </button>
+                </div>
+
+                {loadingMaterials ? <p>Loading application materials...</p> : null}
+                {materialsError ? <p role="alert">{materialsError}</p> : null}
+
+                {applicationMaterials.length ? (
+                  <>
+                    <label htmlFor="material-version" style={{ display: "grid", gap: "0.25rem" }}>
+                      Saved drafts
+                    </label>
+                    <select
+                      id="material-version"
+                      onChange={(event) => setSelectedMaterialId(Number(event.target.value))}
+                      value={selectedMaterialId ?? ""}
+                    >
+                      {applicationMaterials.map((material) => (
+                        <option key={material.id} value={material.id}>
+                          {material.artifact_type === "cover_letter"
+                            ? "Cover letter"
+                            : "Application Q&A"}{" "}
+                          v{material.version} ({new Date(material.created_at).toLocaleString()})
+                        </option>
+                      ))}
+                    </select>
+
+                    {selectedMaterial ? (
+                      <article
+                        style={{
+                          border: "1px solid #ddd",
+                          marginTop: "0.5rem",
+                          padding: "0.75rem",
+                        }}
+                      >
+                        <p>
+                          <strong>Type:</strong>{" "}
+                          {selectedMaterial.artifact_type === "cover_letter"
+                            ? "Cover letter"
+                            : "Application Q&A"}
+                        </p>
+                        <p>
+                          <strong>Version:</strong> {selectedMaterial.version}
+                        </p>
+                        <p>
+                          <strong>Generated with:</strong> {selectedMaterial.provider}/
+                          {selectedMaterial.model}
+                        </p>
+                        <pre
+                          style={{
+                            background: "#fafafa",
+                            borderRadius: 4,
+                            overflowX: "auto",
+                            padding: "0.75rem",
+                            whiteSpace: "pre-wrap",
+                          }}
+                        >
+                          {selectedMaterial.content}
+                        </pre>
+                      </article>
+                    ) : null}
+                  </>
+                ) : (
+                  <p>No application materials generated yet.</p>
                 )}
               </section>
 

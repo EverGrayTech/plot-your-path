@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -13,6 +14,7 @@ from sqlalchemy.pool import StaticPool
 
 from backend.database import Base, get_db
 from backend.main import app
+from backend.models.application_material import ApplicationMaterial
 from backend.models.company import Company
 from backend.models.role import Role
 from backend.models.role_fit_analysis import RoleFitAnalysis
@@ -465,6 +467,120 @@ class TestFitAnalysis:
 
         assert response.status_code == 422
         assert "Failed to generate fit analysis" in response.json()["detail"]
+
+
+class TestApplicationMaterials:
+    """Tests for application materials endpoints."""
+
+    def _material_result(self, role_id: int, *, artifact_type: str, version: int = 1):
+        created = datetime.now(UTC)
+        return SimpleNamespace(
+            id=101,
+            role_id=role_id,
+            artifact_type=artifact_type,
+            version=version,
+            content_path=f"applications/{role_id}/{artifact_type}-v{version}.md",
+            questions=["Why this role?"] if artifact_type == "application_qa" else None,
+            provider="openai",
+            model="gpt-4o",
+            prompt_version="prompt-v1",
+            created_at=created,
+        )
+
+    def test_generate_cover_letter_success(self, client, sample_role):
+        fake_material = self._material_result(sample_role.id, artifact_type="cover_letter")
+
+        with (
+            patch(
+                "backend.routers.jobs.ApplicationMaterialsService.generate_cover_letter",
+                return_value=fake_material,
+            ),
+            patch("backend.routers.jobs.file_exists", return_value=True),
+            patch("backend.routers.jobs.load_file", return_value="Dear hiring manager..."),
+        ):
+            response = client.post(f"/api/jobs/{sample_role.id}/application-materials/cover-letter")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["artifact_type"] == "cover_letter"
+        assert data["content"] == "Dear hiring manager..."
+
+    def test_generate_cover_letter_validation_failure(self, client, sample_role):
+        with patch(
+            "backend.routers.jobs.ApplicationMaterialsService.generate_cover_letter",
+            side_effect=ValueError(
+                "Fit analysis is required before generating application materials"
+            ),
+        ):
+            response = client.post(f"/api/jobs/{sample_role.id}/application-materials/cover-letter")
+
+        assert response.status_code == 422
+        assert "Fit analysis is required" in response.json()["detail"]
+
+    def test_generate_question_answers_success(self, client, sample_role):
+        fake_material = self._material_result(sample_role.id, artifact_type="application_qa")
+
+        with (
+            patch(
+                "backend.routers.jobs.ApplicationMaterialsService.generate_question_answers",
+                return_value=fake_material,
+            ),
+            patch("backend.routers.jobs.file_exists", return_value=True),
+            patch("backend.routers.jobs.load_file", return_value="Q: Why?\nA: Because."),
+        ):
+            response = client.post(
+                f"/api/jobs/{sample_role.id}/application-materials/question-answers",
+                json={"questions": ["Why this role?"]},
+            )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["artifact_type"] == "application_qa"
+        assert data["questions"] == ["Why this role?"]
+
+    def test_generate_question_answers_empty_set_returns_422(self, client, sample_role):
+        with patch(
+            "backend.routers.jobs.ApplicationMaterialsService.generate_question_answers",
+            side_effect=ValueError("Question list must contain at least one non-empty question"),
+        ):
+            response = client.post(
+                f"/api/jobs/{sample_role.id}/application-materials/question-answers",
+                json={"questions": []},
+            )
+
+        assert response.status_code == 422
+        assert "Question list" in response.json()["detail"]
+
+    def test_list_materials_returns_saved_versions(self, client, sample_role, db):
+        created = ApplicationMaterial(
+            role_id=sample_role.id,
+            artifact_type="cover_letter",
+            version=1,
+            content_path=f"applications/{sample_role.id}/cover_letter-v1.md",
+            questions=None,
+            provider="openai",
+            model="gpt-4o",
+            prompt_version="cover-letter-v1",
+        )
+        db.add(created)
+        db.commit()
+
+        with (
+            patch("backend.routers.jobs.file_exists", return_value=True),
+            patch("backend.routers.jobs.load_file", return_value="Generated cover letter"),
+        ):
+            response = client.get(f"/api/jobs/{sample_role.id}/application-materials")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data) == 1
+        assert data[0]["artifact_type"] == "cover_letter"
+        assert data[0]["content"] == "Generated cover letter"
+
+    def test_get_material_not_found_returns_404(self, client, sample_role):
+        response = client.get(f"/api/jobs/{sample_role.id}/application-materials/999")
+        assert response.status_code == 404
+        assert response.json()["detail"] == "Application material not found"
 
 
 # ---------------------------------------------------------------------------
