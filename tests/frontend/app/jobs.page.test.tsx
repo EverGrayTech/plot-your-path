@@ -606,4 +606,65 @@ describe("JobsPageClient", () => {
       expect(updateTokenSpy).toHaveBeenCalledWith("job_parsing", "sk-test-0000");
     });
   });
+
+  it("shows pipeline rows and filters by stage with attention indicators", async () => {
+    vi.spyOn(api, "listJobs").mockResolvedValue(jobs);
+    vi.spyOn(api, "listPipeline").mockResolvedValue({
+      counters: {
+        needs_follow_up: 1,
+        overdue_actions: 1,
+        upcoming_deadlines: 1,
+      },
+      items: [
+        {
+          role_id: 2,
+          company: "Beta Co",
+          title: "Engineer",
+          status: "open",
+          interview_stage: "technical",
+          next_action_at: "2026-03-05T10:00:00Z",
+          deadline_at: "2026-03-07T17:00:00Z",
+          needs_attention: true,
+          attention_reasons: ["Overdue next action"],
+          updated_at: "2026-03-04T10:00:00Z",
+        },
+        {
+          role_id: 1,
+          company: "Acme Corp",
+          title: "Developer",
+          status: "submitted",
+          interview_stage: "applied",
+          next_action_at: null,
+          deadline_at: null,
+          needs_attention: false,
+          attention_reasons: [],
+          updated_at: "2026-03-05T10:00:00Z",
+        },
+      ],
+    });
+
+    render(<JobsPageClient />);
+
+    await screen.findByText("Engineer");
+    fireEvent.click(screen.getByRole("button", { name: "Pipeline" }));
+
+    const pipelineHeading = await screen.findByRole("heading", { name: "Application Pipeline" });
+    const pipelineDialog = pipelineHeading.closest("dialog") as HTMLElement;
+    expect(within(pipelineDialog).getByText(/Needs follow-up:/i)).toBeInTheDocument();
+    expect(within(pipelineDialog).getByText(/Overdue next action/i)).toBeInTheDocument();
+    expect(
+      within(pipelineDialog).getByRole("button", { name: /Engineer — Beta Co/i }),
+    ).toBeInTheDocument();
+
+    fireEvent.change(within(pipelineDialog).getByLabelText("Stage"), {
+      target: { value: "applied" },
+    });
+
+    expect(
+      within(pipelineDialog).queryByRole("button", { name: /Engineer — Beta Co/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      within(pipelineDialog).getByRole("button", { name: /Developer — Acme Corp/i }),
+    ).toBeInTheDocument();
+  });
 });
