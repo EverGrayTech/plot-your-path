@@ -542,4 +542,68 @@ describe("JobsPageClient", () => {
 
     expect(await screen.findByText("Dear hiring manager...")).toBeInTheDocument();
   }, 20000);
+
+  it("opens AI settings, shows masked token, and saves updated token", async () => {
+    vi.spyOn(api, "listJobs").mockResolvedValue(jobs);
+    vi.spyOn(api, "listAISettings")
+      .mockResolvedValueOnce([
+        {
+          operation_family: "job_parsing",
+          provider: "openai",
+          model: "gpt-4o",
+          api_key_env: "OPENAI_API_KEY",
+          base_url: null,
+          temperature: 0.1,
+          max_tokens: 4000,
+          has_runtime_token: true,
+          token_masked: "••••••••7890",
+          created_at: "2026-03-07T18:01:00Z",
+          updated_at: "2026-03-07T18:01:00Z",
+        },
+      ])
+      .mockResolvedValueOnce([
+        {
+          operation_family: "job_parsing",
+          provider: "openai",
+          model: "gpt-4o",
+          api_key_env: "OPENAI_API_KEY",
+          base_url: null,
+          temperature: 0.1,
+          max_tokens: 4000,
+          has_runtime_token: true,
+          token_masked: "••••••••0000",
+          created_at: "2026-03-07T18:01:00Z",
+          updated_at: "2026-03-07T18:02:00Z",
+        },
+      ]);
+    const updateTokenSpy = vi.spyOn(api, "updateAISettingToken").mockResolvedValue({
+      operation_family: "job_parsing",
+      provider: "openai",
+      model: "gpt-4o",
+      api_key_env: "OPENAI_API_KEY",
+      base_url: null,
+      temperature: 0.1,
+      max_tokens: 4000,
+      has_runtime_token: true,
+      token_masked: "••••••••0000",
+      created_at: "2026-03-07T18:01:00Z",
+      updated_at: "2026-03-07T18:02:00Z",
+    });
+
+    render(<JobsPageClient />);
+
+    await screen.findByText("Engineer");
+    fireEvent.click(screen.getByRole("button", { name: "AI Settings" }));
+
+    expect(await screen.findByText(/Runtime token:\s*••••••••7890/i)).toBeInTheDocument();
+
+    fireEvent.change(screen.getByPlaceholderText("Paste token"), {
+      target: { value: "sk-test-0000" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save Token" }));
+
+    await waitFor(() => {
+      expect(updateTokenSpy).toHaveBeenCalledWith("job_parsing", "sk-test-0000");
+    });
+  });
 });

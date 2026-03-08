@@ -7,10 +7,12 @@ from dataclasses import dataclass
 
 from sqlalchemy.orm import Session
 
-from backend.config import LLMConfig, ScrapingConfig, llm_config, scraping_config
+from backend.config import LLMConfig, ScrapingConfig, scraping_config
 from backend.models.company import Company
 from backend.models.role import Role
 from backend.models.role_skill import RoleSkill
+from backend.schemas.ai_settings import OperationFamily
+from backend.services.ai_settings import AISettingsService
 from backend.services.llm_service import LLMError, LLMService
 from backend.services.scraper import ScraperError, ScraperService
 from backend.services.skill_extractor import SkillExtractorService
@@ -57,7 +59,9 @@ class JobCaptureService:
         scraping_cfg: ScrapingConfig | None = None,
     ) -> None:
         self.db = db
-        self.llm_cfg = llm_cfg or llm_config
+        self.llm_cfg = llm_cfg or AISettingsService(db).build_llm_config(
+            OperationFamily.JOB_PARSING
+        )
         self.scraping_cfg = scraping_cfg or scraping_config
 
     async def capture_from_url(self, url: str) -> JobCaptureResult:

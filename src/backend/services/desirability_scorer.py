@@ -8,11 +8,12 @@ import json
 
 from sqlalchemy.orm import Session
 
-from backend.config import llm_config
 from backend.models.company import Company
 from backend.models.desirability_factor_config import DesirabilityFactorConfig
 from backend.models.desirability_score_result import DesirabilityScoreResult
 from backend.models.role import Role
+from backend.schemas.ai_settings import OperationFamily
+from backend.services.ai_settings import AISettingsService
 from backend.services.llm_service import LLMService
 
 DESIRABILITY_VERSION = "desirability-v1"
@@ -66,7 +67,9 @@ class DesirabilityScoringService:
 
     def __init__(self, db: Session, llm_service: LLMService | None = None) -> None:
         self.db = db
-        self.llm_service = llm_service or LLMService()
+        self.llm_service = llm_service or LLMService(
+            config=AISettingsService(db).build_llm_config(OperationFamily.DESIRABILITY_SCORING)
+        )
 
     @staticmethod
     def _normalize_weights(factors: list[DesirabilityFactorConfig]) -> list[float]:
@@ -240,8 +243,8 @@ class DesirabilityScoringService:
             role_id=role_id,
             total_score=round(weighted_total, 2),
             factor_breakdown=breakdown,
-            provider=llm_config.provider,
-            model=llm_config.model,
+            provider=self.llm_service.config.provider,
+            model=self.llm_service.config.model,
             version=DESIRABILITY_VERSION,
         )
         self.db.add(result)

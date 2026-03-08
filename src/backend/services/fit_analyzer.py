@@ -7,12 +7,14 @@ from pathlib import Path
 
 from sqlalchemy.orm import Session
 
-from backend.config import llm_config, settings
+from backend.config import settings
 from backend.models.role import Role
 from backend.models.role_fit_analysis import RoleFitAnalysis
 from backend.models.role_skill import RoleSkill
 from backend.models.skill import Skill
+from backend.schemas.ai_settings import OperationFamily
 from backend.schemas.job import FitRecommendation
+from backend.services.ai_settings import AISettingsService
 from backend.services.llm_service import LLMService
 from backend.utils.file_storage import file_exists, load_file
 
@@ -25,7 +27,9 @@ class FitAnalysisService:
     def __init__(self, db: Session, llm_service: LLMService | None = None) -> None:
         """Initialize fit analysis service."""
         self.db = db
-        self.llm_service = llm_service or LLMService()
+        self.llm_service = llm_service or LLMService(
+            config=AISettingsService(db).build_llm_config(OperationFamily.APPLICATION_GENERATION)
+        )
 
     def _build_rationale_prompt(
         self,
@@ -201,8 +205,8 @@ class FitAnalysisService:
             covered_preferred_skills=covered_preferred,
             missing_preferred_skills=missing_preferred,
             rationale=rationale,
-            provider=llm_config.provider,
-            model=llm_config.model,
+            provider=self.llm_service.config.provider,
+            model=self.llm_service.config.model,
             version=FIT_ANALYSIS_VERSION,
         )
         self.db.add(analysis)

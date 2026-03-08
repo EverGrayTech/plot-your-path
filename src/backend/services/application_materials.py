@@ -8,10 +8,12 @@ from pathlib import Path
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from backend.config import llm_config, settings
+from backend.config import settings
 from backend.models.application_material import ApplicationMaterial
 from backend.models.role import Role
+from backend.schemas.ai_settings import OperationFamily
 from backend.schemas.job import ApplicationArtifactType
+from backend.services.ai_settings import AISettingsService
 from backend.services.fit_analyzer import FitAnalysisService
 from backend.services.llm_service import LLMService
 from backend.utils.file_storage import file_exists, load_file, save_file
@@ -25,7 +27,9 @@ class ApplicationMaterialsService:
 
     def __init__(self, db: Session, llm_service: LLMService | None = None) -> None:
         self.db = db
-        self.llm_service = llm_service or LLMService()
+        self.llm_service = llm_service or LLMService(
+            config=AISettingsService(db).build_llm_config(OperationFamily.APPLICATION_GENERATION)
+        )
 
     def _build_cover_letter_prompt(self, fit_rationale: str, profile_text: str, role: Role) -> str:
         return (
@@ -167,8 +171,8 @@ class ApplicationMaterialsService:
             version=version,
             content_path=stored_path,
             questions=questions,
-            provider=llm_config.provider,
-            model=llm_config.model,
+            provider=self.llm_service.config.provider,
+            model=self.llm_service.config.model,
             prompt_version=prompt_version,
         )
         self.db.add(material)

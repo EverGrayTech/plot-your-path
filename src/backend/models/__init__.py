@@ -1,5 +1,6 @@
 """Database models package."""
 
+from backend.models.ai_operation_setting import AIOperationSetting
 from backend.models.application_material import ApplicationMaterial
 from backend.models.company import Company
 from backend.models.desirability_factor_config import DesirabilityFactorConfig
@@ -12,6 +13,7 @@ from backend.models.skill import Skill
 
 __all__ = [
     "ApplicationMaterial",
+    "AIOperationSetting",
     "Company",
     "DesirabilityFactorConfig",
     "DesirabilityScoreResult",

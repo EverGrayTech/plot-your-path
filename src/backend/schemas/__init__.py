@@ -1,5 +1,13 @@
 """Pydantic schemas package."""
 
+from backend.schemas.ai_settings import (
+    AISetting,
+    AISettingHealth,
+    AISettingTokenClearResponse,
+    AISettingTokenUpdate,
+    AISettingUpdate,
+    OperationFamily,
+)
 from backend.schemas.company import Company, CompanyBase, CompanyCreate
 from backend.schemas.desirability import (
     DesirabilityFactor,
@@ -31,6 +39,12 @@ __all__ = [
     "Company",
     "CompanyBase",
     "CompanyCreate",
+    "AISetting",
+    "AISettingHealth",
+    "AISettingTokenClearResponse",
+    "AISettingTokenUpdate",
+    "AISettingUpdate",
+    "OperationFamily",
     "DesirabilityFactor",
     "DesirabilityFactorBase",
     "DesirabilityFactorCreate",
