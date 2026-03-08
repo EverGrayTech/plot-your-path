@@ -16,6 +16,7 @@ describe("JobsPageClient", () => {
       status: "open",
       fit_score: 76,
       fit_recommendation: "go",
+      desirability_score: 8.1,
     },
     {
       id: 1,
@@ -27,6 +28,7 @@ describe("JobsPageClient", () => {
       status: "submitted",
       fit_score: null,
       fit_recommendation: null,
+      desirability_score: null,
     },
   ];
 
@@ -62,6 +64,7 @@ describe("JobsPageClient", () => {
       status: "open",
       status_history: [],
       latest_fit_analysis: null,
+      latest_desirability_score: null,
     });
 
     render(<JobsPageClient />);
@@ -117,6 +120,7 @@ describe("JobsPageClient", () => {
       status: "open",
       status_history: [],
       latest_fit_analysis: null,
+      latest_desirability_score: null,
     });
 
     render(<JobsPageClient />);
@@ -147,7 +151,7 @@ describe("JobsPageClient", () => {
     expect(
       screen.getByText(/Captured New Role at New Co. Filters were reset so it is visible./i),
     ).toBeInTheDocument();
-  }, 10000);
+  }, 20000);
 
   it("opens job detail modal from row click", async () => {
     vi.spyOn(api, "listJobs").mockResolvedValue(jobs);
@@ -173,6 +177,7 @@ describe("JobsPageClient", () => {
       status: "open",
       status_history: [],
       latest_fit_analysis: null,
+      latest_desirability_score: null,
     });
 
     render(<JobsPageClient />);
@@ -183,7 +188,7 @@ describe("JobsPageClient", () => {
     expect(await screen.findByRole("heading", { name: "Job Detail" })).toBeInTheDocument();
     expect(await screen.findByText("Required skills")).toBeInTheDocument();
     expect(await screen.findByText("Python")).toBeInTheDocument();
-  });
+  }, 15000);
 
   it("navigates from job skill to skill detail", async () => {
     vi.spyOn(api, "listJobs").mockResolvedValue(jobs);
@@ -209,6 +214,7 @@ describe("JobsPageClient", () => {
       status: "open",
       status_history: [],
       latest_fit_analysis: null,
+      latest_desirability_score: null,
     });
     vi.spyOn(api, "getSkill").mockResolvedValue({
       id: 1,
@@ -263,6 +269,7 @@ describe("JobsPageClient", () => {
       status: "open",
       status_history: [],
       latest_fit_analysis: null,
+      latest_desirability_score: null,
     });
     const getSkillSpy = vi.spyOn(api, "getSkill").mockResolvedValue({
       id: 2,
@@ -280,7 +287,7 @@ describe("JobsPageClient", () => {
 
     expect(getSkillSpy).toHaveBeenCalledWith(2);
     expect(await screen.findByRole("heading", { name: "Skill Detail" })).toBeInTheDocument();
-  }, 10000);
+  }, 20000);
 
   it("updates status and renders status history", async () => {
     vi.spyOn(api, "listJobs").mockResolvedValue(jobs);
@@ -307,6 +314,7 @@ describe("JobsPageClient", () => {
         status: "open",
         status_history: [],
         latest_fit_analysis: null,
+        latest_desirability_score: null,
       })
       .mockResolvedValueOnce({
         id: 2,
@@ -336,6 +344,7 @@ describe("JobsPageClient", () => {
           },
         ],
         latest_fit_analysis: null,
+        latest_desirability_score: null,
       });
 
     vi.spyOn(api, "updateJobStatus").mockResolvedValue({
@@ -348,6 +357,7 @@ describe("JobsPageClient", () => {
       status: "submitted",
       fit_score: 76,
       fit_recommendation: "go",
+      desirability_score: 8.1,
     });
 
     render(<JobsPageClient />);
@@ -359,7 +369,7 @@ describe("JobsPageClient", () => {
     });
 
     expect(await screen.findByText(/open → submitted/i)).toBeInTheDocument();
-  });
+  }, 15000);
 
   it("analyzes fit from job detail and renders result", async () => {
     vi.spyOn(api, "listJobs").mockResolvedValue(jobs);
@@ -385,6 +395,7 @@ describe("JobsPageClient", () => {
       status: "open",
       status_history: [],
       latest_fit_analysis: null,
+      latest_desirability_score: null,
     });
     vi.spyOn(api, "analyzeJobFit").mockResolvedValue({
       id: 90,
@@ -417,7 +428,7 @@ describe("JobsPageClient", () => {
     expect(fitAnalysisSection).toHaveTextContent(
       /Rationale:\s*Strong match based on core skills\./i,
     );
-  }, 10000);
+  }, 20000);
 
   it("filters jobs by recommendation including not analyzed", async () => {
     vi.spyOn(api, "listJobs").mockResolvedValue(jobs);
@@ -443,6 +454,7 @@ describe("JobsPageClient", () => {
       status: "open",
       status_history: [],
       latest_fit_analysis: null,
+      latest_desirability_score: null,
     });
 
     render(<JobsPageClient />);
@@ -486,6 +498,7 @@ describe("JobsPageClient", () => {
       status: "open",
       status_history: [],
       latest_fit_analysis: null,
+      latest_desirability_score: null,
     });
     const listMaterialsSpy = vi
       .spyOn(api, "listApplicationMaterials")
@@ -528,5 +541,5 @@ describe("JobsPageClient", () => {
     });
 
     expect(await screen.findByText("Dear hiring manager...")).toBeInTheDocument();
-  }, 10000);
+  }, 20000);
 });

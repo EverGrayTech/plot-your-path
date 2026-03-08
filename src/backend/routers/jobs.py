@@ -12,11 +12,13 @@ from sqlalchemy.orm import Session
 from backend.database import get_db
 from backend.models.application_material import ApplicationMaterial as ApplicationMaterialModel
 from backend.models.company import Company
+from backend.models.desirability_score_result import DesirabilityScoreResult
 from backend.models.role import Role
 from backend.models.role_fit_analysis import RoleFitAnalysis
 from backend.models.role_skill import RoleSkill
 from backend.models.role_status_change import RoleStatusChange as RoleStatusChangeModel
 from backend.schemas.company import Company as CompanySchema
+from backend.schemas.desirability import DesirabilityScore
 from backend.schemas.job import (
     ApplicationMaterial,
     ApplicationMaterialQARequest,
@@ -30,6 +32,7 @@ from backend.schemas.job import (
     SalaryInfo,
 )
 from backend.services.application_materials import ApplicationMaterialsService
+from backend.services.desirability_scorer import DesirabilityScoringService
 from backend.services.fit_analyzer import FitAnalysisService
 from backend.services.job_capture import (
     JobCaptureLLMError,
@@ -126,6 +129,21 @@ def _to_application_material_schema(material: ApplicationMaterialModel) -> Appli
     )
 
 
+def _to_desirability_score_schema(score: DesirabilityScoreResult) -> DesirabilityScore:
+    """Convert ORM desirability row to response schema."""
+    return DesirabilityScore(
+        id=score.id,
+        company_id=score.company_id,
+        role_id=score.role_id,
+        total_score=score.total_score,
+        factor_breakdown=list(score.factor_breakdown or []),
+        provider=score.provider,
+        model=score.model,
+        version=score.version,
+        created_at=score.created_at,
+    )
+
+
 @router.get("/jobs", response_model=list[JobListItem])
 def list_jobs(db: Annotated[Session, Depends(get_db)]) -> list[JobListItem]:
     """
@@ -150,6 +168,12 @@ def list_jobs(db: Annotated[Session, Depends(get_db)]) -> list[JobListItem]:
             .order_by(RoleFitAnalysis.created_at.desc(), RoleFitAnalysis.id.desc())
             .first()
         )
+        latest_desirability = (
+            db.query(DesirabilityScoreResult)
+            .filter(DesirabilityScoreResult.company_id == company.id)
+            .order_by(DesirabilityScoreResult.created_at.desc(), DesirabilityScoreResult.id.desc())
+            .first()
+        )
         result.append(
             JobListItem(
                 id=role.id,
@@ -161,6 +185,9 @@ def list_jobs(db: Annotated[Session, Depends(get_db)]) -> list[JobListItem]:
                 status=RoleStatus(role.status),
                 fit_score=latest_fit.fit_score if latest_fit else None,
                 fit_recommendation=latest_fit.recommendation if latest_fit else None,
+                desirability_score=(
+                    latest_desirability.total_score if latest_desirability else None
+                ),
             )
         )
     return result
@@ -195,6 +222,7 @@ def get_job(role_id: int, db: Annotated[Session, Depends(get_db)]) -> JobDetail:
     extractor = SkillExtractorService(db)
     skills = extractor.get_skills_for_role(role_id)
     latest_fit = FitAnalysisService(db).get_latest_for_role(role_id)
+    latest_desirability = DesirabilityScoringService(db).get_latest_for_role(role_id)
 
     return JobDetail(
         id=role.id,
@@ -213,7 +241,49 @@ def get_job(role_id: int, db: Annotated[Session, Depends(get_db)]) -> JobDetail:
         status=RoleStatus(role.status),
         status_history=_build_status_history(role.id, db),
         latest_fit_analysis=_to_fit_analysis_schema(latest_fit) if latest_fit else None,
+        latest_desirability_score=(
+            _to_desirability_score_schema(latest_desirability) if latest_desirability else None
+        ),
     )
+
+
+@router.post("/jobs/{role_id}/desirability-score", response_model=DesirabilityScore)
+def score_job_desirability(
+    role_id: int,
+    db: Annotated[Session, Depends(get_db)],
+    force_refresh: bool = False,
+) -> DesirabilityScore:
+    """Generate (or fetch cached) desirability score for a role."""
+    service = DesirabilityScoringService(db)
+    try:
+        score = service.generate_for_role(role_id, force_refresh=force_refresh)
+        return _to_desirability_score_schema(score)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Failed to generate desirability score: {exc}",
+        ) from exc
+
+
+@router.post("/jobs/{role_id}/desirability-score/refresh", response_model=DesirabilityScore)
+def refresh_job_desirability(
+    role_id: int,
+    db: Annotated[Session, Depends(get_db)],
+) -> DesirabilityScore:
+    """Force recomputation of desirability score for a role."""
+    service = DesirabilityScoringService(db)
+    try:
+        score = service.generate_for_role(role_id, force_refresh=True)
+        return _to_desirability_score_schema(score)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Failed to refresh desirability score: {exc}",
+        ) from exc
 
 
 @router.post("/jobs/{role_id}/fit-analysis", response_model=FitAnalysis)

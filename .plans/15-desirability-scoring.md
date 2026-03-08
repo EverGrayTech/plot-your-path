@@ -21,31 +21,31 @@ Introduce first-class desirability scoring so role/company prioritization is vis
 ## Implementation Checklist
 
 ### 1. Data + Config Model
-- [ ] Add scoring-config persistence for factor name, prompt, weight, active flag, and ordering
-- [ ] Add score-result persistence for company/role with per-factor breakdown + total
+- [x] Add scoring-config persistence for factor name, prompt, weight, active flag, and ordering
+- [x] Add score-result persistence for company/role with per-factor breakdown + total
 
 ### 2. Backend Scoring Pipeline
-- [ ] Add endpoint/service to compute desirability score from active factors
-- [ ] Implement deterministic weighted-total calculation with validation on weight ranges
-- [ ] Persist reasoning snippets/traces per factor for transparency
-- [ ] Add refresh/recompute action for stale scores
+- [x] Add endpoint/service to compute desirability score from active factors
+- [x] Implement deterministic weighted-total calculation with validation on weight ranges
+- [x] Persist reasoning snippets/traces per factor for transparency
+- [x] Add refresh/recompute action for stale scores
 
 ### 3. Factor Settings APIs
-- [ ] Add CRUD endpoints for desirability factors and weights
+- [x] Add CRUD endpoints for desirability factors and weights
 
 ### 4. Frontend: Prioritization + Factor Settings UX
-- [ ] Add desirability column/sort/filter on Jobs list and company/job detail displays
-- [ ] Add settings dialog/page for factor management (edit/add/remove/reorder)
-- [ ] Show score breakdown and factor rationale in detail view
-- [ ] Add optional Smart Sort (`fit + desirability`) with documented weighting defaults
+- [x] Add desirability column/sort/filter on Jobs list and company/job detail displays
+- [x] Add settings dialog/page for factor management (edit/add/remove/reorder)
+- [x] Show score breakdown and factor rationale in detail view
+- [x] Add optional Smart Sort (`fit + desirability`) with documented weighting defaults
 
 ### 5. Tests + Verification
-- [ ] Add backend tests for scoring math and factor CRUD behavior
-- [ ] Add frontend tests for settings flows and desirability sort/filter behavior
-- [ ] Verify backward compatibility when no scores/settings are configured yet
+- [x] Add backend tests for scoring math and factor CRUD behavior
+- [x] Add frontend tests for settings flows and desirability sort/filter behavior
+- [x] Verify backward compatibility when no scores/settings are configured yet
 
 ## Acceptance Criteria
-- [ ] User can view desirability score and factor breakdown for scored jobs
-- [ ] User can edit factor prompts/weights and trigger recomputation
-- [ ] User can optionally use Smart Sort to rank roles by fit + desirability
-- [ ] Jobs can be prioritized using desirability in-app
+- [x] User can view desirability score and factor breakdown for scored jobs
+- [x] User can edit factor prompts/weights and trigger recomputation
+- [x] User can optionally use Smart Sort to rank roles by fit + desirability
+- [x] Jobs can be prioritized using desirability in-app

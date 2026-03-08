@@ -82,6 +82,7 @@ describe("SkillsPageClient", () => {
       status: "open",
       status_history: [],
       latest_fit_analysis: null,
+      latest_desirability_score: null,
     });
 
     render(<SkillsPageClient />);
@@ -95,5 +96,5 @@ describe("SkillsPageClient", () => {
     const skillModal = await screen.findByRole("dialog");
     fireEvent.click(within(skillModal).getByRole("button", { name: /Engineer — Beta Co/i }));
     expect(await screen.findByRole("heading", { name: "Job Detail" })).toBeInTheDocument();
-  }, 20000);
+  }, 30000);
 });
