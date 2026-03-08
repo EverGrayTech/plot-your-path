@@ -3,20 +3,20 @@
 from __future__ import annotations
 
 import asyncio
-from pathlib import Path
 
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from backend.config import settings
 from backend.models.application_material import ApplicationMaterial
 from backend.models.role import Role
 from backend.schemas.ai_settings import OperationFamily
+from backend.schemas.career_evidence import EvidenceQuery
 from backend.schemas.job import ApplicationArtifactType
 from backend.services.ai_settings import AISettingsService
+from backend.services.career_evidence import CareerEvidenceService
 from backend.services.fit_analyzer import FitAnalysisService
 from backend.services.llm_service import LLMService
-from backend.utils.file_storage import file_exists, load_file, save_file
+from backend.utils.file_storage import save_file
 
 COVER_LETTER_PROMPT_VERSION = "cover-letter-v1"
 QA_PROMPT_VERSION = "application-qa-v1"
@@ -130,18 +130,12 @@ class ApplicationMaterialsService:
         return latest_fit.rationale
 
     def _load_profile_text(self) -> str:
-        profile_path = settings.candidate_profile_path
-        if file_exists(profile_path):
-            content = load_file(profile_path).strip()
-            if content:
-                return content
-
-        fallback_resume_path = str(Path(settings.data_root) / "resume.md")
-        if file_exists(fallback_resume_path):
-            content = load_file(fallback_resume_path).strip()
-            if content:
-                return content
-
+        evidence_service = CareerEvidenceService(self.db)
+        profile_text = evidence_service.load_context_text(
+            EvidenceQuery(limit=8, min_results=3)
+        ).strip()
+        if profile_text:
+            return profile_text
         raise ValueError("Candidate profile source is missing or empty")
 
     def _next_version(self, artifact_type: ApplicationArtifactType, role_id: int) -> int:

@@ -8,6 +8,13 @@ from backend.schemas.ai_settings import (
     AISettingUpdate,
     OperationFamily,
 )
+from backend.schemas.career_evidence import (
+    EvidenceQuery,
+    EvidenceRetrievalResult,
+    EvidenceSourceType,
+    EvidenceUnit,
+    JournalEvidenceEntry,
+)
 from backend.schemas.company import Company, CompanyBase, CompanyCreate
 from backend.schemas.desirability import (
     DesirabilityFactor,
@@ -47,6 +54,11 @@ __all__ = [
     "Company",
     "CompanyBase",
     "CompanyCreate",
+    "EvidenceQuery",
+    "EvidenceRetrievalResult",
+    "EvidenceSourceType",
+    "EvidenceUnit",
+    "JournalEvidenceEntry",
     "AISetting",
     "AISettingHealth",
     "AISettingTokenClearResponse",

@@ -17,24 +17,24 @@ Create a minimal, generic career-evidence interface that can ingest resume-deriv
 ## Implementation Checklist
 
 ### 1. Shared Evidence Contract
-- [ ] Define minimal evidence entity: source, text/body, tags, timeframe, provenance metadata
-- [ ] Define stable retrieval interface for downstream prompt builders
-- [ ] Add version/provenance markers to support future re-ingestion
+- [x] Define minimal evidence entity: source, text/body, tags, timeframe, provenance metadata
+- [x] Define stable retrieval interface for downstream prompt builders
+- [x] Add version/provenance markers to support future re-ingestion
 
 ### 2. Ingestion Adapters (Minimal)
-- [ ] Add adapter for `resume.md` import into evidence units
-- [ ] Add adapter interface for journal entries to map into same evidence contract
-- [ ] Keep adapters idempotent and safe to re-run
+- [x] Add adapter for `resume.md` import into evidence units
+- [x] Add adapter interface for journal entries to map into same evidence contract
+- [x] Keep adapters idempotent and safe to re-run
 
 ### 3. Retrieval Utilities
-- [ ] Add utility methods to fetch evidence by skills/tags/timeframe/relevance
-- [ ] Add deterministic fallback behavior when evidence is sparse
+- [x] Add utility methods to fetch evidence by skills/tags/timeframe/relevance
+- [x] Add deterministic fallback behavior when evidence is sparse
 
 ### 4. Tests + Verification
-- [ ] Add tests for evidence model validation and adapter idempotency
-- [ ] Add tests for retrieval/filter behavior across mixed source types
+- [x] Add tests for evidence model validation and adapter idempotency
+- [x] Add tests for retrieval/filter behavior across mixed source types
 
 ## Acceptance Criteria
-- [ ] Resume and journal content can be represented through one shared minimal evidence interface
-- [ ] Downstream plans can depend on this interface without bespoke source handling
-- [ ] Schema remains intentionally lightweight and extensible
+- [x] Resume and journal content can be represented through one shared minimal evidence interface
+- [x] Downstream plans can depend on this interface without bespoke source handling
+- [x] Schema remains intentionally lightweight and extensible
