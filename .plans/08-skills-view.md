@@ -1,4 +1,4 @@
-# Iteration 08: Skills View for Captured Skill Analysis
+# Plan: Skills View for Captured Skill Analysis
 
 ## Objective
 Provide a dedicated `/skills` view focused on exploring extracted skills and usage frequency, with simple search/sort and modal detail behavior.

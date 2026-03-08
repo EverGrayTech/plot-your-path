@@ -1,4 +1,4 @@
-# Iteration 09: Bidirectional Job ↔ Skill Navigation
+# Plan: Bidirectional Job ↔ Skill Navigation
 
 ## Objective
 Connect the Jobs and Skills workflows by enabling modal-based bidirectional navigation:

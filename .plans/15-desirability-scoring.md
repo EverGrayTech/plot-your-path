@@ -1,4 +1,4 @@
-# Iteration XX: Desirability Scoring Foundation
+# Plan: Desirability Scoring Foundation
 
 ## Objective
 Introduce first-class desirability scoring so role/company prioritization is visible, explainable, and composable with fit.
@@ -13,7 +13,7 @@ Introduce first-class desirability scoring so role/company prioritization is vis
 - Factor definitions/prompts/weights are user-editable
 - Dynamic add/remove of factors is supported in a constrained MVP form (no advanced formula language)
 - Scores are shown with traceable breakdown (factor scores + weighted total)
-- Token/model settings and cost controls are explicitly out of scope here (see dedicated XX plans)
+- Token/model settings and cost controls are explicitly out of scope here (see dedicated plans)
 
 ## Prerequisites
 - `13-application-fit-analysis.md` (canonical fit signal)

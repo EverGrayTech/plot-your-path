@@ -1,4 +1,4 @@
-# Iteration XX: Application Ops Tracking (Pipeline Management)
+# Plan: Application Ops Tracking (Pipeline Management)
 
 ## Objective
 Add a dedicated application-operations workflow so active job hunt execution (deadlines, follow-ups, contacts, interview stages) is managed inside the app.
@@ -15,7 +15,7 @@ Add a dedicated application-operations workflow so active job hunt execution (de
 - Includes reminders as in-app indicators first (no external notifications integration)
 
 ## Prerequisites
-- `10-job-status-tracking-iteration.md`
+- `10-job-status-tracking.md`
 
 ## Implementation Checklist
 

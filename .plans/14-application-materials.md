@@ -1,4 +1,4 @@
-# Iteration 14: Application Materials MVP (Cover Letter + Application Q&A)
+# Plan: Application Materials MVP (Cover Letter + Application Q&A)
 
 ## Objective
 Replace the external chat workflow for application writing by generating role-tailored cover letters and application-question answers directly in-app.

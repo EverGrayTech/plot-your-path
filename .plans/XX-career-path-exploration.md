@@ -1,4 +1,4 @@
-# Iteration 19: Career Path Exploration (What-If Planning)
+# Plan: Career Path Exploration (What-If Planning)
 
 ## Objective
 Enable forward-looking career planning by suggesting plausible next-role pathways with visible trade-offs in desirability, compensation trajectory, and skill-gap effort.
@@ -16,8 +16,8 @@ Enable forward-looking career planning by suggesting plausible next-role pathway
 
 ## Prerequisites
 - `13-application-fit-analysis.md`
-- `XX-desirability-scoring-and-settings-foundation.md`
-- `XX-career-evidence-foundation.md`
+- `15-desirability-scoring.md`
+- `XX-career-evidence.md`
 
 ## Implementation Checklist
 

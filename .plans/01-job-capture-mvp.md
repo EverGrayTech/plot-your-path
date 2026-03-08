@@ -1,4 +1,4 @@
-# Plan: Phase 1 - Job Capture & Storage Implementation
+# Plan: Job Capture & Storage Implementation
 
 ## Overview
 

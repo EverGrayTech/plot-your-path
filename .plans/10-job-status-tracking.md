@@ -1,4 +1,4 @@
-# Iteration 10: Job Status Tracking + Status History Audit
+# Plan: Job Status Tracking + Status History Audit
 
 ## Objective
 Add a full status-management workflow so captured jobs can move through application stages and retain an auditable status history visible from job detail.

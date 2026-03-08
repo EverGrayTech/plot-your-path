@@ -1,4 +1,4 @@
-# Iteration XX: Interview Prep Pack
+# Plan: Interview Prep Pack
 
 ## Objective
 Deliver a dedicated interview-preparation workflow with role-targeted talking points, likely question coverage, and reusable story drafts.
@@ -18,8 +18,8 @@ Deliver a dedicated interview-preparation workflow with role-targeted talking po
 - Mock-interview simulation is out of scope for this iteration
 
 ## Prerequisites
-- `14-application-materials-mvp.md`
-- `XX-career-evidence-foundation.md`
+- `14-application-materials.md`
+- `XX-career-evidence.md`
 
 ## Implementation Checklist
 

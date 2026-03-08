@@ -1,4 +1,4 @@
-# Iteration XX: Career Evidence Foundation (Minimal Shared Interface)
+# Plan: Career Evidence Foundation (Minimal Shared Interface)
 
 ## Objective
 Create a minimal, generic career-evidence interface that can ingest resume-derived content and future journal entries without locking the product into an over-modeled schema.

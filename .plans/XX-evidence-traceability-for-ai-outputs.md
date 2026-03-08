@@ -1,4 +1,4 @@
-# Iteration XX: Evidence Traceability for AI Outputs
+# Plan: Evidence Traceability for AI Outputs
 
 ## Objective
 Make generated content auditable by showing which source evidence informed each major output segment (fit rationale, cover letter claims, Q&A answers, interview prep statements).
@@ -15,8 +15,8 @@ Make generated content auditable by showing which source evidence informed each 
 - Does not require full semantic provenance graph initially
 
 ## Prerequisites
-- `XX-career-evidence-foundation.md`
-- `14-application-materials-mvp.md`
+- `14-application-materials.md`
+- `XX-career-evidence.md`
 
 ## Implementation Checklist
 
