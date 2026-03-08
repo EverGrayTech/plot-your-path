@@ -7,6 +7,8 @@ import {
   type ApplicationMaterial,
   type DesirabilityFactor,
   type FitRecommendation,
+  type InterviewPrepPack,
+  type InterviewPrepSectionKey,
   type InterviewStage,
   type JobDetail,
   type JobListItem,
@@ -19,6 +21,7 @@ import {
   createDesirabilityFactor,
   deleteDesirabilityFactor,
   generateCoverLetter,
+  generateInterviewPrepPack,
   generateQuestionAnswers,
   getJob,
   getSkill,
@@ -26,14 +29,17 @@ import {
   listAISettings,
   listApplicationMaterials,
   listDesirabilityFactors,
+  listInterviewPrepPacks,
   listJobs,
   listPipeline,
   refreshDesirabilityScore,
+  regenerateInterviewPrepSection,
   reorderDesirabilityFactors,
   scoreJobDesirability,
   updateAISetting,
   updateAISettingToken,
   updateDesirabilityFactor,
+  updateInterviewPrepPack,
   updateInterviewStage,
   updateJobStatus,
   updateNextAction,
@@ -92,6 +98,23 @@ function toLocalInputValue(isoString: string | null): string {
   return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
 }
 
+function interviewPrepToMarkdown(pack: InterviewPrepPack): string {
+  const sections = [
+    { key: "likely_questions", title: "Likely Questions" },
+    { key: "talking_points", title: "Talking Points" },
+    { key: "star_stories", title: "STAR Story Draft Suggestions" },
+  ] as const;
+
+  const lines: string[] = ["# Interview Prep Pack"];
+  for (const section of sections) {
+    lines.push(`\n## ${section.title}`);
+    for (const item of pack.sections[section.key]) {
+      lines.push(`- ${item}`);
+    }
+  }
+  return `${lines.join("\n")}\n`;
+}
+
 export function JobsPageClient() {
   const [jobs, setJobs] = useState<JobListItem[]>([]);
   const [loadingJobs, setLoadingJobs] = useState(true);
@@ -122,6 +145,18 @@ export function JobsPageClient() {
   const [materialsError, setMaterialsError] = useState<string | null>(null);
   const [generatingCoverLetter, setGeneratingCoverLetter] = useState(false);
   const [generatingQA, setGeneratingQA] = useState(false);
+  const [generatingInterviewPrep, setGeneratingInterviewPrep] = useState(false);
+  const [interviewPrepPacks, setInterviewPrepPacks] = useState<InterviewPrepPack[]>([]);
+  const [interviewPrepLoading, setInterviewPrepLoading] = useState(false);
+  const [interviewPrepError, setInterviewPrepError] = useState<string | null>(null);
+  const [selectedInterviewPrepId, setSelectedInterviewPrepId] = useState<number | null>(null);
+  const [editingLikelyQuestions, setEditingLikelyQuestions] = useState("");
+  const [editingTalkingPoints, setEditingTalkingPoints] = useState("");
+  const [editingStarStories, setEditingStarStories] = useState("");
+  const [savingInterviewPrep, setSavingInterviewPrep] = useState(false);
+  const [regeneratingSection, setRegeneratingSection] = useState<InterviewPrepSectionKey | null>(
+    null,
+  );
   const [scoringDesirability, setScoringDesirability] = useState(false);
   const [desirabilityError, setDesirabilityError] = useState<string | null>(null);
   const [qaQuestionsInput, setQaQuestionsInput] = useState("");
@@ -424,6 +459,9 @@ export function JobsPageClient() {
       setApplicationMaterials([]);
       setSelectedMaterialId(null);
       setMaterialsError(null);
+      setInterviewPrepPacks([]);
+      setSelectedInterviewPrepId(null);
+      setInterviewPrepError(null);
       return;
     }
 
@@ -452,6 +490,52 @@ export function JobsPageClient() {
 
     fetchMaterials();
   }, [selectedRoleId]);
+
+  useEffect(() => {
+    if (!selectedRoleId) {
+      return;
+    }
+
+    const fetchInterviewPrepPacks = async () => {
+      setInterviewPrepLoading(true);
+      setInterviewPrepError(null);
+      try {
+        const response = await listInterviewPrepPacks(selectedRoleId);
+        setInterviewPrepPacks(response);
+        setSelectedInterviewPrepId((previous) => {
+          if (previous && response.some((item) => item.id === previous)) {
+            return previous;
+          }
+          return response[0]?.id ?? null;
+        });
+      } catch (error) {
+        if (error instanceof Error) {
+          setInterviewPrepError(error.message);
+        } else {
+          setInterviewPrepError("Failed to load interview prep packs.");
+        }
+      } finally {
+        setInterviewPrepLoading(false);
+      }
+    };
+
+    fetchInterviewPrepPacks();
+  }, [selectedRoleId]);
+
+  const selectedInterviewPrepPack =
+    interviewPrepPacks.find((item) => item.id === selectedInterviewPrepId) ?? null;
+
+  useEffect(() => {
+    if (!selectedInterviewPrepPack) {
+      setEditingLikelyQuestions("");
+      setEditingTalkingPoints("");
+      setEditingStarStories("");
+      return;
+    }
+    setEditingLikelyQuestions(selectedInterviewPrepPack.sections.likely_questions.join("\n"));
+    setEditingTalkingPoints(selectedInterviewPrepPack.sections.talking_points.join("\n"));
+    setEditingStarStories(selectedInterviewPrepPack.sections.star_stories.join("\n"));
+  }, [selectedInterviewPrepPack]);
 
   async function handleGenerateCoverLetter() {
     if (!selectedJob) {
@@ -506,6 +590,122 @@ export function JobsPageClient() {
     } finally {
       setGeneratingQA(false);
     }
+  }
+
+  async function handleGenerateInterviewPrep() {
+    if (!selectedJob) {
+      return;
+    }
+
+    setGeneratingInterviewPrep(true);
+    setInterviewPrepError(null);
+    try {
+      const created = await generateInterviewPrepPack(selectedJob.id);
+      const refreshed = await listInterviewPrepPacks(selectedJob.id);
+      setInterviewPrepPacks(refreshed);
+      setSelectedInterviewPrepId(created.id);
+    } catch (error) {
+      if (error instanceof Error) {
+        setInterviewPrepError(error.message);
+      } else {
+        setInterviewPrepError("Failed to generate interview prep pack.");
+      }
+    } finally {
+      setGeneratingInterviewPrep(false);
+    }
+  }
+
+  async function handleRegenerateInterviewPrepSection(section: InterviewPrepSectionKey) {
+    if (!selectedJob) {
+      return;
+    }
+    setRegeneratingSection(section);
+    setInterviewPrepError(null);
+    try {
+      const updated = await regenerateInterviewPrepSection(selectedJob.id, section);
+      const refreshed = await listInterviewPrepPacks(selectedJob.id);
+      setInterviewPrepPacks(refreshed);
+      setSelectedInterviewPrepId(updated.id);
+    } catch (error) {
+      if (error instanceof Error) {
+        setInterviewPrepError(error.message);
+      } else {
+        setInterviewPrepError("Failed to regenerate interview prep section.");
+      }
+    } finally {
+      setRegeneratingSection(null);
+    }
+  }
+
+  async function handleSaveInterviewPrepEdits() {
+    if (!selectedJob || !selectedInterviewPrepPack) {
+      return;
+    }
+
+    const toItems = (value: string) =>
+      value
+        .split("\n")
+        .map((item) => item.trim())
+        .filter(Boolean);
+
+    const sections = {
+      likely_questions: toItems(editingLikelyQuestions),
+      talking_points: toItems(editingTalkingPoints),
+      star_stories: toItems(editingStarStories),
+    };
+
+    if (
+      !sections.likely_questions.length ||
+      !sections.talking_points.length ||
+      !sections.star_stories.length
+    ) {
+      setInterviewPrepError("Each interview prep section requires at least one non-empty item.");
+      return;
+    }
+
+    setSavingInterviewPrep(true);
+    setInterviewPrepError(null);
+    try {
+      const saved = await updateInterviewPrepPack(
+        selectedJob.id,
+        selectedInterviewPrepPack.id,
+        sections,
+      );
+      setInterviewPrepPacks((previous) =>
+        previous.map((item) => (item.id === saved.id ? saved : item)),
+      );
+      setSelectedInterviewPrepId(saved.id);
+    } catch (error) {
+      if (error instanceof Error) {
+        setInterviewPrepError(error.message);
+      } else {
+        setInterviewPrepError("Failed to save interview prep edits.");
+      }
+    } finally {
+      setSavingInterviewPrep(false);
+    }
+  }
+
+  async function handleCopyInterviewPrep(pack: InterviewPrepPack) {
+    const text = interviewPrepToMarkdown(pack);
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      setInterviewPrepError("Unable to copy prep pack to clipboard in this browser.");
+    }
+  }
+
+  function handleExportInterviewPrep(pack: InterviewPrepPack) {
+    const text = interviewPrepToMarkdown(pack);
+    const blob = new Blob([text], { type: "text/markdown;charset=utf-8" });
+    const objectUrl = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = objectUrl;
+    link.download = `interview-prep-pack-v${pack.version}.md`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(objectUrl);
   }
 
   async function handleScoreDesirability(forceRefresh: boolean) {
@@ -1309,6 +1509,146 @@ export function JobsPageClient() {
                   </>
                 ) : (
                   <p>No application materials generated yet.</p>
+                )}
+              </section>
+
+              <section>
+                <h4>Interview Prep</h4>
+                <button
+                  disabled={generatingInterviewPrep}
+                  onClick={handleGenerateInterviewPrep}
+                  type="button"
+                >
+                  {generatingInterviewPrep
+                    ? "Generating prep pack..."
+                    : "Generate Interview Prep Pack"}
+                </button>
+
+                {interviewPrepLoading ? <p>Loading interview prep packs...</p> : null}
+                {interviewPrepError ? <p role="alert">{interviewPrepError}</p> : null}
+
+                {interviewPrepPacks.length ? (
+                  <>
+                    <label
+                      htmlFor="interview-prep-version"
+                      style={{ display: "grid", gap: "0.25rem" }}
+                    >
+                      Saved prep versions
+                    </label>
+                    <select
+                      id="interview-prep-version"
+                      onChange={(event) => setSelectedInterviewPrepId(Number(event.target.value))}
+                      value={selectedInterviewPrepId ?? ""}
+                    >
+                      {interviewPrepPacks.map((pack) => (
+                        <option key={pack.id} value={pack.id}>
+                          Interview prep v{pack.version} (
+                          {new Date(pack.created_at).toLocaleString()})
+                        </option>
+                      ))}
+                    </select>
+
+                    {selectedInterviewPrepPack ? (
+                      <div
+                        style={{
+                          border: "1px solid #ddd",
+                          marginTop: "0.5rem",
+                          padding: "0.75rem",
+                        }}
+                      >
+                        <p>
+                          <strong>Generated with:</strong> {selectedInterviewPrepPack.provider}/
+                          {selectedInterviewPrepPack.model}
+                        </p>
+                        <div style={{ display: "grid", gap: "0.5rem" }}>
+                          <label style={{ display: "grid", gap: "0.25rem" }}>
+                            Likely questions (one per line)
+                            <textarea
+                              onChange={(event) => setEditingLikelyQuestions(event.target.value)}
+                              rows={6}
+                              value={editingLikelyQuestions}
+                            />
+                          </label>
+                          <button
+                            disabled={regeneratingSection === "likely_questions"}
+                            onClick={() => handleRegenerateInterviewPrepSection("likely_questions")}
+                            type="button"
+                          >
+                            {regeneratingSection === "likely_questions"
+                              ? "Regenerating questions..."
+                              : "Regenerate Questions"}
+                          </button>
+
+                          <label style={{ display: "grid", gap: "0.25rem" }}>
+                            Talking points (one per line)
+                            <textarea
+                              onChange={(event) => setEditingTalkingPoints(event.target.value)}
+                              rows={6}
+                              value={editingTalkingPoints}
+                            />
+                          </label>
+                          <button
+                            disabled={regeneratingSection === "talking_points"}
+                            onClick={() => handleRegenerateInterviewPrepSection("talking_points")}
+                            type="button"
+                          >
+                            {regeneratingSection === "talking_points"
+                              ? "Regenerating talking points..."
+                              : "Regenerate Talking Points"}
+                          </button>
+
+                          <label style={{ display: "grid", gap: "0.25rem" }}>
+                            STAR story drafts (one per line)
+                            <textarea
+                              onChange={(event) => setEditingStarStories(event.target.value)}
+                              rows={6}
+                              value={editingStarStories}
+                            />
+                          </label>
+                          <button
+                            disabled={regeneratingSection === "star_stories"}
+                            onClick={() => handleRegenerateInterviewPrepSection("star_stories")}
+                            type="button"
+                          >
+                            {regeneratingSection === "star_stories"
+                              ? "Regenerating STAR drafts..."
+                              : "Regenerate STAR Drafts"}
+                          </button>
+                        </div>
+
+                        <div
+                          style={{
+                            display: "flex",
+                            flexWrap: "wrap",
+                            gap: "0.5rem",
+                            marginTop: "0.5rem",
+                          }}
+                        >
+                          <button
+                            disabled={savingInterviewPrep}
+                            onClick={handleSaveInterviewPrepEdits}
+                            type="button"
+                          >
+                            {savingInterviewPrep ? "Saving..." : "Save Interview Prep Edits"}
+                          </button>
+                          <button
+                            onClick={() => handleCopyInterviewPrep(selectedInterviewPrepPack)}
+                            type="button"
+                          >
+                            Copy Prep Pack
+                          </button>
+                          <button
+                            onClick={() => handleExportInterviewPrep(selectedInterviewPrepPack)}
+                            type="button"
+                          >
+                            Export Prep Pack
+                          </button>
+                        </div>
+                      </div>
+                    ) : null}
+                  </>
+                ) : (
+                  <p>No interview prep packs generated yet.</p>
                 )}
               </section>
 
