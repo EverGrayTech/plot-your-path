@@ -20,24 +20,24 @@ Add a dedicated application-operations workflow so active job hunt execution (de
 ## Implementation Checklist
 
 ### 1. Data + API Foundation
-- [ ] Add application-ops entity linked to role for operational metadata
-- [ ] Add interview-stage timeline model with timestamps and notes
-- [ ] Add CRUD endpoints for ops details, next actions, and stage updates
+- [x] Add application-ops entity linked to role for operational metadata
+- [x] Add interview-stage timeline model with timestamps and notes
+- [x] Add CRUD endpoints for ops details, next actions, and stage updates
 
 ### 2. Operational Views
-- [ ] Add “Application Ops” section in Job Detail
-- [ ] Add pipeline list/table view grouped by stage and next-action urgency
-- [ ] Add filters for overdue actions, this-week deadlines, and recently updated roles
+- [x] Add “Application Ops” section in Job Detail
+- [x] Add pipeline list/table view grouped by stage and next-action urgency
+- [x] Add filters for overdue actions, this-week deadlines, and recently updated roles
 
 ### 3. Reminder/Attention Signals
-- [ ] Add computed “needs attention” indicators for overdue or missing next actions
-- [ ] Add lightweight dashboard counters for follow-ups and upcoming deadlines
+- [x] Add computed “needs attention” indicators for overdue or missing next actions
+- [x] Add lightweight dashboard counters for follow-ups and upcoming deadlines
 
 ### 4. Tests + Verification
-- [ ] Add backend tests for ops CRUD and stage timeline behavior
-- [ ] Add frontend tests for pipeline filtering and attention-state rendering
+- [x] Add backend tests for ops CRUD and stage timeline behavior
+- [x] Add frontend tests for pipeline filtering and attention-state rendering
 
 ## Acceptance Criteria
-- [ ] User can track role-specific deadlines, contacts, and next actions
-- [ ] User can manage interview-stage progression with notes
-- [ ] App clearly surfaces what needs attention during active application cycles
+- [x] User can track role-specific deadlines, contacts, and next actions
+- [x] User can manage interview-stage progression with notes
+- [x] App clearly surfaces what needs attention during active application cycles

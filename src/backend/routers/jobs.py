@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+from datetime import UTC, datetime, timedelta
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -11,8 +12,10 @@ from sqlalchemy.orm import Session
 
 from backend.database import get_db
 from backend.models.application_material import ApplicationMaterial as ApplicationMaterialModel
+from backend.models.application_ops import ApplicationOps as ApplicationOpsModel
 from backend.models.company import Company
 from backend.models.desirability_score_result import DesirabilityScoreResult
+from backend.models.interview_stage_event import InterviewStageEvent as InterviewStageEventModel
 from backend.models.role import Role
 from backend.models.role_fit_analysis import RoleFitAnalysis
 from backend.models.role_skill import RoleSkill
@@ -22,11 +25,19 @@ from backend.schemas.desirability import DesirabilityScore
 from backend.schemas.job import (
     ApplicationMaterial,
     ApplicationMaterialQARequest,
+    ApplicationOps,
+    ApplicationOpsUpdate,
     FitAnalysis,
+    InterviewStage,
+    InterviewStageEvent,
+    InterviewStageEventCreate,
     JobDetail,
     JobListItem,
     JobScrapeRequest,
     JobScrapeResponse,
+    PipelineCounters,
+    PipelineItem,
+    PipelineResponse,
     RoleStatus,
     RoleStatusChange,
     SalaryInfo,
@@ -50,6 +61,33 @@ class StatusUpdate(BaseModel):
     """Schema for updating a job's status."""
 
     status: RoleStatus
+
+
+class NextActionUpdate(BaseModel):
+    """Payload for updating only next-action datetime."""
+
+    next_action_at: datetime | None
+
+
+def _application_ops_attention(
+    application_ops: ApplicationOpsModel | None,
+    *,
+    now: datetime,
+) -> tuple[bool, list[str]]:
+    """Compute whether a role needs attention based on ops metadata."""
+    if application_ops is None:
+        return True, ["No application ops metadata"]
+
+    reasons: list[str] = []
+    if application_ops.next_action_at is None:
+        reasons.append("Missing next action")
+    elif application_ops.next_action_at < now:
+        reasons.append("Overdue next action")
+
+    if application_ops.deadline_at is not None and application_ops.deadline_at < now:
+        reasons.append("Deadline passed")
+
+    return len(reasons) > 0, reasons
 
 
 def _build_salary_range(role: Role) -> str | None:
@@ -91,6 +129,63 @@ def _build_status_history(role_id: int, db: Session) -> list[RoleStatusChange]:
         )
         for row in rows
     ]
+
+
+def _build_interview_stage_timeline(role_id: int, db: Session) -> list[InterviewStageEvent]:
+    """Build interview stage timeline in chronological order for a role."""
+    rows = (
+        db.query(InterviewStageEventModel)
+        .filter(InterviewStageEventModel.role_id == role_id)
+        .order_by(InterviewStageEventModel.occurred_at.asc(), InterviewStageEventModel.id.asc())
+        .all()
+    )
+    return [
+        InterviewStageEvent(
+            id=row.id,
+            role_id=row.role_id,
+            stage=InterviewStage(row.stage),
+            notes=row.notes,
+            occurred_at=row.occurred_at,
+            created_at=row.created_at,
+        )
+        for row in rows
+    ]
+
+
+def _current_interview_stage(role_id: int, db: Session) -> InterviewStage | None:
+    """Fetch latest interview stage for a role."""
+    row = (
+        db.query(InterviewStageEventModel)
+        .filter(InterviewStageEventModel.role_id == role_id)
+        .order_by(InterviewStageEventModel.occurred_at.desc(), InterviewStageEventModel.id.desc())
+        .first()
+    )
+    if row is None:
+        return None
+    return InterviewStage(row.stage)
+
+
+def _to_application_ops_schema(
+    role_id: int,
+    application_ops: ApplicationOpsModel,
+    *,
+    now: datetime,
+) -> ApplicationOps:
+    """Convert ORM application-ops row to response schema with attention signals."""
+    needs_attention, reasons = _application_ops_attention(application_ops, now=now)
+    return ApplicationOps(
+        role_id=role_id,
+        applied_at=application_ops.applied_at,
+        deadline_at=application_ops.deadline_at,
+        source=application_ops.source,
+        recruiter_contact=application_ops.recruiter_contact,
+        notes=application_ops.notes,
+        next_action_at=application_ops.next_action_at,
+        needs_attention=needs_attention,
+        attention_reasons=reasons,
+        created_at=application_ops.created_at,
+        updated_at=application_ops.updated_at,
+    )
 
 
 def _to_fit_analysis_schema(analysis: RoleFitAnalysis) -> FitAnalysis:
@@ -144,6 +239,14 @@ def _to_desirability_score_schema(score: DesirabilityScoreResult) -> Desirabilit
     )
 
 
+def _role_or_404(role_id: int, db: Session) -> Role:
+    """Fetch role or raise 404."""
+    role = db.query(Role).filter(Role.id == role_id).first()
+    if role is None:
+        raise HTTPException(status_code=404, detail="Job not found")
+    return role
+
+
 @router.get("/jobs", response_model=list[JobListItem])
 def list_jobs(db: Annotated[Session, Depends(get_db)]) -> list[JobListItem]:
     """
@@ -160,7 +263,12 @@ def list_jobs(db: Annotated[Session, Depends(get_db)]) -> list[JobListItem]:
     )
 
     result: list[JobListItem] = []
+    now = datetime.now(UTC).replace(tzinfo=None)
     for role, company in rows:
+        application_ops = (
+            db.query(ApplicationOpsModel).filter(ApplicationOpsModel.role_id == role.id).first()
+        )
+        needs_attention, _ = _application_ops_attention(application_ops, now=now)
         skills_count = db.query(RoleSkill).filter(RoleSkill.role_id == role.id).count()
         latest_fit = (
             db.query(RoleFitAnalysis)
@@ -188,9 +296,77 @@ def list_jobs(db: Annotated[Session, Depends(get_db)]) -> list[JobListItem]:
                 desirability_score=(
                     latest_desirability.total_score if latest_desirability else None
                 ),
+                current_interview_stage=_current_interview_stage(role.id, db),
+                deadline_at=application_ops.deadline_at if application_ops else None,
+                next_action_at=application_ops.next_action_at if application_ops else None,
+                needs_attention=needs_attention,
             )
         )
     return result
+
+
+@router.get("/jobs/pipeline", response_model=PipelineResponse)
+def list_jobs_pipeline(
+    db: Annotated[Session, Depends(get_db)],
+    overdue_only: bool = False,
+    this_week_deadlines: bool = False,
+    recently_updated: bool = False,
+) -> PipelineResponse:
+    """List operational pipeline view with urgency filters and counters."""
+    now = datetime.now(UTC).replace(tzinfo=None)
+    week_end = now + timedelta(days=7)
+    recently_cutoff = now - timedelta(days=3)
+
+    rows = (
+        db.query(Role, Company, ApplicationOpsModel)
+        .join(Company, Role.company_id == Company.id)
+        .outerjoin(ApplicationOpsModel, ApplicationOpsModel.role_id == Role.id)
+        .order_by(Role.created_at.desc())
+        .all()
+    )
+
+    items: list[PipelineItem] = []
+    for role, company, application_ops in rows:
+        needs_attention, reasons = _application_ops_attention(application_ops, now=now)
+        current_stage = _current_interview_stage(role.id, db)
+        updated_at = application_ops.updated_at if application_ops else role.created_at
+        next_action_at = application_ops.next_action_at if application_ops else None
+        deadline_at = application_ops.deadline_at if application_ops else None
+
+        if overdue_only and (next_action_at is None or next_action_at >= now):
+            continue
+        if this_week_deadlines and (
+            deadline_at is None or deadline_at < now or deadline_at > week_end
+        ):
+            continue
+        if recently_updated and updated_at < recently_cutoff:
+            continue
+
+        items.append(
+            PipelineItem(
+                role_id=role.id,
+                company=company.name,
+                title=role.title,
+                status=RoleStatus(role.status),
+                interview_stage=current_stage,
+                next_action_at=next_action_at,
+                deadline_at=deadline_at,
+                needs_attention=needs_attention,
+                attention_reasons=reasons,
+                updated_at=updated_at,
+            )
+        )
+
+    counters = PipelineCounters(
+        needs_follow_up=sum(1 for item in items if "Missing next action" in item.attention_reasons),
+        overdue_actions=sum(1 for item in items if "Overdue next action" in item.attention_reasons),
+        upcoming_deadlines=sum(
+            1
+            for item in items
+            if item.deadline_at is not None and now <= item.deadline_at <= week_end
+        ),
+    )
+    return PipelineResponse(counters=counters, items=items)
 
 
 @router.get("/jobs/{role_id}", response_model=JobDetail)
@@ -207,9 +383,7 @@ def get_job(role_id: int, db: Annotated[Session, Depends(get_db)]) -> JobDetail:
     Raises:
         HTTPException 404: If the job is not found.
     """
-    role = db.query(Role).filter(Role.id == role_id).first()
-    if not role:
-        raise HTTPException(status_code=404, detail="Job not found")
+    role = _role_or_404(role_id, db)
 
     company = db.query(Company).filter(Company.id == role.company_id).first()
 
@@ -223,6 +397,10 @@ def get_job(role_id: int, db: Annotated[Session, Depends(get_db)]) -> JobDetail:
     skills = extractor.get_skills_for_role(role_id)
     latest_fit = FitAnalysisService(db).get_latest_for_role(role_id)
     latest_desirability = DesirabilityScoringService(db).get_latest_for_role(role_id)
+    application_ops = (
+        db.query(ApplicationOpsModel).filter(ApplicationOpsModel.role_id == role_id).first()
+    )
+    now = datetime.now(UTC).replace(tzinfo=None)
 
     return JobDetail(
         id=role.id,
@@ -240,10 +418,113 @@ def get_job(role_id: int, db: Annotated[Session, Depends(get_db)]) -> JobDetail:
         created_at=role.created_at,
         status=RoleStatus(role.status),
         status_history=_build_status_history(role.id, db),
+        application_ops=(
+            _to_application_ops_schema(role.id, application_ops, now=now)
+            if application_ops
+            else None
+        ),
+        interview_stage_timeline=_build_interview_stage_timeline(role.id, db),
         latest_fit_analysis=_to_fit_analysis_schema(latest_fit) if latest_fit else None,
         latest_desirability_score=(
             _to_desirability_score_schema(latest_desirability) if latest_desirability else None
         ),
+    )
+
+
+@router.get("/jobs/{role_id}/application-ops", response_model=ApplicationOps)
+def get_application_ops(
+    role_id: int,
+    db: Annotated[Session, Depends(get_db)],
+) -> ApplicationOps:
+    """Get application-ops metadata for a role."""
+    _role_or_404(role_id, db)
+    row = db.query(ApplicationOpsModel).filter(ApplicationOpsModel.role_id == role_id).first()
+    if row is None:
+        raise HTTPException(status_code=404, detail="Application ops not found")
+    now = datetime.now(UTC).replace(tzinfo=None)
+    return _to_application_ops_schema(role_id, row, now=now)
+
+
+@router.put("/jobs/{role_id}/application-ops", response_model=ApplicationOps)
+def upsert_application_ops(
+    role_id: int,
+    payload: ApplicationOpsUpdate,
+    db: Annotated[Session, Depends(get_db)],
+) -> ApplicationOps:
+    """Create or update application-ops metadata for a role."""
+    _role_or_404(role_id, db)
+    row = db.query(ApplicationOpsModel).filter(ApplicationOpsModel.role_id == role_id).first()
+    if row is None:
+        row = ApplicationOpsModel(role_id=role_id)
+        db.add(row)
+
+    row.applied_at = payload.applied_at
+    row.deadline_at = payload.deadline_at
+    row.source = payload.source.strip() if payload.source else None
+    row.recruiter_contact = payload.recruiter_contact.strip() if payload.recruiter_contact else None
+    row.notes = payload.notes.strip() if payload.notes else None
+    row.next_action_at = payload.next_action_at
+
+    db.commit()
+    db.refresh(row)
+    now = datetime.now(UTC).replace(tzinfo=None)
+    return _to_application_ops_schema(role_id, row, now=now)
+
+
+@router.patch("/jobs/{role_id}/application-ops/next-action", response_model=ApplicationOps)
+def update_next_action(
+    role_id: int,
+    payload: NextActionUpdate,
+    db: Annotated[Session, Depends(get_db)],
+) -> ApplicationOps:
+    """Update only next-action datetime for a role."""
+    _role_or_404(role_id, db)
+    row = db.query(ApplicationOpsModel).filter(ApplicationOpsModel.role_id == role_id).first()
+    if row is None:
+        row = ApplicationOpsModel(role_id=role_id)
+        db.add(row)
+    row.next_action_at = payload.next_action_at
+
+    db.commit()
+    db.refresh(row)
+    now = datetime.now(UTC).replace(tzinfo=None)
+    return _to_application_ops_schema(role_id, row, now=now)
+
+
+@router.get("/jobs/{role_id}/interview-stages", response_model=list[InterviewStageEvent])
+def list_interview_stages(
+    role_id: int,
+    db: Annotated[Session, Depends(get_db)],
+) -> list[InterviewStageEvent]:
+    """List interview-stage timeline entries for a role."""
+    _role_or_404(role_id, db)
+    return _build_interview_stage_timeline(role_id, db)
+
+
+@router.post("/jobs/{role_id}/interview-stages", response_model=InterviewStageEvent)
+def create_interview_stage_event(
+    role_id: int,
+    payload: InterviewStageEventCreate,
+    db: Annotated[Session, Depends(get_db)],
+) -> InterviewStageEvent:
+    """Append interview-stage event to role timeline."""
+    _role_or_404(role_id, db)
+    row = InterviewStageEventModel(
+        role_id=role_id,
+        stage=payload.stage.value,
+        notes=payload.notes.strip() if payload.notes else None,
+        occurred_at=payload.occurred_at,
+    )
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return InterviewStageEvent(
+        id=row.id,
+        role_id=row.role_id,
+        stage=InterviewStage(row.stage),
+        notes=row.notes,
+        occurred_at=row.occurred_at,
+        created_at=row.created_at,
     )
 
 

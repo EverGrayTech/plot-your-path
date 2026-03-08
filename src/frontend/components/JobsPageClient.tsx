@@ -3,13 +3,15 @@
 import React, { useEffect, useState } from "react";
 
 import {
-  type ApplicationMaterial,
   type AISetting,
-  type OperationFamily,
+  type ApplicationMaterial,
   type DesirabilityFactor,
   type FitRecommendation,
+  type InterviewStage,
   type JobDetail,
   type JobListItem,
+  type OperationFamily,
+  type PipelineItem,
   type RoleStatus,
   type SkillDetail,
   analyzeJobFit,
@@ -20,18 +22,22 @@ import {
   generateQuestionAnswers,
   getJob,
   getSkill,
-  listApplicationMaterials,
+  healthcheckAISetting,
   listAISettings,
+  listApplicationMaterials,
   listDesirabilityFactors,
   listJobs,
+  listPipeline,
   refreshDesirabilityScore,
   reorderDesirabilityFactors,
   scoreJobDesirability,
   updateAISetting,
   updateAISettingToken,
   updateDesirabilityFactor,
+  updateInterviewStage,
   updateJobStatus,
-  healthcheckAISetting,
+  updateNextAction,
+  upsertApplicationOps,
 } from "../lib/api";
 import { CaptureJobForm } from "./CaptureJobForm";
 import { Modal } from "./Modal";
@@ -39,6 +45,7 @@ import { Modal } from "./Modal";
 type SortMode = "newest" | "oldest" | "company_az" | "desirability_desc" | "smart_sort";
 type RecommendationFilter = "all" | "go" | "maybe" | "no-go" | "not_analyzed";
 type DesirabilityFilter = "all" | "scored" | "not_scored";
+type StageFilter = "all" | InterviewStage;
 
 const SMART_SORT_FIT_WEIGHT = 0.6;
 const SMART_SORT_DESIRABILITY_WEIGHT = 0.4;
@@ -56,6 +63,35 @@ function recommendationLabel(value: FitRecommendation | null): string {
   return "Not analyzed";
 }
 
+function interviewStageLabel(value: InterviewStage | null | undefined): string {
+  if (!value) {
+    return "Not started";
+  }
+  if (value === "recruiter_screen") {
+    return "Recruiter Screen";
+  }
+  if (value === "hiring_manager") {
+    return "Hiring Manager";
+  }
+  return value
+    .split("_")
+    .map((part) => part[0].toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function toLocalInputValue(isoString: string | null): string {
+  if (!isoString) {
+    return "";
+  }
+  const date = new Date(isoString);
+  const yyyy = date.getFullYear();
+  const mm = `${date.getMonth() + 1}`.padStart(2, "0");
+  const dd = `${date.getDate()}`.padStart(2, "0");
+  const hh = `${date.getHours()}`.padStart(2, "0");
+  const min = `${date.getMinutes()}`.padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+}
+
 export function JobsPageClient() {
   const [jobs, setJobs] = useState<JobListItem[]>([]);
   const [loadingJobs, setLoadingJobs] = useState(true);
@@ -68,6 +104,7 @@ export function JobsPageClient() {
   const [showCaptureModal, setShowCaptureModal] = useState(false);
   const [showFactorSettings, setShowFactorSettings] = useState(false);
   const [showAISettings, setShowAISettings] = useState(false);
+  const [showPipeline, setShowPipeline] = useState(false);
   const [selectedRoleId, setSelectedRoleId] = useState<number | null>(null);
   const [selectedJob, setSelectedJob] = useState<JobDetail | null>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
@@ -103,9 +140,35 @@ export function JobsPageClient() {
     desirability_scoring: "",
     application_generation: "",
   });
-  const [healthByFamily, setHealthByFamily] = useState<
-    Partial<Record<OperationFamily, string>>
-  >({});
+  const [healthByFamily, setHealthByFamily] = useState<Partial<Record<OperationFamily, string>>>(
+    {},
+  );
+  const [pipelineItems, setPipelineItems] = useState<PipelineItem[]>([]);
+  const [pipelineLoading, setPipelineLoading] = useState(false);
+  const [pipelineError, setPipelineError] = useState<string | null>(null);
+  const [pipelineCounters, setPipelineCounters] = useState({
+    needs_follow_up: 0,
+    overdue_actions: 0,
+    upcoming_deadlines: 0,
+  });
+  const [pipelineOverdueOnly, setPipelineOverdueOnly] = useState(false);
+  const [pipelineWeekDeadlines, setPipelineWeekDeadlines] = useState(false);
+  const [pipelineRecentlyUpdated, setPipelineRecentlyUpdated] = useState(false);
+  const [pipelineStageFilter, setPipelineStageFilter] = useState<StageFilter>("all");
+  const [opsAppliedAt, setOpsAppliedAt] = useState("");
+  const [opsDeadlineAt, setOpsDeadlineAt] = useState("");
+  const [opsSource, setOpsSource] = useState("");
+  const [opsRecruiterContact, setOpsRecruiterContact] = useState("");
+  const [opsNotes, setOpsNotes] = useState("");
+  const [opsNextActionAt, setOpsNextActionAt] = useState("");
+  const [opsSaving, setOpsSaving] = useState(false);
+  const [opsError, setOpsError] = useState<string | null>(null);
+  const [newStage, setNewStage] = useState<InterviewStage>("applied");
+  const [stageNotes, setStageNotes] = useState("");
+  const [stageOccurredAt, setStageOccurredAt] = useState(
+    toLocalInputValue(new Date().toISOString()),
+  );
+  const [stageSaving, setStageSaving] = useState(false);
 
   async function loadJobs() {
     setLoadingJobs(true);
@@ -154,6 +217,51 @@ export function JobsPageClient() {
 
     fetchJobDetail();
   }, [selectedRoleId]);
+
+  useEffect(() => {
+    if (!selectedJob) {
+      return;
+    }
+    const timeline = selectedJob.interview_stage_timeline ?? [];
+    setOpsAppliedAt(toLocalInputValue(selectedJob.application_ops?.applied_at ?? null));
+    setOpsDeadlineAt(toLocalInputValue(selectedJob.application_ops?.deadline_at ?? null));
+    setOpsSource(selectedJob.application_ops?.source ?? "");
+    setOpsRecruiterContact(selectedJob.application_ops?.recruiter_contact ?? "");
+    setOpsNotes(selectedJob.application_ops?.notes ?? "");
+    setOpsNextActionAt(toLocalInputValue(selectedJob.application_ops?.next_action_at ?? null));
+    setNewStage(timeline.at(-1)?.stage ?? "applied");
+    setStageOccurredAt(toLocalInputValue(new Date().toISOString()));
+  }, [selectedJob]);
+
+  useEffect(() => {
+    if (!showPipeline) {
+      return;
+    }
+
+    const fetchPipeline = async () => {
+      setPipelineLoading(true);
+      setPipelineError(null);
+      try {
+        const response = await listPipeline({
+          overdueOnly: pipelineOverdueOnly,
+          thisWeekDeadlines: pipelineWeekDeadlines,
+          recentlyUpdated: pipelineRecentlyUpdated,
+        });
+        setPipelineItems(response.items);
+        setPipelineCounters(response.counters);
+      } catch (error) {
+        if (error instanceof Error) {
+          setPipelineError(error.message);
+        } else {
+          setPipelineError("Failed to load pipeline.");
+        }
+      } finally {
+        setPipelineLoading(false);
+      }
+    };
+
+    fetchPipeline();
+  }, [showPipeline, pipelineOverdueOnly, pipelineWeekDeadlines, pipelineRecentlyUpdated]);
 
   async function handleStatusChange(nextStatus: RoleStatus) {
     if (!selectedJob) {
@@ -205,6 +313,83 @@ export function JobsPageClient() {
       }
     } finally {
       setAnalyzingFit(false);
+    }
+  }
+
+  async function handleSaveOps() {
+    if (!selectedJob) {
+      return;
+    }
+    setOpsSaving(true);
+    setOpsError(null);
+    try {
+      await upsertApplicationOps(selectedJob.id, {
+        applied_at: opsAppliedAt || null,
+        deadline_at: opsDeadlineAt || null,
+        source: opsSource || null,
+        recruiter_contact: opsRecruiterContact || null,
+        notes: opsNotes || null,
+        next_action_at: opsNextActionAt || null,
+      });
+      const refreshed = await getJob(selectedJob.id);
+      setSelectedJob(refreshed);
+      await loadJobs();
+    } catch (error) {
+      if (error instanceof Error) {
+        setOpsError(error.message);
+      } else {
+        setOpsError("Failed to save application ops.");
+      }
+    } finally {
+      setOpsSaving(false);
+    }
+  }
+
+  async function handleAddStage() {
+    if (!selectedJob || !stageOccurredAt) {
+      return;
+    }
+    setStageSaving(true);
+    setOpsError(null);
+    try {
+      await updateInterviewStage(selectedJob.id, {
+        stage: newStage,
+        notes: stageNotes || null,
+        occurred_at: new Date(stageOccurredAt).toISOString(),
+      });
+      setStageNotes("");
+      const refreshed = await getJob(selectedJob.id);
+      setSelectedJob(refreshed);
+      await loadJobs();
+    } catch (error) {
+      if (error instanceof Error) {
+        setOpsError(error.message);
+      } else {
+        setOpsError("Failed to add interview stage.");
+      }
+    } finally {
+      setStageSaving(false);
+    }
+  }
+
+  async function handleSetNextAction(daysFromNow: number) {
+    if (!selectedJob) {
+      return;
+    }
+    const next = new Date();
+    next.setDate(next.getDate() + daysFromNow);
+    try {
+      const updated = await updateNextAction(selectedJob.id, next.toISOString());
+      setOpsNextActionAt(toLocalInputValue(updated.next_action_at));
+      const refreshed = await getJob(selectedJob.id);
+      setSelectedJob(refreshed);
+      await loadJobs();
+    } catch (error) {
+      if (error instanceof Error) {
+        setOpsError(error.message);
+      } else {
+        setOpsError("Failed to update next action.");
+      }
     }
   }
 
@@ -634,6 +819,9 @@ export function JobsPageClient() {
         <button onClick={() => setShowCaptureModal(true)} type="button">
           Add Job
         </button>
+        <button onClick={() => setShowPipeline(true)} type="button">
+          Pipeline
+        </button>
         <button
           onClick={() => {
             setShowFactorSettings(true);
@@ -745,6 +933,9 @@ export function JobsPageClient() {
                   {job.desirability_score !== null
                     ? job.desirability_score.toFixed(2)
                     : "Not scored"}
+                  {" • Stage: "}
+                  {interviewStageLabel(job.current_interview_stage)}
+                  {job.needs_attention ? " • Needs attention" : ""}
                 </small>
               </button>
             </li>
@@ -811,6 +1002,134 @@ export function JobsPageClient() {
                 Salary: {selectedJob.salary.min ?? "?"} - {selectedJob.salary.max ?? "?"}{" "}
                 {selectedJob.salary.currency}
               </p>
+
+              <section>
+                <h4>Application Ops</h4>
+                {selectedJob.application_ops?.needs_attention ? (
+                  <p>
+                    <strong>Needs attention:</strong>{" "}
+                    {selectedJob.application_ops.attention_reasons.join(", ") ||
+                      "Missing next action"}
+                  </p>
+                ) : (
+                  <p>No urgent follow-up flags.</p>
+                )}
+                {opsError ? <p role="alert">{opsError}</p> : null}
+                <div style={{ display: "grid", gap: "0.5rem", gridTemplateColumns: "1fr 1fr" }}>
+                  <label style={{ display: "grid", gap: "0.25rem" }}>
+                    Applied at
+                    <input
+                      onChange={(event) => setOpsAppliedAt(event.target.value)}
+                      type="datetime-local"
+                      value={opsAppliedAt}
+                    />
+                  </label>
+                  <label style={{ display: "grid", gap: "0.25rem" }}>
+                    Deadline
+                    <input
+                      onChange={(event) => setOpsDeadlineAt(event.target.value)}
+                      type="datetime-local"
+                      value={opsDeadlineAt}
+                    />
+                  </label>
+                  <label style={{ display: "grid", gap: "0.25rem" }}>
+                    Source
+                    <input
+                      onChange={(event) => setOpsSource(event.target.value)}
+                      value={opsSource}
+                    />
+                  </label>
+                  <label style={{ display: "grid", gap: "0.25rem" }}>
+                    Recruiter / Contact
+                    <input
+                      onChange={(event) => setOpsRecruiterContact(event.target.value)}
+                      value={opsRecruiterContact}
+                    />
+                  </label>
+                  <label style={{ display: "grid", gap: "0.25rem", gridColumn: "1 / -1" }}>
+                    Notes
+                    <textarea
+                      onChange={(event) => setOpsNotes(event.target.value)}
+                      rows={3}
+                      value={opsNotes}
+                    />
+                  </label>
+                  <label style={{ display: "grid", gap: "0.25rem", gridColumn: "1 / -1" }}>
+                    Next action date
+                    <input
+                      onChange={(event) => setOpsNextActionAt(event.target.value)}
+                      type="datetime-local"
+                      value={opsNextActionAt}
+                    />
+                  </label>
+                </div>
+                <div
+                  style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginTop: "0.5rem" }}
+                >
+                  <button disabled={opsSaving} onClick={handleSaveOps} type="button">
+                    {opsSaving ? "Saving..." : "Save Ops"}
+                  </button>
+                  <button onClick={() => handleSetNextAction(1)} type="button">
+                    Next Action +1 day
+                  </button>
+                  <button onClick={() => handleSetNextAction(3)} type="button">
+                    Next Action +3 days
+                  </button>
+                </div>
+
+                <h5 style={{ marginBottom: "0.5rem", marginTop: "1rem" }}>
+                  Interview stage timeline
+                </h5>
+                {(selectedJob.interview_stage_timeline ?? []).length ? (
+                  <ul>
+                    {(selectedJob.interview_stage_timeline ?? []).map((entry) => (
+                      <li key={entry.id}>
+                        {interviewStageLabel(entry.stage)} —{" "}
+                        {new Date(entry.occurred_at).toLocaleString()}
+                        {entry.notes ? ` (${entry.notes})` : ""}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>No interview stage updates yet.</p>
+                )}
+                <div style={{ display: "grid", gap: "0.5rem", gridTemplateColumns: "1fr 1fr" }}>
+                  <label style={{ display: "grid", gap: "0.25rem" }}>
+                    Add stage
+                    <select
+                      onChange={(event) => setNewStage(event.target.value as InterviewStage)}
+                      value={newStage}
+                    >
+                      <option value="applied">Applied</option>
+                      <option value="recruiter_screen">Recruiter Screen</option>
+                      <option value="hiring_manager">Hiring Manager</option>
+                      <option value="technical">Technical</option>
+                      <option value="onsite">Onsite</option>
+                      <option value="offer">Offer</option>
+                      <option value="closed">Closed</option>
+                    </select>
+                  </label>
+                  <label style={{ display: "grid", gap: "0.25rem" }}>
+                    Occurred at
+                    <input
+                      onChange={(event) => setStageOccurredAt(event.target.value)}
+                      type="datetime-local"
+                      value={stageOccurredAt}
+                    />
+                  </label>
+                  <label style={{ display: "grid", gap: "0.25rem", gridColumn: "1 / -1" }}>
+                    Stage notes
+                    <textarea
+                      onChange={(event) => setStageNotes(event.target.value)}
+                      rows={2}
+                      value={stageNotes}
+                    />
+                  </label>
+                </div>
+                <button disabled={stageSaving} onClick={handleAddStage} type="button">
+                  {stageSaving ? "Adding stage..." : "Add Stage Event"}
+                </button>
+              </section>
 
               <section>
                 <h4>Fit analysis</h4>
@@ -1201,7 +1520,9 @@ export function JobsPageClient() {
                     defaultValue={setting.model}
                     onBlur={(event) => {
                       if (event.target.value !== setting.model) {
-                        handleUpdateAIConfig(setting.operation_family, { model: event.target.value });
+                        handleUpdateAIConfig(setting.operation_family, {
+                          model: event.target.value,
+                        });
                       }
                     }}
                   />
@@ -1251,6 +1572,102 @@ export function JobsPageClient() {
               </li>
             ))}
           </ul>
+        </Modal>
+      ) : null}
+
+      {showPipeline ? (
+        <Modal
+          onClose={() => {
+            setShowPipeline(false);
+            setPipelineError(null);
+          }}
+          title="Application Pipeline"
+        >
+          <p>
+            <strong>Needs follow-up:</strong> {pipelineCounters.needs_follow_up} •{" "}
+            <strong>Overdue:</strong> {pipelineCounters.overdue_actions} •{" "}
+            <strong>Deadlines (7d):</strong> {pipelineCounters.upcoming_deadlines}
+          </p>
+          <div style={{ display: "flex", gap: "0.75rem", marginBottom: "0.75rem" }}>
+            <label>
+              <input
+                checked={pipelineOverdueOnly}
+                onChange={(event) => setPipelineOverdueOnly(event.target.checked)}
+                type="checkbox"
+              />{" "}
+              Overdue actions
+            </label>
+            <label>
+              <input
+                checked={pipelineWeekDeadlines}
+                onChange={(event) => setPipelineWeekDeadlines(event.target.checked)}
+                type="checkbox"
+              />{" "}
+              This-week deadlines
+            </label>
+            <label>
+              <input
+                checked={pipelineRecentlyUpdated}
+                onChange={(event) => setPipelineRecentlyUpdated(event.target.checked)}
+                type="checkbox"
+              />{" "}
+              Recently updated
+            </label>
+            <label>
+              Stage
+              <select
+                onChange={(event) => setPipelineStageFilter(event.target.value as StageFilter)}
+                value={pipelineStageFilter}
+              >
+                <option value="all">All</option>
+                <option value="applied">Applied</option>
+                <option value="recruiter_screen">Recruiter Screen</option>
+                <option value="hiring_manager">Hiring Manager</option>
+                <option value="technical">Technical</option>
+                <option value="onsite">Onsite</option>
+                <option value="offer">Offer</option>
+                <option value="closed">Closed</option>
+              </select>
+            </label>
+          </div>
+          {pipelineLoading ? <p>Loading pipeline...</p> : null}
+          {pipelineError ? <p role="alert">{pipelineError}</p> : null}
+          {!pipelineLoading && !pipelineError ? (
+            <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
+              {pipelineItems
+                .filter(
+                  (item) =>
+                    pipelineStageFilter === "all" || item.interview_stage === pipelineStageFilter,
+                )
+                .map((item) => (
+                  <li
+                    key={item.role_id}
+                    style={{ border: "1px solid #ddd", marginBottom: "0.5rem", padding: "0.5rem" }}
+                  >
+                    <button
+                      onClick={() => {
+                        setShowPipeline(false);
+                        setSelectedRoleId(item.role_id);
+                      }}
+                      style={{ textAlign: "left", width: "100%" }}
+                      type="button"
+                    >
+                      <strong>{item.title}</strong> — {item.company}
+                      <br />
+                      <small>
+                        {interviewStageLabel(item.interview_stage)} • next action:{" "}
+                        {item.next_action_at
+                          ? new Date(item.next_action_at).toLocaleString()
+                          : "None"}{" "}
+                        • deadline:{" "}
+                        {item.deadline_at ? new Date(item.deadline_at).toLocaleString() : "None"}
+                        {item.needs_attention ? ` • ${item.attention_reasons.join(", ")}` : ""}
+                      </small>
+                    </button>
+                  </li>
+                ))}
+            </ul>
+          ) : null}
         </Modal>
       ) : null}
 

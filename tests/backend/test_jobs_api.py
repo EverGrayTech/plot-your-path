@@ -15,9 +15,11 @@ from sqlalchemy.pool import StaticPool
 from backend.database import Base, get_db
 from backend.main import app
 from backend.models.application_material import ApplicationMaterial
+from backend.models.application_ops import ApplicationOps
 from backend.models.company import Company
 from backend.models.desirability_factor_config import DesirabilityFactorConfig
 from backend.models.desirability_score_result import DesirabilityScoreResult
+from backend.models.interview_stage_event import InterviewStageEvent
 from backend.models.role import Role
 from backend.models.role_fit_analysis import RoleFitAnalysis
 from backend.models.role_skill import RoleSkill
@@ -173,6 +175,10 @@ class TestListJobs:
         assert job["fit_score"] is None
         assert job["fit_recommendation"] is None
         assert job["desirability_score"] is None
+        assert job["current_interview_stage"] is None
+        assert job["deadline_at"] is None
+        assert job["next_action_at"] is None
+        assert job["needs_attention"] is True
         assert "$120,000 - $180,000 USD" in job["salary_range"]
 
     def test_list_includes_latest_fit_signal(self, client, db, sample_role, sample_skills):
@@ -339,6 +345,8 @@ class TestGetJob:
         assert data["salary"]["min"] == 120000
         assert data["salary"]["max"] == 180000
         assert data["status_history"] == []
+        assert data["application_ops"] is None
+        assert data["interview_stage_timeline"] == []
         assert data["latest_fit_analysis"] is None
         assert data["latest_desirability_score"] is None
 
@@ -504,6 +512,122 @@ class TestUpdateJobStatus:
             response = client.patch(f"/api/jobs/{sample_role.id}/status", json={"status": status})
             assert response.status_code == 200
             assert response.json()["status"] == status
+
+
+class TestApplicationOps:
+    """Tests for application-ops and interview-stage endpoints."""
+
+    def test_upsert_and_get_application_ops(self, client, sample_role):
+        payload = {
+            "applied_at": "2099-03-01T09:00:00",
+            "deadline_at": "2099-03-10T17:00:00",
+            "source": "LinkedIn",
+            "recruiter_contact": "recruiter@example.com",
+            "notes": "Initial submission completed.",
+            "next_action_at": "2099-03-15T09:00:00",
+        }
+        put_response = client.put(f"/api/jobs/{sample_role.id}/application-ops", json=payload)
+        assert put_response.status_code == 200
+        put_data = put_response.json()
+        assert put_data["role_id"] == sample_role.id
+        assert put_data["source"] == "LinkedIn"
+        assert put_data["needs_attention"] is False
+
+        get_response = client.get(f"/api/jobs/{sample_role.id}/application-ops")
+        assert get_response.status_code == 200
+        get_data = get_response.json()
+        assert get_data["recruiter_contact"] == "recruiter@example.com"
+        assert get_data["notes"] == "Initial submission completed."
+
+    def test_update_next_action_creates_ops_if_missing(self, client, sample_role):
+        response = client.patch(
+            f"/api/jobs/{sample_role.id}/application-ops/next-action",
+            json={"next_action_at": "2099-03-07T10:00:00"},
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["next_action_at"].startswith("2099-03-07T10:00:00")
+        assert data["needs_attention"] is False
+
+    def test_application_ops_404_for_missing_role(self, client):
+        response = client.put("/api/jobs/999/application-ops", json={"source": "Referral"})
+        assert response.status_code == 404
+        assert response.json()["detail"] == "Job not found"
+
+    def test_create_and_list_interview_stage_events(self, client, sample_role):
+        create_response = client.post(
+            f"/api/jobs/{sample_role.id}/interview-stages",
+            json={
+                "stage": "recruiter_screen",
+                "notes": "30 minute intro call",
+                "occurred_at": "2026-03-04T15:00:00",
+            },
+        )
+        assert create_response.status_code == 200
+        created = create_response.json()
+        assert created["stage"] == "recruiter_screen"
+        assert created["notes"] == "30 minute intro call"
+
+        list_response = client.get(f"/api/jobs/{sample_role.id}/interview-stages")
+        assert list_response.status_code == 200
+        listed = list_response.json()
+        assert len(listed) == 1
+        assert listed[0]["stage"] == "recruiter_screen"
+
+    def test_pipeline_view_filters_and_counters(self, client, db, sample_company, sample_role):
+        role_two = Role(
+            company_id=sample_company.id,
+            title="Platform Engineer",
+            team_division="Core",
+            salary_min=140000,
+            salary_max=190000,
+            salary_currency="USD",
+            url="https://example.com/platform-role",
+            raw_html_path="data/jobs/raw/acme-corp/22.html",
+            cleaned_md_path="data/jobs/cleaned/acme-corp/22.md",
+            status="submitted",
+        )
+        db.add(role_two)
+        db.flush()
+
+        db.add(
+            ApplicationOps(
+                role_id=sample_role.id,
+                source="LinkedIn",
+                next_action_at=datetime(2000, 1, 1, 9, 0, 0),
+                deadline_at=datetime(2000, 1, 3, 17, 0, 0),
+            )
+        )
+        db.add(
+            ApplicationOps(
+                role_id=role_two.id,
+                source="Referral",
+                next_action_at=None,
+                deadline_at=None,
+            )
+        )
+        db.add(
+            InterviewStageEvent(
+                role_id=sample_role.id,
+                stage="technical",
+                notes="Panel scheduled",
+                occurred_at=datetime(2026, 3, 2, 10, 0, 0),
+            )
+        )
+        db.commit()
+
+        response = client.get("/api/jobs/pipeline")
+        assert response.status_code == 200
+        payload = response.json()
+        assert len(payload["items"]) == 2
+        assert payload["counters"]["overdue_actions"] >= 1
+        assert payload["counters"]["needs_follow_up"] >= 1
+
+        overdue_only = client.get("/api/jobs/pipeline?overdue_only=true")
+        assert overdue_only.status_code == 200
+        overdue_payload = overdue_only.json()
+        assert len(overdue_payload["items"]) >= 1
+        assert all(item["next_action_at"] is not None for item in overdue_payload["items"])
 
 
 class TestFitAnalysis:
