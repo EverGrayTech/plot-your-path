@@ -1,4 +1,4 @@
-# Iteration 12: Skill Standardization + Consolidation
+# Plan: Skill Standardization + Consolidation
 
 ## Objective
 Reduce duplicate/near-duplicate skills by applying deterministic canonicalization during ingest and consolidating existing records in the database.

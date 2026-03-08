@@ -1,4 +1,4 @@
-# Iteration 07: Jobs View as Primary Workflow
+# Plan: Jobs View as Primary Workflow
 
 ## Objective
 Establish `/jobs` as the primary landing workflow, move job capture into a modal launched from this page, and provide slim client-side search/sort controls.

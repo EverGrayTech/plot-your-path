@@ -1,4 +1,4 @@
-# Iteration XX: Outcome Feedback Learning Loop
+# Plan: Outcome Feedback Learning Loop
 
 ## Objective
 Capture downstream outcomes (screen/reject/interview/offer) and tie them back to generated artifacts, prompts, and model settings to support iterative system improvement.
@@ -15,8 +15,8 @@ Capture downstream outcomes (screen/reject/interview/offer) and tie them back to
 - Keep implementation local-first and privacy-preserving
 
 ## Prerequisites
-- `10-job-status-tracking-iteration.md`
-- `14-application-materials-mvp.md`
+- `10-job-status-tracking.md`
+- `14-application-materials.md`
 - `XX-application-ops-tracking.md`
 
 ## Implementation Checklist

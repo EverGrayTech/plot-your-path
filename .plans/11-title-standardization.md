@@ -1,4 +1,4 @@
-# Iteration 11: Job Title Standardization
+# Plan: Job Title Standardization
 
 ## Objective
 Reduce title variation by standardizing role titles into a consistent structure while preserving meaningful distinctions.

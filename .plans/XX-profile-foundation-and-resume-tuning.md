@@ -1,4 +1,4 @@
-# Iteration 16: Profile Foundation + Resume Tuning (Raw Experience Path)
+# Plan: Profile Foundation + Resume Tuning (Raw Experience Path)
 
 ## Objective
 Begin transition from document-only context to a native profile foundation that still supports `resume.md` fallback, and use it to generate role-targeted resume tuning guidance.
@@ -15,8 +15,8 @@ Begin transition from document-only context to a native profile foundation that 
 - This iteration does not yet implement full timeline/work-journal ingestion
 
 ## Prerequisites
-- `XX-career-evidence-foundation.md`
 - `13-application-fit-analysis.md`
+- `XX-career-evidence.md`
 
 ## Implementation Checklist
 

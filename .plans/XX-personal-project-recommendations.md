@@ -1,4 +1,4 @@
-# Iteration 20: Personal Project Recommendations (Skill Gap Closure)
+# Plan: Personal Project Recommendations (Skill Gap Closure)
 
 ## Objective
 Recommend practical, portfolio-friendly projects that close high-value skill gaps aligned with target roles and career pathways.

@@ -1,4 +1,4 @@
-# Iteration XX: AI Settings — Model + Token Controls by Operation Family
+# Plan: AI Settings — Model + Token Controls by Operation Family
 
 ## Objective
 Expose user-controlled provider token and model selection by operation family so the app is portable, configurable, and user-owned.
@@ -18,9 +18,9 @@ Expose user-controlled provider token and model selection by operation family so
 - Defaults remain available for zero-config startup
 
 ## Prerequisites
-- `01-job_capture_mvp.md`
-- `14-application-materials-mvp.md`
-- `XX-desirability-scoring-foundation.md`
+- `01-job-capture-mvp.md`
+- `14-application-materials.md`
+- `15-desirability-scoring.md`
 
 ## Implementation Checklist
 

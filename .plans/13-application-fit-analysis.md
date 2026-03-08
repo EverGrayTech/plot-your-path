@@ -1,4 +1,4 @@
-# Iteration 13: In-App Role Fit (Skill Match) Analysis MVP
+# Plan: In-App Role Fit (Skill Match) Analysis MVP
 
 ## Objective
 Replace the external chat step for initial role triage by adding a native, repeatable in-app role-fit workflow for each captured job.

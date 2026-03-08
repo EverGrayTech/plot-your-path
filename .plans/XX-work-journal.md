@@ -1,4 +1,4 @@
-# Iteration 17: Work Journal Foundation (Continuous Experience Capture)
+# Plan: Work Journal Foundation (Continuous Experience Capture)
 
 ## Objective
 Lay the groundwork for ongoing work-journal capture so future application materials and profile context are built from contemporaneous evidence, not memory reconstruction.
@@ -15,7 +15,7 @@ Lay the groundwork for ongoing work-journal capture so future application materi
 - No automatic STAR conversion yet (prepared for next phase)
 
 ## Prerequisites
-- `XX-career-evidence-foundation.md`
+- `XX-career-evidence.md`
 
 ## Implementation Checklist
 
