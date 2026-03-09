@@ -12,7 +12,9 @@ import backend.models  # noqa: F401
 from backend.database import Base, engine
 
 
-def _add_missing_columns(bind: Engine, table_name: str, column_definitions: Iterable[str]) -> list[str]:
+def _add_missing_columns(
+    bind: Engine, table_name: str, column_definitions: Iterable[str]
+) -> list[str]:
     """Add the provided columns to a table when they are missing."""
     inspector = inspect(bind)
     existing_columns = {column["name"] for column in inspector.get_columns(table_name)}
