@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from datetime import date
 from hashlib import sha256
@@ -77,6 +78,34 @@ class CareerEvidenceService:
         return sections
 
     @staticmethod
+    def _build_resume_enrichment(section: str, section_index: int) -> dict[str, str | int | bool]:
+        lines = [line.strip() for line in section.splitlines() if line.strip()]
+        heading = ""
+        if lines and lines[0].startswith("#"):
+            heading = lines[0].lstrip("#").strip()
+
+        bullet_count = sum(1 for line in lines if line.startswith(("-", "*")))
+        keyword_matches = re.findall(r"[A-Za-z][A-Za-z0-9+.#-]{2,}", section)
+        keyword_candidates = [match.lower() for match in keyword_matches]
+        seen: set[str] = set()
+        keywords: list[str] = []
+        for keyword in keyword_candidates:
+            if keyword in seen:
+                continue
+            seen.add(keyword)
+            keywords.append(keyword)
+            if len(keywords) >= 12:
+                break
+
+        return {
+            "section_heading": heading,
+            "section_index": section_index,
+            "bullet_count": bullet_count,
+            "has_heading": bool(heading),
+            "keywords": ",".join(keywords),
+        }
+
+    @staticmethod
     def _to_unit(evidence: CareerEvidence) -> EvidenceUnit:
         return EvidenceUnit(
             id=evidence.id,
@@ -88,11 +117,26 @@ class CareerEvidenceService:
             timeframe_start=evidence.timeframe_start,
             timeframe_end=evidence.timeframe_end,
             provenance=dict(evidence.provenance or {}),
+            resume_enrichment=dict(evidence.resume_enrichment or {}),
             schema_version=evidence.schema_version,
             content_hash=evidence.content_hash,
             created_at=evidence.created_at,
             updated_at=evidence.updated_at,
         )
+
+    def _detect_resume_source(self, resume_markdown: str | None) -> tuple[str, str]:
+        if resume_markdown is not None:
+            return resume_markdown, "inline"
+
+        profile_path = settings.candidate_profile_path
+        if file_exists(profile_path):
+            return load_file(profile_path), profile_path
+
+        fallback_resume_path = str(Path(settings.data_root) / "resume.md")
+        if file_exists(fallback_resume_path):
+            return load_file(fallback_resume_path), fallback_resume_path
+
+        return "", "missing"
 
     def _build_relevance_score(self, evidence: CareerEvidence, query: EvidenceQuery) -> int:
         score = 0
@@ -133,6 +177,7 @@ class CareerEvidenceService:
         *,
         body: str,
         provenance: dict[str, str | int | float | bool | None],
+        resume_enrichment: dict[str, str | int | float | bool | None],
         source_key: str,
         source_record_id: str | None,
         source_type: EvidenceSourceType,
@@ -154,6 +199,7 @@ class CareerEvidenceService:
                 timeframe_start=timeframe_start,
                 timeframe_end=timeframe_end,
                 provenance=provenance,
+                resume_enrichment=resume_enrichment,
                 schema_version=EVIDENCE_SCHEMA_VERSION,
                 content_hash=content_hash,
             )
@@ -168,6 +214,7 @@ class CareerEvidenceService:
         row.timeframe_start = timeframe_start
         row.timeframe_end = timeframe_end
         row.provenance = provenance
+        row.resume_enrichment = resume_enrichment
         row.schema_version = EVIDENCE_SCHEMA_VERSION
         row.content_hash = content_hash
         self.db.flush()
@@ -191,6 +238,7 @@ class CareerEvidenceService:
                 tags=entry.tags,
                 timeframe_end=entry.timeframe_end,
                 timeframe_start=entry.timeframe_start,
+                resume_enrichment={},
             )
             persisted.append(row)
 
@@ -219,6 +267,7 @@ class CareerEvidenceService:
             tags=tags or [],
             timeframe_end=timeframe_end,
             timeframe_start=timeframe_start,
+            resume_enrichment={},
         )
         self.db.commit()
         self.db.refresh(row)
@@ -256,6 +305,7 @@ class CareerEvidenceService:
                 tags=[],
                 timeframe_end=None,
                 timeframe_start=None,
+                resume_enrichment=self._build_resume_enrichment(body, index),
             )
             persisted.append(row)
 
@@ -263,6 +313,22 @@ class CareerEvidenceService:
         for row in persisted:
             self.db.refresh(row)
         return persisted
+
+    def sync_resume_profile(
+        self,
+        *,
+        resume_markdown: str | None = None,
+        source_record_id: str = "resume.md",
+    ) -> tuple[list[CareerEvidence], str]:
+        """Sync resume source into evidence store and return records plus source used."""
+        raw, source_used = self._detect_resume_source(resume_markdown)
+        if not raw.strip():
+            return [], source_used
+        rows = self.ingest_resume_markdown(
+            resume_markdown=raw,
+            source_record_id=source_record_id,
+        )
+        return rows, source_used
 
     def load_context_text(self, query: EvidenceQuery) -> str:
         """Return concatenated evidence text for downstream prompt builders."""

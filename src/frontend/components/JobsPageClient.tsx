@@ -14,6 +14,7 @@ import {
   type JobListItem,
   type OperationFamily,
   type PipelineItem,
+  type ResumeTuningSuggestion,
   type RoleStatus,
   type SkillDetail,
   analyzeJobFit,
@@ -23,6 +24,7 @@ import {
   generateCoverLetter,
   generateInterviewPrepPack,
   generateQuestionAnswers,
+  generateResumeTuning,
   getJob,
   getSkill,
   healthcheckAISetting,
@@ -32,10 +34,12 @@ import {
   listInterviewPrepPacks,
   listJobs,
   listPipeline,
+  listResumeTuning,
   refreshDesirabilityScore,
   regenerateInterviewPrepSection,
   reorderDesirabilityFactors,
   scoreJobDesirability,
+  syncResumeProfile,
   updateAISetting,
   updateAISettingToken,
   updateDesirabilityFactor,
@@ -115,6 +119,26 @@ function interviewPrepToMarkdown(pack: InterviewPrepPack): string {
   return `${lines.join("\n")}\n`;
 }
 
+function resumeTuningToMarkdown(suggestion: ResumeTuningSuggestion): string {
+  const sections = [
+    { key: "keep_bullets", title: "Keep Bullets" },
+    { key: "remove_bullets", title: "Remove / Deprioritize Bullets" },
+    { key: "emphasize_bullets", title: "Emphasize Bullets" },
+    { key: "missing_keywords", title: "Missing Keywords" },
+    { key: "summary_tweaks", title: "Summary Tweaks" },
+    { key: "confidence_notes", title: "Confidence / Rationale Notes" },
+  ] as const;
+
+  const lines: string[] = ["# Resume Tuning Suggestions"];
+  for (const section of sections) {
+    lines.push(`\n## ${section.title}`);
+    for (const item of suggestion.sections[section.key]) {
+      lines.push(`- ${item}`);
+    }
+  }
+  return `${lines.join("\n")}\n`;
+}
+
 export function JobsPageClient() {
   const [jobs, setJobs] = useState<JobListItem[]>([]);
   const [loadingJobs, setLoadingJobs] = useState(true);
@@ -158,6 +182,15 @@ export function JobsPageClient() {
     null,
   );
   const [scoringDesirability, setScoringDesirability] = useState(false);
+  const [resumeTuningSuggestions, setResumeTuningSuggestions] = useState<ResumeTuningSuggestion[]>(
+    [],
+  );
+  const [resumeTuningLoading, setResumeTuningLoading] = useState(false);
+  const [resumeTuningError, setResumeTuningError] = useState<string | null>(null);
+  const [generatingResumeTuning, setGeneratingResumeTuning] = useState(false);
+  const [syncingResumeProfile, setSyncingResumeProfile] = useState(false);
+  const [resumeSyncNotice, setResumeSyncNotice] = useState<string | null>(null);
+  const [selectedResumeTuningId, setSelectedResumeTuningId] = useState<number | null>(null);
   const [desirabilityError, setDesirabilityError] = useState<string | null>(null);
   const [qaQuestionsInput, setQaQuestionsInput] = useState("");
   const [selectedMaterialId, setSelectedMaterialId] = useState<number | null>(null);
@@ -462,6 +495,10 @@ export function JobsPageClient() {
       setInterviewPrepPacks([]);
       setSelectedInterviewPrepId(null);
       setInterviewPrepError(null);
+      setResumeTuningSuggestions([]);
+      setSelectedResumeTuningId(null);
+      setResumeTuningError(null);
+      setResumeSyncNotice(null);
       return;
     }
 
@@ -489,6 +526,37 @@ export function JobsPageClient() {
     };
 
     fetchMaterials();
+  }, [selectedRoleId]);
+
+  useEffect(() => {
+    if (!selectedRoleId) {
+      return;
+    }
+
+    const fetchResumeTuning = async () => {
+      setResumeTuningLoading(true);
+      setResumeTuningError(null);
+      try {
+        const response = await listResumeTuning(selectedRoleId);
+        setResumeTuningSuggestions(response);
+        setSelectedResumeTuningId((previous) => {
+          if (previous && response.some((item) => item.id === previous)) {
+            return previous;
+          }
+          return response[0]?.id ?? null;
+        });
+      } catch (error) {
+        if (error instanceof Error) {
+          setResumeTuningError(error.message);
+        } else {
+          setResumeTuningError("Failed to load resume tuning suggestions.");
+        }
+      } finally {
+        setResumeTuningLoading(false);
+      }
+    };
+
+    fetchResumeTuning();
   }, [selectedRoleId]);
 
   useEffect(() => {
@@ -524,6 +592,8 @@ export function JobsPageClient() {
 
   const selectedInterviewPrepPack =
     interviewPrepPacks.find((item) => item.id === selectedInterviewPrepId) ?? null;
+  const selectedResumeTuning =
+    resumeTuningSuggestions.find((item) => item.id === selectedResumeTuningId) ?? null;
 
   useEffect(() => {
     if (!selectedInterviewPrepPack) {
@@ -693,6 +763,70 @@ export function JobsPageClient() {
     } catch {
       setInterviewPrepError("Unable to copy prep pack to clipboard in this browser.");
     }
+  }
+
+  async function handleSyncResumeProfile() {
+    setSyncingResumeProfile(true);
+    setResumeTuningError(null);
+    setResumeSyncNotice(null);
+    try {
+      const result = await syncResumeProfile();
+      setResumeSyncNotice(
+        `Synced ${result.ingested_count} resume section(s) from ${result.source_used}.`,
+      );
+    } catch (error) {
+      if (error instanceof Error) {
+        setResumeTuningError(error.message);
+      } else {
+        setResumeTuningError("Failed to sync resume profile.");
+      }
+    } finally {
+      setSyncingResumeProfile(false);
+    }
+  }
+
+  async function handleGenerateResumeTuning() {
+    if (!selectedJob) {
+      return;
+    }
+    setGeneratingResumeTuning(true);
+    setResumeTuningError(null);
+    try {
+      const created = await generateResumeTuning(selectedJob.id);
+      const refreshed = await listResumeTuning(selectedJob.id);
+      setResumeTuningSuggestions(refreshed);
+      setSelectedResumeTuningId(created.id);
+    } catch (error) {
+      if (error instanceof Error) {
+        setResumeTuningError(error.message);
+      } else {
+        setResumeTuningError("Failed to generate resume tuning suggestions.");
+      }
+    } finally {
+      setGeneratingResumeTuning(false);
+    }
+  }
+
+  async function handleCopyResumeTuning(suggestion: ResumeTuningSuggestion) {
+    const text = resumeTuningToMarkdown(suggestion);
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      setResumeTuningError("Unable to copy resume tuning suggestions in this browser.");
+    }
+  }
+
+  function handleExportResumeTuning(suggestion: ResumeTuningSuggestion) {
+    const text = resumeTuningToMarkdown(suggestion);
+    const blob = new Blob([text], { type: "text/markdown;charset=utf-8" });
+    const objectUrl = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = objectUrl;
+    link.download = `resume-tuning-v${suggestion.version}.md`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(objectUrl);
   }
 
   function handleExportInterviewPrep(pack: InterviewPrepPack) {
@@ -1649,6 +1783,106 @@ export function JobsPageClient() {
                   </>
                 ) : (
                   <p>No interview prep packs generated yet.</p>
+                )}
+              </section>
+
+              <section>
+                <h4>Resume Tuning</h4>
+                <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.5rem" }}>
+                  <button
+                    disabled={syncingResumeProfile}
+                    onClick={handleSyncResumeProfile}
+                    type="button"
+                  >
+                    {syncingResumeProfile ? "Syncing profile..." : "Sync Resume Profile"}
+                  </button>
+                  <button
+                    disabled={generatingResumeTuning}
+                    onClick={handleGenerateResumeTuning}
+                    type="button"
+                  >
+                    {generatingResumeTuning ? "Generating tuning..." : "Generate Resume Tuning"}
+                  </button>
+                </div>
+                {resumeSyncNotice ? <p>{resumeSyncNotice}</p> : null}
+                {resumeTuningLoading ? <p>Loading resume tuning suggestions...</p> : null}
+                {resumeTuningError ? <p role="alert">{resumeTuningError}</p> : null}
+
+                {resumeTuningSuggestions.length ? (
+                  <>
+                    <label
+                      htmlFor="resume-tuning-version"
+                      style={{ display: "grid", gap: "0.25rem" }}
+                    >
+                      Saved resume tuning versions
+                    </label>
+                    <select
+                      id="resume-tuning-version"
+                      onChange={(event) => setSelectedResumeTuningId(Number(event.target.value))}
+                      value={selectedResumeTuningId ?? ""}
+                    >
+                      {resumeTuningSuggestions.map((suggestion) => (
+                        <option key={suggestion.id} value={suggestion.id}>
+                          Resume tuning v{suggestion.version} (
+                          {new Date(suggestion.created_at).toLocaleString()})
+                        </option>
+                      ))}
+                    </select>
+
+                    {selectedResumeTuning ? (
+                      <div
+                        style={{
+                          border: "1px solid #ddd",
+                          marginTop: "0.5rem",
+                          padding: "0.75rem",
+                        }}
+                      >
+                        <p>
+                          <strong>Generated with:</strong> {selectedResumeTuning.provider}/
+                          {selectedResumeTuning.model}
+                        </p>
+                        {[
+                          ["Keep Bullets", selectedResumeTuning.sections.keep_bullets],
+                          [
+                            "Remove / Deprioritize Bullets",
+                            selectedResumeTuning.sections.remove_bullets,
+                          ],
+                          ["Emphasize Bullets", selectedResumeTuning.sections.emphasize_bullets],
+                          ["Missing Keywords", selectedResumeTuning.sections.missing_keywords],
+                          ["Summary Tweaks", selectedResumeTuning.sections.summary_tweaks],
+                          [
+                            "Confidence / Rationale Notes",
+                            selectedResumeTuning.sections.confidence_notes,
+                          ],
+                        ].map(([title, items]) => (
+                          <div key={title}>
+                            <h5 style={{ marginBottom: "0.25rem" }}>{title}</h5>
+                            <ul>
+                              {(items as string[]).map((item) => (
+                                <li key={`${title}-${item}`}>{item}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        ))}
+                        <div style={{ display: "flex", gap: "0.5rem" }}>
+                          <button
+                            onClick={() => handleCopyResumeTuning(selectedResumeTuning)}
+                            type="button"
+                          >
+                            Copy Tuning Suggestions
+                          </button>
+                          <button
+                            onClick={() => handleExportResumeTuning(selectedResumeTuning)}
+                            type="button"
+                          >
+                            Export Tuning Suggestions
+                          </button>
+                        </div>
+                      </div>
+                    ) : null}
+                  </>
+                ) : (
+                  <p>No resume tuning suggestions generated yet.</p>
                 )}
               </section>
 

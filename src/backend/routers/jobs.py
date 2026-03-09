@@ -43,11 +43,15 @@ from backend.schemas.job import (
     PipelineCounters,
     PipelineItem,
     PipelineResponse,
+    ResumeProfileSyncResult,
+    ResumeTuningSections,
+    ResumeTuningSuggestion,
     RoleStatus,
     RoleStatusChange,
     SalaryInfo,
 )
 from backend.services.application_materials import ApplicationMaterialsService
+from backend.services.career_evidence import CareerEvidenceService
 from backend.services.desirability_scorer import DesirabilityScoringService
 from backend.services.fit_analyzer import FitAnalysisService
 from backend.services.job_capture import (
@@ -72,6 +76,13 @@ class NextActionUpdate(BaseModel):
     """Payload for updating only next-action datetime."""
 
     next_action_at: datetime | None
+
+
+class ResumeProfileSyncRequest(BaseModel):
+    """Optional payload to sync resume content into profile evidence store."""
+
+    resume_markdown: str | None = None
+    source_record_id: str = "resume.md"
 
 
 def _application_ops_attention(
@@ -241,6 +252,29 @@ def _to_interview_prep_pack_schema(material: ApplicationMaterialModel) -> Interv
             likely_questions=list(sections.get(InterviewPrepSectionKey.LIKELY_QUESTIONS.value, [])),
             talking_points=list(sections.get(InterviewPrepSectionKey.TALKING_POINTS.value, [])),
             star_stories=list(sections.get(InterviewPrepSectionKey.STAR_STORIES.value, [])),
+        ),
+        provider=material.provider,
+        model=material.model,
+        prompt_version=material.prompt_version,
+        created_at=material.created_at,
+    )
+
+
+def _to_resume_tuning_schema(material: ApplicationMaterialModel) -> ResumeTuningSuggestion:
+    """Convert ORM resume-tuning row to response schema."""
+    sections = material.sections or {}
+    return ResumeTuningSuggestion(
+        id=material.id,
+        role_id=material.role_id,
+        artifact_type=material.artifact_type,
+        version=material.version,
+        sections=ResumeTuningSections(
+            keep_bullets=list(sections.get("keep_bullets", [])),
+            remove_bullets=list(sections.get("remove_bullets", [])),
+            emphasize_bullets=list(sections.get("emphasize_bullets", [])),
+            missing_keywords=list(sections.get("missing_keywords", [])),
+            summary_tweaks=list(sections.get("summary_tweaks", [])),
+            confidence_notes=list(sections.get("confidence_notes", [])),
         ),
         provider=material.provider,
         model=material.model,
@@ -619,6 +653,24 @@ def analyze_job_fit(role_id: int, db: Annotated[Session, Depends(get_db)]) -> Fi
         ) from exc
 
 
+@router.post("/jobs/profile/sync-resume", response_model=ResumeProfileSyncResult)
+def sync_resume_profile(
+    payload: ResumeProfileSyncRequest,
+    db: Annotated[Session, Depends(get_db)],
+) -> ResumeProfileSyncResult:
+    """Sync resume markdown into shared career evidence profile foundation."""
+    service = CareerEvidenceService(db)
+    rows, source_used = service.sync_resume_profile(
+        resume_markdown=payload.resume_markdown,
+        source_record_id=payload.source_record_id,
+    )
+    return ResumeProfileSyncResult(
+        ingested_count=len(rows),
+        source_record_id=payload.source_record_id,
+        source_used=source_used,
+    )
+
+
 @router.post(
     "/jobs/{role_id}/application-materials/cover-letter", response_model=ApplicationMaterial
 )
@@ -782,6 +834,56 @@ def update_interview_prep_pack(
             status_code=422,
             detail=f"Failed to update interview prep pack: {exc}",
         ) from exc
+
+
+@router.post("/jobs/{role_id}/resume-tuning", response_model=ResumeTuningSuggestion)
+def generate_resume_tuning(
+    role_id: int,
+    db: Annotated[Session, Depends(get_db)],
+) -> ResumeTuningSuggestion:
+    """Generate and persist resume tuning suggestions for a role."""
+    service = ApplicationMaterialsService(db)
+    try:
+        material = service.generate_resume_tuning_suggestion(role_id)
+        return _to_resume_tuning_schema(material)
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Failed to generate resume tuning suggestions: {exc}",
+        ) from exc
+
+
+@router.get("/jobs/{role_id}/resume-tuning", response_model=list[ResumeTuningSuggestion])
+def list_resume_tuning(
+    role_id: int,
+    db: Annotated[Session, Depends(get_db)],
+) -> list[ResumeTuningSuggestion]:
+    """List saved resume tuning suggestion versions for a role."""
+    service = ApplicationMaterialsService(db)
+    try:
+        materials = service.list_resume_tuning_suggestions(role_id)
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    return [_to_resume_tuning_schema(item) for item in materials]
+
+
+@router.get("/jobs/{role_id}/resume-tuning/{material_id}", response_model=ResumeTuningSuggestion)
+def get_resume_tuning(
+    role_id: int,
+    material_id: int,
+    db: Annotated[Session, Depends(get_db)],
+) -> ResumeTuningSuggestion:
+    """Get a specific resume tuning suggestion version for a role."""
+    service = ApplicationMaterialsService(db)
+    try:
+        material = service.get_resume_tuning_suggestion(material_id, role_id)
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    return _to_resume_tuning_schema(material)
 
 
 @router.get(

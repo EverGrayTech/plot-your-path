@@ -39,6 +39,7 @@ describe("JobsPageClient", () => {
   beforeEach(() => {
     vi.spyOn(api, "listApplicationMaterials").mockResolvedValue([]);
     vi.spyOn(api, "listInterviewPrepPacks").mockResolvedValue([]);
+    vi.spyOn(api, "listResumeTuning").mockResolvedValue([]);
   });
 
   it("loads jobs and applies search + sort controls", async () => {
@@ -813,5 +814,100 @@ describe("JobsPageClient", () => {
       expect(listPrepSpy).toHaveBeenCalledTimes(3);
     });
     expect(await screen.findByDisplayValue("Tell us about your impact.")).toBeInTheDocument();
+  }, 20000);
+
+  it("syncs profile and generates resume tuning suggestions", async () => {
+    vi.spyOn(api, "listJobs").mockResolvedValue(jobs);
+    vi.spyOn(api, "getJob").mockResolvedValue({
+      id: 2,
+      company: {
+        id: 10,
+        name: "Beta Co",
+        slug: "beta-co",
+        website: null,
+        created_at: "2026-03-05T10:00:00Z",
+      },
+      title: "Engineer",
+      team_division: "Platform",
+      salary: { min: 120000, max: 150000, currency: "USD" },
+      url: "https://example.com/jobs/2",
+      skills: {
+        required: [{ id: 1, name: "Python", requirement_level: "required" }],
+        preferred: [{ id: 2, name: "FastAPI", requirement_level: "preferred" }],
+      },
+      description_md: "",
+      created_at: "2026-03-05T10:00:00Z",
+      status: "open",
+      status_history: [],
+      latest_fit_analysis: null,
+      latest_desirability_score: null,
+    });
+
+    vi.spyOn(api, "syncResumeProfile").mockResolvedValue({
+      ingested_count: 2,
+      source_record_id: "resume.md",
+      source_used: "resume.md",
+    });
+    vi.spyOn(api, "generateResumeTuning").mockResolvedValue({
+      id: 1001,
+      role_id: 2,
+      artifact_type: "resume_tuning",
+      version: 1,
+      sections: {
+        keep_bullets: ["Keep measurable impact bullet"],
+        remove_bullets: ["Remove generic bullet"],
+        emphasize_bullets: ["Emphasize API scale outcomes"],
+        missing_keywords: ["observability"],
+        summary_tweaks: ["Lead with platform impact"],
+        confidence_notes: ["High confidence for required-skill alignment"],
+      },
+      provider: "openai",
+      model: "gpt-4o",
+      prompt_version: "resume-tuning-v1",
+      created_at: "2026-03-07T18:20:00Z",
+    });
+
+    const listResumeTuningSpy = vi
+      .spyOn(api, "listResumeTuning")
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([
+        {
+          id: 1001,
+          role_id: 2,
+          artifact_type: "resume_tuning",
+          version: 1,
+          sections: {
+            keep_bullets: ["Keep measurable impact bullet"],
+            remove_bullets: ["Remove generic bullet"],
+            emphasize_bullets: ["Emphasize API scale outcomes"],
+            missing_keywords: ["observability"],
+            summary_tweaks: ["Lead with platform impact"],
+            confidence_notes: ["High confidence for required-skill alignment"],
+          },
+          provider: "openai",
+          model: "gpt-4o",
+          prompt_version: "resume-tuning-v1",
+          created_at: "2026-03-07T18:20:00Z",
+        },
+      ]);
+
+    render(<JobsPageClient />);
+
+    await screen.findByText("Engineer");
+    fireEvent.click(screen.getByRole("button", { name: /Engineer — Beta Co/i }));
+
+    fireEvent.click(await screen.findByRole("button", { name: "Sync Resume Profile" }));
+    expect(
+      await screen.findByText(/Synced 2 resume section\(s\) from resume\.md/i),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Generate Resume Tuning" }));
+
+    await waitFor(() => {
+      expect(listResumeTuningSpy).toHaveBeenCalledTimes(2);
+    });
+
+    expect(await screen.findByText("Keep measurable impact bullet")).toBeInTheDocument();
+    expect(screen.getByText("observability")).toBeInTheDocument();
   }, 20000);
 });

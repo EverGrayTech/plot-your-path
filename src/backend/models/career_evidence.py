@@ -20,6 +20,7 @@ class CareerEvidence(Base):
     timeframe_start = Column(Date, nullable=True, index=True)
     timeframe_end = Column(Date, nullable=True, index=True)
     provenance = Column(JSON, nullable=False, default=dict)
+    resume_enrichment = Column(JSON, nullable=False, default=dict)
     schema_version = Column(String, nullable=False, default="evidence-v1")
     content_hash = Column(String, nullable=False, index=True)
     created_at = Column(DateTime, server_default=func.now(), nullable=False, index=True)
