@@ -135,6 +135,7 @@ class ApplicationArtifactType(StrEnum):
     APPLICATION_QA = "application_qa"
     COVER_LETTER = "cover_letter"
     INTERVIEW_PREP_PACK = "interview_prep_pack"
+    RESUME_TUNING = "resume_tuning"
 
 
 class InterviewPrepSectionKey(StrEnum):
@@ -177,6 +178,39 @@ class InterviewPrepPackRegenerateRequest(BaseModel):
     """Request payload for regenerating one interview prep section."""
 
     section: InterviewPrepSectionKey
+
+
+class ResumeProfileSyncResult(BaseModel):
+    """Result payload for syncing resume markdown into profile evidence units."""
+
+    ingested_count: int
+    source_record_id: str
+    source_used: str
+
+
+class ResumeTuningSections(BaseModel):
+    """Structured resume tuning suggestion sections."""
+
+    confidence_notes: list[str]
+    emphasize_bullets: list[str]
+    keep_bullets: list[str]
+    missing_keywords: list[str]
+    remove_bullets: list[str]
+    summary_tweaks: list[str]
+
+
+class ResumeTuningSuggestion(BaseModel):
+    """Generated resume tuning suggestion payload."""
+
+    id: int
+    role_id: int
+    artifact_type: ApplicationArtifactType
+    version: int
+    sections: ResumeTuningSections
+    provider: str
+    model: str
+    prompt_version: str
+    created_at: datetime
 
 
 class FitAnalysis(BaseModel):

@@ -21,26 +21,26 @@ Begin transition from document-only context to a native profile foundation that 
 ## Implementation Checklist
 
 ### 1. Profile Data Foundation
-- [ ] Add resume-specific enrichment fields that extend (not replace) career evidence records
-- [ ] Add import/sync path from `resume.md` into career evidence-backed profile views
-- [ ] Track provenance so generated suggestions can reference source context
+- [x] Add resume-specific enrichment fields that extend (not replace) career evidence records
+- [x] Add import/sync path from `resume.md` into career evidence-backed profile views
+- [x] Track provenance so generated suggestions can reference source context
 
 ### 2. Resume Tuning Engine
-- [ ] Add endpoint/service to generate role-targeted resume tuning suggestions
-- [ ] Produce structured output: keep/remove/emphasize bullets, missing keywords, summary tweaks
-- [ ] Include confidence/rationale notes tied to role requirements and fit analysis
+- [x] Add endpoint/service to generate role-targeted resume tuning suggestions
+- [x] Produce structured output: keep/remove/emphasize bullets, missing keywords, summary tweaks
+- [x] Include confidence/rationale notes tied to role requirements and fit analysis
 
 ### 3. Frontend Workflow
-- [ ] Add “Resume Tuning” action in Job Detail/Application Materials area
-- [ ] Display suggested edits in reviewable sections (not auto-applied)
-- [ ] Add copy/export affordance for revised draft content
+- [x] Add “Resume Tuning” action in Job Detail/Application Materials area
+- [x] Display suggested edits in reviewable sections (not auto-applied)
+- [x] Add copy/export affordance for revised draft content
 
 ### 4. Tests + Verification
-- [ ] Add backend tests for resume import fallback behavior and tuning outputs
-- [ ] Add frontend tests for tuning generation and suggestion rendering
-- [ ] Verify compatibility with fit-analysis + application-materials flow
+- [x] Add backend tests for resume import fallback behavior and tuning outputs
+- [x] Add frontend tests for tuning generation and suggestion rendering
+- [x] Verify compatibility with fit-analysis + application-materials flow
 
 ## Acceptance Criteria
-- [ ] User can generate role-specific resume tuning suggestions in-app
-- [ ] App can operate from structured profile data or `resume.md` fallback
-- [ ] Suggestions are reviewable, explainable, and non-destructive
+- [x] User can generate role-specific resume tuning suggestions in-app
+- [x] App can operate from structured profile data or `resume.md` fallback
+- [x] Suggestions are reviewable, explainable, and non-destructive

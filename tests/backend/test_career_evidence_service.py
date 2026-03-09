@@ -41,6 +41,9 @@ def test_ingest_resume_markdown_is_idempotent_by_section_key() -> None:
         assert rows[0].body.startswith("# Experience")
         assert "FastAPI" in rows[0].body
         assert rows[0].provenance["adapter_version"] == "resume-adapter-v1"
+        enrichment = dict(rows[0].resume_enrichment or {})
+        assert enrichment.get("has_heading") is True
+        assert "fastapi" in str(enrichment.get("keywords", ""))
     finally:
         session.close()
 
@@ -145,5 +148,27 @@ def test_load_context_text_bootstraps_from_resume_when_store_is_empty() -> None:
 
         assert "FastAPI" in context
         assert session.query(CareerEvidence).count() == 1
+    finally:
+        session.close()
+
+
+def test_sync_resume_profile_reports_source_used() -> None:
+    """Sync helper should report detected source path and ingested section count."""
+    session = _session()
+    service = CareerEvidenceService(session)
+
+    try:
+        with (
+            patch("backend.services.career_evidence.file_exists", side_effect=[True, False]),
+            patch(
+                "backend.services.career_evidence.load_file",
+                return_value="# Summary\nPlatform engineer",
+            ),
+        ):
+            rows, source_used = service.sync_resume_profile()
+
+        assert source_used
+        assert len(rows) == 1
+        assert rows[0].source_type == EvidenceSourceType.RESUME.value
     finally:
         session.close()

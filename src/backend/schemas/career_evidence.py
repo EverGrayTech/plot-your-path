@@ -56,6 +56,7 @@ class EvidenceUnit(BaseModel):
     timeframe_start: date | None
     timeframe_end: date | None
     provenance: dict[str, str | int | float | bool | None]
+    resume_enrichment: dict[str, str | int | float | bool | None]
     schema_version: str
     content_hash: str
     created_at: datetime

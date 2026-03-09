@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import json
-from typing import Any
+from typing import Any, cast
 
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -25,6 +25,7 @@ from backend.utils.file_storage import save_file
 COVER_LETTER_PROMPT_VERSION = "cover-letter-v1"
 INTERVIEW_PREP_PROMPT_VERSION = "interview-prep-pack-v1"
 QA_PROMPT_VERSION = "application-qa-v1"
+RESUME_TUNING_PROMPT_VERSION = "resume-tuning-v1"
 
 
 class ApplicationMaterialsService:
@@ -36,14 +37,26 @@ class ApplicationMaterialsService:
             config=AISettingsService(db).build_llm_config(OperationFamily.APPLICATION_GENERATION)
         )
 
+    @staticmethod
+    def _role_title(role: Role) -> str:
+        return cast(str, role.title)
+
+    @staticmethod
+    def _role_team_division(role: Role) -> str | None:
+        return cast(str | None, role.team_division)
+
+    @staticmethod
+    def _role_url(role: Role) -> str:
+        return cast(str, role.url)
+
     def _build_cover_letter_prompt(self, fit_rationale: str, profile_text: str, role: Role) -> str:
         return (
             "Write a concise, tailored cover letter draft for this role.\n"
             "Output plain text only. 220-320 words.\n"
             "Use role context and fit rationale. Avoid inventing achievements.\n\n"
-            f"Role title: {role.title}\n"
-            f"Role team/division: {role.team_division or 'N/A'}\n"
-            f"Role URL: {role.url}\n"
+            f"Role title: {self._role_title(role)}\n"
+            f"Role team/division: {self._role_team_division(role) or 'N/A'}\n"
+            f"Role URL: {self._role_url(role)}\n"
             f"Fit rationale: {fit_rationale}\n\n"
             "Candidate profile excerpt:\n"
             f"{profile_text[:6000]}"
@@ -64,9 +77,9 @@ class ApplicationMaterialsService:
             "Output plain text only in this format for each item:\n"
             "Q: <original question>\nA: <answer>\n"
             "Do not skip questions. Do not invent facts.\n\n"
-            f"Role title: {role.title}\n"
-            f"Role team/division: {role.team_division or 'N/A'}\n"
-            f"Role URL: {role.url}\n"
+            f"Role title: {self._role_title(role)}\n"
+            f"Role team/division: {self._role_team_division(role) or 'N/A'}\n"
+            f"Role URL: {self._role_url(role)}\n"
             f"Fit rationale: {fit_rationale}\n\n"
             "Candidate profile excerpt:\n"
             f"{profile_text[:6000]}\n\n"
@@ -98,9 +111,9 @@ class ApplicationMaterialsService:
             "Likely questions should include behavioral + role-specific items.\n"
             "Talking points should align to role needs and fit context.\n"
             "STAR stories should be draft-ready prompts grounded in known evidence only.\n\n"
-            f"Role title: {role.title}\n"
-            f"Role team/division: {role.team_division or 'N/A'}\n"
-            f"Role URL: {role.url}\n"
+            f"Role title: {self._role_title(role)}\n"
+            f"Role team/division: {self._role_team_division(role) or 'N/A'}\n"
+            f"Role URL: {self._role_url(role)}\n"
             f"Required skills: {required}\n"
             f"Preferred skills: {preferred}\n"
             f"Fit rationale: {fit_rationale}\n\n"
@@ -129,8 +142,8 @@ class ApplicationMaterialsService:
             "Return exact schema:"
             ' {"items": ["..."]} with 4-8 concise strings.\n'
             "Do not return markdown.\n\n"
-            f"Role title: {role.title}\n"
-            f"Role team/division: {role.team_division or 'N/A'}\n"
+            f"Role title: {self._role_title(role)}\n"
+            f"Role team/division: {self._role_team_division(role) or 'N/A'}\n"
             f"Required skills: {required}\n"
             f"Preferred skills: {preferred}\n"
             f"Fit rationale: {fit_rationale}\n\n"
@@ -140,13 +153,48 @@ class ApplicationMaterialsService:
             f"{profile_text[:6000]}"
         )
 
+    def _build_resume_tuning_prompt(
+        self,
+        fit_rationale: str,
+        profile_text: str,
+        role: Role,
+        required_skills: list[str],
+        preferred_skills: list[str],
+    ) -> str:
+        required = ", ".join(required_skills) if required_skills else "None listed"
+        preferred = ", ".join(preferred_skills) if preferred_skills else "None listed"
+        return (
+            "Generate role-targeted resume tuning guidance as strict JSON only.\n"
+            "Guidance must be non-destructive and reviewable suggestions, not direct overwrite instructions.\n"
+            "Reference role requirements, fit signals, and candidate evidence.\n"
+            "If uncertain, explicitly label lower confidence in confidence_notes.\n"
+            "Return exact schema:\n"
+            "{\n"
+            '  "keep_bullets": ["..."],\n'
+            '  "remove_bullets": ["..."],\n'
+            '  "emphasize_bullets": ["..."],\n'
+            '  "missing_keywords": ["..."],\n'
+            '  "summary_tweaks": ["..."],\n'
+            '  "confidence_notes": ["..."]\n'
+            "}\n"
+            "Each array must contain at least one concise string.\n\n"
+            f"Role title: {self._role_title(role)}\n"
+            f"Role team/division: {self._role_team_division(role) or 'N/A'}\n"
+            f"Role URL: {self._role_url(role)}\n"
+            f"Required skills: {required}\n"
+            f"Preferred skills: {preferred}\n"
+            f"Fit rationale: {fit_rationale}\n\n"
+            "Candidate profile excerpt:\n"
+            f"{profile_text[:8000]}"
+        )
+
     @staticmethod
     def _fallback_cover_letter(role: Role, fit_rationale: str) -> str:
         """Build deterministic fallback cover-letter draft when LLM is unavailable."""
         return (
             "Dear Hiring Team,\n\n"
-            f"I am excited to apply for the {role.title} role"
-            f"{f' on the {role.team_division} team' if role.team_division else ''}. "
+            f"I am excited to apply for the {ApplicationMaterialsService._role_title(role)} role"
+            f"{f' on the {ApplicationMaterialsService._role_team_division(role)} team' if ApplicationMaterialsService._role_team_division(role) else ''}. "
             "My background aligns with the needs of this position, and I am motivated by the "
             "opportunity to contribute meaningful results quickly.\n\n"
             f"From my fit analysis: {fit_rationale} "
@@ -169,7 +217,7 @@ class ApplicationMaterialsService:
                         f"Q: {question}",
                         (
                             "A: I am interested in this role because it aligns with my strengths and growth goals. "
-                            f"For the {role.title} position, my current fit summary is: {fit_rationale} "
+                            f"For the {ApplicationMaterialsService._role_title(role)} position, my current fit summary is: {fit_rationale} "
                             "I would contribute focused execution, clear communication, and ownership while "
                             "continuing to deepen expertise in areas where additional depth would benefit the team."
                         ),
@@ -185,10 +233,10 @@ class ApplicationMaterialsService:
         preferred_skills: list[str],
         role: Role,
     ) -> dict[str, list[str]]:
-        primary_skills = required_skills[:3] or [role.title]
+        primary_skills = required_skills[:3] or [ApplicationMaterialsService._role_title(role)]
         secondary_skills = preferred_skills[:3] or required_skills[:2]
         likely_questions = [
-            f"What motivated you to apply for the {role.title} role?",
+            f"What motivated you to apply for the {ApplicationMaterialsService._role_title(role)} role?",
             "Tell us about a time you delivered results under ambiguity.",
             f"How have you applied {primary_skills[0]} in production settings?",
             "Describe a challenging stakeholder alignment situation and how you handled it.",
@@ -221,6 +269,37 @@ class ApplicationMaterialsService:
             InterviewPrepSectionKey.LIKELY_QUESTIONS.value: likely_questions,
             InterviewPrepSectionKey.TALKING_POINTS.value: talking_points,
             InterviewPrepSectionKey.STAR_STORIES.value: star_stories,
+        }
+
+    @staticmethod
+    def _fallback_resume_tuning_sections(
+        fit_rationale: str,
+        preferred_skills: list[str],
+        required_skills: list[str],
+    ) -> dict[str, list[str]]:
+        focus_skills = required_skills[:3] or preferred_skills[:3]
+        return {
+            "keep_bullets": [
+                "Keep bullets that show measurable delivery outcomes and ownership.",
+                "Keep bullets that demonstrate direct alignment to role requirements.",
+            ],
+            "remove_bullets": [
+                "Remove or compress generic responsibility-only bullets without outcomes.",
+                "Remove older bullets that do not support this role's target scope.",
+            ],
+            "emphasize_bullets": [
+                f"Emphasize examples tied to: {', '.join(focus_skills) if focus_skills else 'core role skills'}.",
+                f"Highlight fit signal from analysis: {fit_rationale}",
+            ],
+            "missing_keywords": focus_skills or ["domain-specific terminology", "team impact"],
+            "summary_tweaks": [
+                "Adjust summary to foreground role-relevant impact and current target scope.",
+                "Add one line connecting recent results to immediate team needs.",
+            ],
+            "confidence_notes": [
+                "High confidence for recommendations tied directly to explicit role requirements.",
+                "Lower confidence where role scope is implied rather than explicitly stated.",
+            ],
         }
 
     @staticmethod
@@ -267,6 +346,23 @@ class ApplicationMaterialsService:
         }
 
     @staticmethod
+    def _parse_resume_tuning_sections(output: str) -> dict[str, list[str]]:
+        data = json.loads(output)
+        if not isinstance(data, dict):
+            raise ValueError("Resume tuning output must be a JSON object")
+        sections: dict[str, list[str]] = {}
+        for key in (
+            "keep_bullets",
+            "remove_bullets",
+            "emphasize_bullets",
+            "missing_keywords",
+            "summary_tweaks",
+            "confidence_notes",
+        ):
+            sections[key] = ApplicationMaterialsService._coerce_section_list(data.get(key), key)
+        return sections
+
+    @staticmethod
     def _render_interview_prep_markdown(sections: dict[str, list[str]]) -> str:
         blocks: list[str] = ["# Interview Prep Pack"]
         labels = {
@@ -278,6 +374,30 @@ class ApplicationMaterialsService:
             InterviewPrepSectionKey.LIKELY_QUESTIONS.value,
             InterviewPrepSectionKey.TALKING_POINTS.value,
             InterviewPrepSectionKey.STAR_STORIES.value,
+        ):
+            blocks.append(f"\n## {labels[key]}")
+            for item in sections.get(key, []):
+                blocks.append(f"- {item}")
+        return "\n".join(blocks).strip() + "\n"
+
+    @staticmethod
+    def _render_resume_tuning_markdown(sections: dict[str, list[str]]) -> str:
+        blocks: list[str] = ["# Resume Tuning Suggestions"]
+        labels = {
+            "keep_bullets": "Keep Bullets",
+            "remove_bullets": "Remove / Deprioritize Bullets",
+            "emphasize_bullets": "Emphasize Bullets",
+            "missing_keywords": "Missing Keywords",
+            "summary_tweaks": "Summary Tweaks",
+            "confidence_notes": "Confidence / Rationale Notes",
+        }
+        for key in (
+            "keep_bullets",
+            "remove_bullets",
+            "emphasize_bullets",
+            "missing_keywords",
+            "summary_tweaks",
+            "confidence_notes",
         ):
             blocks.append(f"\n## {labels[key]}")
             for item in sections.get(key, []):
@@ -504,6 +624,33 @@ class ApplicationMaterialsService:
             .all()
         )
 
+    def list_resume_tuning_suggestions(self, role_id: int) -> list[ApplicationMaterial]:
+        self._require_role(role_id)
+        return (
+            self.db.query(ApplicationMaterial)
+            .filter(ApplicationMaterial.role_id == role_id)
+            .filter(
+                ApplicationMaterial.artifact_type == ApplicationArtifactType.RESUME_TUNING.value
+            )
+            .order_by(ApplicationMaterial.version.desc(), ApplicationMaterial.id.desc())
+            .all()
+        )
+
+    def get_resume_tuning_suggestion(self, material_id: int, role_id: int) -> ApplicationMaterial:
+        self._require_role(role_id)
+        material = (
+            self.db.query(ApplicationMaterial)
+            .filter(ApplicationMaterial.id == material_id)
+            .filter(ApplicationMaterial.role_id == role_id)
+            .filter(
+                ApplicationMaterial.artifact_type == ApplicationArtifactType.RESUME_TUNING.value
+            )
+            .first()
+        )
+        if material is None:
+            raise LookupError("Resume tuning suggestion not found")
+        return material
+
     def regenerate_interview_prep_section(
         self,
         role_id: int,
@@ -574,14 +721,53 @@ class ApplicationMaterialsService:
         sections: dict[str, list[str]],
     ) -> ApplicationMaterial:
         material = self.get_interview_prep_pack(material_id, role_id)
-        material.sections = sections
-        material.content_path = save_file(
+        cast(Any, material).sections = sections
+        cast(Any, material).content_path = save_file(
             self._render_interview_prep_markdown(sections),
-            material.content_path,
+            cast(str, material.content_path),
         )
         self.db.commit()
         self.db.refresh(material)
         return material
+
+    def generate_resume_tuning_suggestion(self, role_id: int) -> ApplicationMaterial:
+        role = self._require_role(role_id)
+        fit_rationale = self._get_fit_rationale(role_id)
+        profile_text = self._load_profile_text()
+        required_skills, preferred_skills = self._load_role_skills(role_id)
+        version = self._next_version(ApplicationArtifactType.RESUME_TUNING, role_id)
+
+        prompt = self._build_resume_tuning_prompt(
+            fit_rationale,
+            profile_text,
+            role,
+            required_skills,
+            preferred_skills,
+        )
+
+        sections: dict[str, list[str]] | None = None
+        try:
+            output = self._clean_output(asyncio.run(self.llm_service.complete(prompt)))
+            sections = self._parse_resume_tuning_sections(output)
+        except Exception:
+            sections = None
+
+        if not sections:
+            sections = self._fallback_resume_tuning_sections(
+                fit_rationale,
+                preferred_skills,
+                required_skills,
+            )
+
+        return self._persist_material(
+            artifact_type=ApplicationArtifactType.RESUME_TUNING,
+            content=self._render_resume_tuning_markdown(sections),
+            prompt_version=RESUME_TUNING_PROMPT_VERSION,
+            role_id=role_id,
+            questions=None,
+            sections=sections,
+            version=version,
+        )
 
     def list_for_role(self, role_id: int) -> list[ApplicationMaterial]:
         self._require_role(role_id)

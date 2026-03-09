@@ -1021,6 +1021,102 @@ class TestApplicationMaterials:
         update_mock.assert_called_once()
         assert response.json()["sections"]["talking_points"] == ["Updated talking point"]
 
+    def test_sync_resume_profile_endpoint(self, client):
+        with patch(
+            "backend.routers.jobs.CareerEvidenceService.sync_resume_profile",
+            return_value=([], "resume.md"),
+        ) as sync_mock:
+            response = client.post("/api/jobs/profile/sync-resume", json={})
+
+        assert response.status_code == 200
+        payload = response.json()
+        assert payload["ingested_count"] == 0
+        assert payload["source_record_id"] == "resume.md"
+        assert payload["source_used"] == "resume.md"
+        sync_mock.assert_called_once()
+
+    def test_generate_resume_tuning_success(self, client, sample_role):
+        fake_material = SimpleNamespace(
+            id=601,
+            role_id=sample_role.id,
+            artifact_type="resume_tuning",
+            version=1,
+            content_path=f"applications/{sample_role.id}/resume_tuning-v1.md",
+            sections={
+                "keep_bullets": ["Keep measurable impact bullet"],
+                "remove_bullets": ["Remove generic responsibility bullet"],
+                "emphasize_bullets": ["Emphasize API scale outcomes"],
+                "missing_keywords": ["fastapi", "observability"],
+                "summary_tweaks": ["Lead with platform impact in summary"],
+                "confidence_notes": ["High confidence for required skill alignment"],
+            },
+            provider="openai",
+            model="gpt-4o",
+            prompt_version="resume-tuning-v1",
+            created_at=datetime.now(UTC),
+        )
+
+        with patch(
+            "backend.routers.jobs.ApplicationMaterialsService.generate_resume_tuning_suggestion",
+            return_value=fake_material,
+        ):
+            response = client.post(f"/api/jobs/{sample_role.id}/resume-tuning")
+
+        assert response.status_code == 200
+        payload = response.json()
+        assert payload["artifact_type"] == "resume_tuning"
+        assert payload["sections"]["missing_keywords"] == ["fastapi", "observability"]
+
+    def test_list_resume_tuning_versions(self, client, sample_role):
+        v2 = SimpleNamespace(
+            id=702,
+            role_id=sample_role.id,
+            artifact_type="resume_tuning",
+            version=2,
+            content_path=f"applications/{sample_role.id}/resume_tuning-v2.md",
+            sections={
+                "keep_bullets": ["Keep v2"],
+                "remove_bullets": ["Remove v2"],
+                "emphasize_bullets": ["Emphasize v2"],
+                "missing_keywords": ["keyword-v2"],
+                "summary_tweaks": ["Summary v2"],
+                "confidence_notes": ["Confidence v2"],
+            },
+            provider="openai",
+            model="gpt-4o",
+            prompt_version="resume-tuning-v1",
+            created_at=datetime.now(UTC),
+        )
+        v1 = SimpleNamespace(
+            id=701,
+            role_id=sample_role.id,
+            artifact_type="resume_tuning",
+            version=1,
+            content_path=f"applications/{sample_role.id}/resume_tuning-v1.md",
+            sections={
+                "keep_bullets": ["Keep v1"],
+                "remove_bullets": ["Remove v1"],
+                "emphasize_bullets": ["Emphasize v1"],
+                "missing_keywords": ["keyword-v1"],
+                "summary_tweaks": ["Summary v1"],
+                "confidence_notes": ["Confidence v1"],
+            },
+            provider="openai",
+            model="gpt-4o",
+            prompt_version="resume-tuning-v1",
+            created_at=datetime.now(UTC),
+        )
+
+        with patch(
+            "backend.routers.jobs.ApplicationMaterialsService.list_resume_tuning_suggestions",
+            return_value=[v2, v1],
+        ):
+            response = client.get(f"/api/jobs/{sample_role.id}/resume-tuning")
+
+        assert response.status_code == 200
+        payload = response.json()
+        assert [item["version"] for item in payload] == [2, 1]
+
 
 # ---------------------------------------------------------------------------
 # Tests: POST /api/jobs/scrape
