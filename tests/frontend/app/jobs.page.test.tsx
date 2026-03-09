@@ -910,4 +910,105 @@ describe("JobsPageClient", () => {
     expect(await screen.findByText("Keep measurable impact bullet")).toBeInTheDocument();
     expect(screen.getByText("observability")).toBeInTheDocument();
   }, 20000);
+
+  it("renders evidence traceability and unsupported claim flags for generated outputs", async () => {
+    vi.spyOn(api, "listJobs").mockResolvedValue(jobs);
+    vi.spyOn(api, "getJob").mockResolvedValue({
+      id: 2,
+      company: {
+        id: 10,
+        name: "Beta Co",
+        slug: "beta-co",
+        website: null,
+        created_at: "2026-03-05T10:00:00Z",
+      },
+      title: "Engineer",
+      team_division: "Platform",
+      salary: { min: 120000, max: 150000, currency: "USD" },
+      url: "https://example.com/jobs/2",
+      skills: {
+        required: [{ id: 1, name: "Python", requirement_level: "required" }],
+        preferred: [{ id: 2, name: "FastAPI", requirement_level: "preferred" }],
+      },
+      description_md: "",
+      created_at: "2026-03-05T10:00:00Z",
+      status: "open",
+      status_history: [],
+      latest_fit_analysis: {
+        id: 90,
+        role_id: 2,
+        fit_score: 84,
+        recommendation: "go",
+        covered_required_skills: ["Python"],
+        missing_required_skills: [],
+        covered_preferred_skills: ["FastAPI"],
+        missing_preferred_skills: [],
+        rationale: "Strong match based on core skills.",
+        rationale_citations: [
+          {
+            source_type: "career_evidence",
+            source_id: 7,
+            source_record_id: "resume.md",
+            source_key: "experience.platform",
+            snippet_reference: "Built and scaled APIs",
+            confidence: 0.9,
+          },
+        ],
+        unsupported_claims: ["Leadership depth not fully evidenced"],
+        provider: "openai",
+        model: "gpt-4o",
+        version: "fit-v1",
+        created_at: "2026-03-07T18:00:00Z",
+      },
+      latest_desirability_score: null,
+    });
+
+    vi.spyOn(api, "listApplicationMaterials").mockResolvedValue([
+      {
+        id: 11,
+        role_id: 2,
+        artifact_type: "cover_letter",
+        version: 1,
+        content: "Dear hiring manager...",
+        questions: null,
+        section_traceability: [
+          {
+            section_key: "intro",
+            citations: [
+              {
+                source_type: "career_evidence",
+                source_id: 8,
+                source_record_id: "resume.md",
+                source_key: "projects.job_ingestion",
+                snippet_reference: "Improved ingestion reliability",
+                confidence: 0.87,
+              },
+            ],
+            unsupported_claims: [],
+          },
+        ],
+        unsupported_claims: ["Team size estimate is inferred"],
+        provider: "openai",
+        model: "gpt-4o",
+        prompt_version: "cover-letter-v1",
+        created_at: "2026-03-07T18:10:00Z",
+      },
+    ]);
+    vi.spyOn(api, "listInterviewPrepPacks").mockResolvedValue([]);
+    vi.spyOn(api, "listResumeTuning").mockResolvedValue([]);
+
+    render(<JobsPageClient />);
+
+    await screen.findByText("Engineer");
+    fireEvent.click(screen.getByRole("button", { name: /Engineer — Beta Co/i }));
+
+    expect(await screen.findByText("Evidence references:")).toBeInTheDocument();
+    expect(screen.getByText(/Built and scaled APIs/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Unsupported claim flags:/i).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText(/Leadership depth not fully evidenced/i)).toBeInTheDocument();
+
+    expect(await screen.findByText("Evidence Traceability")).toBeInTheDocument();
+    expect(screen.getByText(/Improved ingestion reliability/i)).toBeInTheDocument();
+    expect(screen.getByText(/Team size estimate is inferred/i)).toBeInTheDocument();
+  }, 20000);
 });

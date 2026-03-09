@@ -1,9 +1,11 @@
 """Job-related Pydantic schemas."""
 
+from __future__ import annotations
+
 from datetime import datetime
 from enum import StrEnum
 
-from pydantic import BaseModel, ConfigDict, HttpUrl
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl
 
 from backend.schemas.company import Company
 from backend.schemas.desirability import DesirabilityScore
@@ -165,6 +167,8 @@ class InterviewPrepPack(BaseModel):
     provider: str
     model: str
     prompt_version: str
+    section_traceability: list[SectionTraceability] = Field(default_factory=list)
+    unsupported_claims: list[str] = Field(default_factory=list)
     created_at: datetime
 
 
@@ -199,6 +203,25 @@ class ResumeTuningSections(BaseModel):
     summary_tweaks: list[str]
 
 
+class OutputCitation(BaseModel):
+    """Lightweight citation entry that traces output text to one evidence unit."""
+
+    confidence: float
+    snippet_reference: str
+    source_id: int | None
+    source_key: str
+    source_record_id: str | None
+    source_type: str
+
+
+class SectionTraceability(BaseModel):
+    """Section-level traceability including citations and unsupported flags."""
+
+    citations: list[OutputCitation] = Field(default_factory=list)
+    section_key: str
+    unsupported_claims: list[str] = Field(default_factory=list)
+
+
 class ResumeTuningSuggestion(BaseModel):
     """Generated resume tuning suggestion payload."""
 
@@ -210,6 +233,8 @@ class ResumeTuningSuggestion(BaseModel):
     provider: str
     model: str
     prompt_version: str
+    section_traceability: list[SectionTraceability] = Field(default_factory=list)
+    unsupported_claims: list[str] = Field(default_factory=list)
     created_at: datetime
 
 
@@ -225,6 +250,8 @@ class FitAnalysis(BaseModel):
     covered_preferred_skills: list[str]
     missing_preferred_skills: list[str]
     rationale: str
+    rationale_citations: list[OutputCitation] = Field(default_factory=list)
+    unsupported_claims: list[str] = Field(default_factory=list)
     provider: str
     model: str
     version: str
@@ -246,6 +273,8 @@ class ApplicationMaterial(BaseModel):
     version: int
     content: str
     questions: list[str] | None
+    section_traceability: list[SectionTraceability] = Field(default_factory=list)
+    unsupported_claims: list[str] = Field(default_factory=list)
     provider: str
     model: str
     prompt_version: str

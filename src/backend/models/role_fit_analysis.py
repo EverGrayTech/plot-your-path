@@ -37,6 +37,8 @@ class RoleFitAnalysis(Base):
     covered_preferred_skills = Column(JSON, nullable=False, default=list)
     missing_preferred_skills = Column(JSON, nullable=False, default=list)
     rationale = Column(Text, nullable=False)
+    rationale_citations = Column(JSON, nullable=False, default=list)
+    unsupported_claims = Column(JSON, nullable=False, default=list)
     provider = Column(String, nullable=False)
     model = Column(String, nullable=False)
     version = Column(String, nullable=False)
