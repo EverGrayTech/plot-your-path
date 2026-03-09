@@ -142,15 +142,16 @@ class JobCaptureService:
                 salary_max=job_data.get("salary_max"),
                 salary_currency=job_data.get("salary_currency") or "USD",
                 url=url,
-                raw_html_path="pending",
-                cleaned_md_path="pending",
+                raw_content_source=raw_source,
+                raw_html_path=None,
+                cleaned_md_path=None,
                 status="open",
             )
             self.db.add(role)
             self.db.flush()
 
             if raw_source == "clipboard":
-                role.raw_html_path = "clipboard"
+                role.raw_html_path = None
             else:
                 assert raw_html is not None, "raw_html is required for non-clipboard sources"
                 role.raw_html_path = save_file(raw_html, f"jobs/raw/{company.slug}/{role.id}.html")

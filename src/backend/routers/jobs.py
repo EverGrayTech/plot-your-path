@@ -70,7 +70,7 @@ from backend.services.outcome_feedback import OutcomeFeedbackService
 from backend.services.skill_extractor import SkillExtractorService
 from backend.utils.async_utils import run_async_task
 from backend.utils.file_storage import file_exists, load_file
-from backend.utils.time import utc_now_naive
+from backend.utils.time import normalize_utc_naive, utc_now_naive
 
 router = APIRouter()
 
@@ -552,12 +552,12 @@ def upsert_application_ops(
         row = ApplicationOpsModel(role_id=role_id)
         db.add(row)
 
-    row.applied_at = payload.applied_at
-    row.deadline_at = payload.deadline_at
+    row.applied_at = normalize_utc_naive(payload.applied_at)
+    row.deadline_at = normalize_utc_naive(payload.deadline_at)
     row.source = payload.source.strip() if payload.source else None
     row.recruiter_contact = payload.recruiter_contact.strip() if payload.recruiter_contact else None
     row.notes = payload.notes.strip() if payload.notes else None
-    row.next_action_at = payload.next_action_at
+    row.next_action_at = normalize_utc_naive(payload.next_action_at)
 
     db.commit()
     db.refresh(row)
@@ -577,7 +577,7 @@ def update_next_action(
     if row is None:
         row = ApplicationOpsModel(role_id=role_id)
         db.add(row)
-    row.next_action_at = payload.next_action_at
+    row.next_action_at = normalize_utc_naive(payload.next_action_at)
 
     db.commit()
     db.refresh(row)
@@ -607,7 +607,7 @@ def create_interview_stage_event(
         role_id=role_id,
         stage=payload.stage.value,
         notes=payload.notes.strip() if payload.notes else None,
-        occurred_at=payload.occurred_at,
+        occurred_at=normalize_utc_naive(payload.occurred_at),
     )
     db.add(row)
     db.commit()
@@ -809,7 +809,9 @@ async def generate_question_answers(
     """Generate and persist Q&A draft answers for a role."""
     service = ApplicationMaterialsService(db)
     try:
-        material = await run_in_threadpool(service.generate_question_answers, payload.questions, role_id)
+        material = await run_in_threadpool(
+            service.generate_question_answers, payload.questions, role_id
+        )
         return _to_application_material_schema(material)
     except LookupError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
