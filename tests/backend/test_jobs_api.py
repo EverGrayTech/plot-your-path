@@ -441,9 +441,10 @@ class TestGetJob:
     def test_get_job_with_file(self, client, db, sample_role, sample_skills):
         """Returns Markdown content when the cleaned file exists on disk."""
         with (
-            patch("backend.routers.jobs.file_exists", return_value=True),
+            patch("backend.services.job_presenters.file_exists", return_value=True),
             patch(
-                "backend.routers.jobs.load_file", return_value="# Backend Engineer\n\nGreat role!"
+                "backend.services.job_presenters.load_file",
+                return_value="# Backend Engineer\n\nGreat role!",
             ),
         ):
             response = client.get(f"/api/jobs/{sample_role.id}")
@@ -924,7 +925,7 @@ class TestFitAnalysis:
             created_at=datetime.now(UTC),
         )
         with patch(
-            "backend.routers.jobs.FitAnalysisService.generate_for_role",
+            "backend.routers.jobs_analysis.FitAnalysisService.generate_for_role",
             return_value=traced,
         ):
             response = client.post(f"/api/jobs/{sample_role.id}/fit-analysis")
@@ -939,7 +940,7 @@ class TestFitAnalysis:
         self, client, sample_role, sample_skills
     ):
         with patch(
-            "backend.routers.jobs.FitAnalysisService.generate_for_role",
+            "backend.routers.jobs_analysis.FitAnalysisService.generate_for_role",
             side_effect=RuntimeError("malformed model output"),
         ):
             response = client.post(f"/api/jobs/{sample_role.id}/fit-analysis")
@@ -1077,11 +1078,13 @@ class TestApplicationMaterials:
 
         with (
             patch(
-                "backend.routers.jobs.ApplicationMaterialsService.generate_cover_letter",
+                "backend.routers.jobs_materials.ApplicationMaterialsService.generate_cover_letter",
                 return_value=fake_material,
             ),
-            patch("backend.routers.jobs.file_exists", return_value=True),
-            patch("backend.routers.jobs.load_file", return_value="Dear hiring manager..."),
+            patch("backend.services.job_presenters.file_exists", return_value=True),
+            patch(
+                "backend.services.job_presenters.load_file", return_value="Dear hiring manager..."
+            ),
         ):
             response = client.post(f"/api/jobs/{sample_role.id}/application-materials/cover-letter")
 
@@ -1112,11 +1115,13 @@ class TestApplicationMaterials:
 
         with (
             patch(
-                "backend.routers.jobs.ApplicationMaterialsService.generate_cover_letter",
+                "backend.routers.jobs_materials.ApplicationMaterialsService.generate_cover_letter",
                 return_value=fake_material,
             ),
-            patch("backend.routers.jobs.file_exists", return_value=True),
-            patch("backend.routers.jobs.load_file", return_value="Dear hiring manager..."),
+            patch("backend.services.job_presenters.file_exists", return_value=True),
+            patch(
+                "backend.services.job_presenters.load_file", return_value="Dear hiring manager..."
+            ),
         ):
             response = client.post(f"/api/jobs/{sample_role.id}/application-materials/cover-letter")
 
@@ -1127,7 +1132,7 @@ class TestApplicationMaterials:
 
     def test_generate_cover_letter_validation_failure(self, client, sample_role):
         with patch(
-            "backend.routers.jobs.ApplicationMaterialsService.generate_cover_letter",
+            "backend.routers.jobs_materials.ApplicationMaterialsService.generate_cover_letter",
             side_effect=ValueError(
                 "Fit analysis is required before generating application materials"
             ),
@@ -1142,11 +1147,11 @@ class TestApplicationMaterials:
 
         with (
             patch(
-                "backend.routers.jobs.ApplicationMaterialsService.generate_question_answers",
+                "backend.routers.jobs_materials.ApplicationMaterialsService.generate_question_answers",
                 return_value=fake_material,
             ),
-            patch("backend.routers.jobs.file_exists", return_value=True),
-            patch("backend.routers.jobs.load_file", return_value="Q: Why?\nA: Because."),
+            patch("backend.services.job_presenters.file_exists", return_value=True),
+            patch("backend.services.job_presenters.load_file", return_value="Q: Why?\nA: Because."),
         ):
             response = client.post(
                 f"/api/jobs/{sample_role.id}/application-materials/question-answers",
@@ -1160,7 +1165,7 @@ class TestApplicationMaterials:
 
     def test_generate_question_answers_empty_set_returns_422(self, client, sample_role):
         with patch(
-            "backend.routers.jobs.ApplicationMaterialsService.generate_question_answers",
+            "backend.routers.jobs_materials.ApplicationMaterialsService.generate_question_answers",
             side_effect=ValueError("Question list must contain at least one non-empty question"),
         ):
             response = client.post(
@@ -1186,8 +1191,10 @@ class TestApplicationMaterials:
         db.commit()
 
         with (
-            patch("backend.routers.jobs.file_exists", return_value=True),
-            patch("backend.routers.jobs.load_file", return_value="Generated cover letter"),
+            patch("backend.services.job_presenters.file_exists", return_value=True),
+            patch(
+                "backend.services.job_presenters.load_file", return_value="Generated cover letter"
+            ),
         ):
             response = client.get(f"/api/jobs/{sample_role.id}/application-materials")
 
@@ -1221,7 +1228,7 @@ class TestApplicationMaterials:
         )
 
         with patch(
-            "backend.routers.jobs.ApplicationMaterialsService.generate_interview_prep_pack",
+            "backend.routers.jobs_materials.ApplicationMaterialsService.generate_interview_prep_pack",
             return_value=fake_material,
         ):
             response = client.post(f"/api/jobs/{sample_role.id}/interview-prep-pack")
@@ -1266,7 +1273,7 @@ class TestApplicationMaterials:
         )
 
         with patch(
-            "backend.routers.jobs.ApplicationMaterialsService.list_interview_prep_packs",
+            "backend.routers.jobs_materials.ApplicationMaterialsService.list_interview_prep_packs",
             return_value=[v2, v1],
         ):
             response = client.get(f"/api/jobs/{sample_role.id}/interview-prep-pack")
@@ -1294,7 +1301,7 @@ class TestApplicationMaterials:
         )
 
         with patch(
-            "backend.routers.jobs.ApplicationMaterialsService.regenerate_interview_prep_section",
+            "backend.routers.jobs_materials.ApplicationMaterialsService.regenerate_interview_prep_section",
             return_value=fake_material,
         ) as regenerate_mock:
             response = client.post(
@@ -1325,7 +1332,7 @@ class TestApplicationMaterials:
         )
 
         with patch(
-            "backend.routers.jobs.ApplicationMaterialsService.update_interview_prep_pack",
+            "backend.routers.jobs_materials.ApplicationMaterialsService.update_interview_prep_pack",
             return_value=fake_material,
         ) as update_mock:
             response = client.put(
@@ -1345,7 +1352,7 @@ class TestApplicationMaterials:
 
     def test_sync_resume_profile_endpoint(self, client):
         with patch(
-            "backend.routers.jobs.CareerEvidenceService.sync_resume_profile",
+            "backend.routers.jobs_analysis.CareerEvidenceService.sync_resume_profile",
             return_value=([], "resume.md"),
         ) as sync_mock:
             response = client.post("/api/jobs/profile/sync-resume", json={})
@@ -1379,7 +1386,7 @@ class TestApplicationMaterials:
         )
 
         with patch(
-            "backend.routers.jobs.ApplicationMaterialsService.generate_resume_tuning_suggestion",
+            "backend.routers.jobs_materials.ApplicationMaterialsService.generate_resume_tuning_suggestion",
             return_value=fake_material,
         ):
             response = client.post(f"/api/jobs/{sample_role.id}/resume-tuning")
@@ -1430,7 +1437,7 @@ class TestApplicationMaterials:
         )
 
         with patch(
-            "backend.routers.jobs.ApplicationMaterialsService.list_resume_tuning_suggestions",
+            "backend.routers.jobs_materials.ApplicationMaterialsService.list_resume_tuning_suggestions",
             return_value=[v2, v1],
         ):
             response = client.get(f"/api/jobs/{sample_role.id}/resume-tuning")
@@ -1473,7 +1480,7 @@ class TestScrapeJob:
         mock_service = MagicMock()
         mock_service.capture_from_url = AsyncMock(return_value=self._capture_result())
 
-        with patch("backend.routers.jobs.JobCaptureService", return_value=mock_service):
+        with patch("backend.routers.jobs_capture.JobCaptureService", return_value=mock_service):
             response = client.post(
                 "/api/jobs/scrape",
                 json={"url": "https://greenhouse.io/jobs/99999"},
@@ -1500,7 +1507,7 @@ class TestScrapeJob:
                 skills_extracted=2,
             )
         )
-        with patch("backend.routers.jobs.JobCaptureService", return_value=mock_service):
+        with patch("backend.routers.jobs_capture.JobCaptureService", return_value=mock_service):
             response = client.post(
                 "/api/jobs/scrape",
                 json={"url": "https://greenhouse.io/jobs/12345"},
@@ -1526,7 +1533,7 @@ class TestScrapeJob:
         mock_service = MagicMock()
         mock_service.capture_from_url = AsyncMock(side_effect=JobCaptureScrapingError("blocked"))
 
-        with patch("backend.routers.jobs.JobCaptureService", return_value=mock_service):
+        with patch("backend.routers.jobs_capture.JobCaptureService", return_value=mock_service):
             response = client.post(
                 "/api/jobs/scrape",
                 json={"url": "https://blocked.example.com/job/1"},
@@ -1545,7 +1552,7 @@ class TestScrapeJob:
             return_value=self._capture_result(status="success")
         )
 
-        with patch("backend.routers.jobs.JobCaptureService", return_value=mock_service):
+        with patch("backend.routers.jobs_capture.JobCaptureService", return_value=mock_service):
             response = client.post(
                 "/api/jobs/scrape",
                 json={
@@ -1568,7 +1575,7 @@ class TestScrapeJob:
         mock_service = MagicMock()
         mock_service.capture_from_url = AsyncMock(side_effect=JobCaptureLLMError("timeout"))
 
-        with patch("backend.routers.jobs.JobCaptureService", return_value=mock_service):
+        with patch("backend.routers.jobs_capture.JobCaptureService", return_value=mock_service):
             response = client.post(
                 "/api/jobs/scrape",
                 json={"url": "https://greenhouse.io/jobs/77777"},
@@ -1586,7 +1593,7 @@ class TestScrapeJob:
             side_effect=JobCapturePersistenceError("db write failed")
         )
 
-        with patch("backend.routers.jobs.JobCaptureService", return_value=mock_service):
+        with patch("backend.routers.jobs_capture.JobCaptureService", return_value=mock_service):
             response = client.post(
                 "/api/jobs/scrape",
                 json={"url": "https://greenhouse.io/jobs/88888"},
@@ -1599,7 +1606,7 @@ class TestScrapeJob:
         """Router passes URL through to service capture_from_url."""
         mock_service = MagicMock()
         mock_service.capture_from_url = AsyncMock(return_value=self._capture_result())
-        with patch("backend.routers.jobs.JobCaptureService", return_value=mock_service):
+        with patch("backend.routers.jobs_capture.JobCaptureService", return_value=mock_service):
             response = client.post(
                 "/api/jobs/scrape",
                 json={"url": "https://greenhouse.io/jobs/new-acme-job"},
@@ -1617,7 +1624,7 @@ class TestScrapeJob:
             return_value=self._capture_result(skills_extracted=0)
         )
 
-        with patch("backend.routers.jobs.JobCaptureService", return_value=mock_service):
+        with patch("backend.routers.jobs_capture.JobCaptureService", return_value=mock_service):
             response = client.post(
                 "/api/jobs/scrape",
                 json={"url": "https://greenhouse.io/jobs/no-skills"},
@@ -1632,7 +1639,7 @@ class TestScrapeJob:
         mock_service.capture_from_url = AsyncMock(
             return_value=self._capture_result(company="NewCo")
         )
-        with patch("backend.routers.jobs.JobCaptureService", return_value=mock_service):
+        with patch("backend.routers.jobs_capture.JobCaptureService", return_value=mock_service):
             response = client.post(
                 "/api/jobs/scrape",
                 json={"url": "https://greenhouse.io/jobs/slug-test"},
@@ -1648,7 +1655,7 @@ class TestScrapeJob:
             return_value=self._capture_result(company="Unknown Company")
         )
 
-        with patch("backend.routers.jobs.JobCaptureService", return_value=mock_service):
+        with patch("backend.routers.jobs_capture.JobCaptureService", return_value=mock_service):
             response = client.post(
                 "/api/jobs/scrape",
                 json={"url": "https://greenhouse.io/jobs/unknown-co"},
@@ -1662,7 +1669,7 @@ class TestScrapeJob:
         mock_service = MagicMock()
         mock_service.capture_from_url = AsyncMock(return_value=self._capture_result())
 
-        with patch("backend.routers.jobs.JobCaptureService", return_value=mock_service):
+        with patch("backend.routers.jobs_capture.JobCaptureService", return_value=mock_service):
             response = client.post(
                 "/api/jobs/scrape",
                 json={"url": "https://greenhouse.io/jobs/file-test"},
@@ -1676,7 +1683,7 @@ class TestScrapeJob:
         mock_service = MagicMock()
         mock_service.capture_from_url = AsyncMock(return_value=self._capture_result())
 
-        with patch("backend.routers.jobs.JobCaptureService", return_value=mock_service):
+        with patch("backend.routers.jobs_capture.JobCaptureService", return_value=mock_service):
             response = client.post(
                 "/api/jobs/scrape",
                 json={"url": "https://greenhouse.io/jobs/no-salary"},
@@ -1691,7 +1698,7 @@ class TestScrapeJob:
         mock_service.capture_from_url = AsyncMock(
             return_value=self._capture_result(company="TechCo")
         )
-        with patch("backend.routers.jobs.JobCaptureService", return_value=mock_service):
+        with patch("backend.routers.jobs_capture.JobCaptureService", return_value=mock_service):
             response = client.post(
                 "/api/jobs/scrape",
                 json={"url": "https://greenhouse.io/jobs/slug-collision"},

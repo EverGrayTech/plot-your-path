@@ -5,8 +5,8 @@ from __future__ import annotations
 from pathlib import Path
 
 from sqlalchemy import create_engine, text
-from sqlalchemy.engine import Engine
 from sqlalchemy import inspect as sqlalchemy_inspect
+from sqlalchemy.engine import Engine
 
 from backend.init_db import init_database
 

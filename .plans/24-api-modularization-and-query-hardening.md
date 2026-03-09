@@ -77,24 +77,24 @@ Refactor direction:
 ## Implementation Steps
 
 ### 1. Decompose routing surface
-- [ ] Define new internal router/module boundaries.
-- [ ] Move route groups into cohesive files while preserving endpoint behavior.
+- [x] Define new internal router/module boundaries.
+- [x] Move route groups into cohesive files while preserving endpoint behavior.
 
 ### 2. Extract read/query services
-- [ ] Introduce dedicated query logic for jobs list, job detail, and pipeline views.
-- [ ] Replace loop-driven repeated queries with consolidated read patterns.
+- [x] Introduce dedicated query logic for jobs list, job detail, and pipeline views.
+- [x] Replace loop-driven repeated queries with consolidated read patterns.
 
 ### 3. Extract schema/presentation mapping
-- [ ] Move route-local transformation helpers into shared presentation modules.
-- [ ] Keep HTTP handlers focused on dependency wiring and response return.
+- [x] Move route-local transformation helpers into shared presentation modules.
+- [x] Keep HTTP handlers focused on dependency wiring and response return.
 
 ### 4. Standardize HTTP error handling
-- [ ] Replace repetitive endpoint-local exception mapping with shared patterns.
-- [ ] Ensure status codes remain product-appropriate and testable.
+- [x] Replace repetitive endpoint-local exception mapping with shared patterns.
+- [x] Ensure status codes remain product-appropriate and testable.
 
 ### 5. Verify endpoint compatibility
-- [ ] Preserve current response contracts unless an intentional API change is separately approved.
-- [ ] Update and extend tests to confirm parity.
+- [x] Preserve current response contracts unless an intentional API change is separately approved.
+- [x] Update and extend tests to confirm parity.
 
 ---
 
@@ -108,8 +108,8 @@ Refactor direction:
 
 ## Success Criteria
 
-- [ ] The current jobs API is split into smaller, cohesive routing modules.
-- [ ] List/detail/pipeline endpoints avoid repeated per-row database lookups where practical.
-- [ ] Response-shaping logic is reusable and testable outside route handlers.
-- [ ] Error mapping is more consistent and less repetitive.
-- [ ] Existing endpoint contracts remain stable unless explicitly approved otherwise.
+- [x] The current jobs API is split into smaller, cohesive routing modules.
+- [x] List/detail/pipeline endpoints avoid repeated per-row database lookups where practical.
+- [x] Response-shaping logic is reusable and testable outside route handlers.
+- [x] Error mapping is more consistent and less repetitive.
+- [x] Existing endpoint contracts remain stable unless explicitly approved otherwise.
