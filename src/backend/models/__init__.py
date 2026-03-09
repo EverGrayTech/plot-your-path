@@ -8,6 +8,7 @@ from backend.models.company import Company
 from backend.models.desirability_factor_config import DesirabilityFactorConfig
 from backend.models.desirability_score_result import DesirabilityScoreResult
 from backend.models.interview_stage_event import InterviewStageEvent
+from backend.models.outcome_event import OutcomeEvent
 from backend.models.role import Role
 from backend.models.role_fit_analysis import RoleFitAnalysis
 from backend.models.role_skill import RoleSkill
@@ -22,6 +23,7 @@ __all__ = [
     "Company",
     "DesirabilityFactorConfig",
     "DesirabilityScoreResult",
+    "OutcomeEvent",
     "Role",
     "RoleFitAnalysis",
     "Skill",

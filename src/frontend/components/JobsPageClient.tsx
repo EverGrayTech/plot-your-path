@@ -13,6 +13,10 @@ import {
   type JobDetail,
   type JobListItem,
   type OperationFamily,
+  type OutcomeEvent,
+  type OutcomeEventType,
+  type OutcomeInsights,
+  type OutcomeTuningSuggestions,
   type PipelineItem,
   type ResumeTuningSuggestion,
   type RoleStatus,
@@ -21,12 +25,15 @@ import {
   analyzeJobFit,
   clearAISettingToken,
   createDesirabilityFactor,
+  createOutcomeEvent,
   deleteDesirabilityFactor,
   generateCoverLetter,
   generateInterviewPrepPack,
   generateQuestionAnswers,
   generateResumeTuning,
   getJob,
+  getOutcomeInsights,
+  getOutcomeTuningSuggestions,
   getSkill,
   healthcheckAISetting,
   listAISettings,
@@ -34,6 +41,7 @@ import {
   listDesirabilityFactors,
   listInterviewPrepPacks,
   listJobs,
+  listOutcomeEvents,
   listPipeline,
   listResumeTuning,
   refreshDesirabilityScore,
@@ -88,6 +96,26 @@ function interviewStageLabel(value: InterviewStage | null | undefined): string {
     .split("_")
     .map((part) => part[0].toUpperCase() + part.slice(1))
     .join(" ");
+}
+
+function outcomeEventLabel(value: OutcomeEventType): string {
+  if (value === "screen") {
+    return "Screen";
+  }
+  if (value === "interview") {
+    return "Interview";
+  }
+  if (value === "offer") {
+    return "Offer";
+  }
+  return "Rejected";
+}
+
+function toPercent(value: number | null): string {
+  if (value === null) {
+    return "N/A";
+  }
+  return `${(value * 100).toFixed(1)}%`;
 }
 
 function toLocalInputValue(isoString: string | null): string {
@@ -198,6 +226,7 @@ export function JobsPageClient() {
   const [showFactorSettings, setShowFactorSettings] = useState(false);
   const [showAISettings, setShowAISettings] = useState(false);
   const [showPipeline, setShowPipeline] = useState(false);
+  const [showOutcomeInsights, setShowOutcomeInsights] = useState(false);
   const [selectedRoleId, setSelectedRoleId] = useState<number | null>(null);
   const [selectedJob, setSelectedJob] = useState<JobDetail | null>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
@@ -283,6 +312,19 @@ export function JobsPageClient() {
     toLocalInputValue(new Date().toISOString()),
   );
   const [stageSaving, setStageSaving] = useState(false);
+  const [outcomeEvents, setOutcomeEvents] = useState<OutcomeEvent[]>([]);
+  const [outcomesLoading, setOutcomesLoading] = useState(false);
+  const [outcomesError, setOutcomesError] = useState<string | null>(null);
+  const [newOutcomeType, setNewOutcomeType] = useState<OutcomeEventType>("screen");
+  const [newOutcomeOccurredAt, setNewOutcomeOccurredAt] = useState(
+    toLocalInputValue(new Date().toISOString()),
+  );
+  const [newOutcomeNotes, setNewOutcomeNotes] = useState("");
+  const [savingOutcome, setSavingOutcome] = useState(false);
+  const [outcomeInsights, setOutcomeInsights] = useState<OutcomeInsights | null>(null);
+  const [outcomeInsightsLoading, setOutcomeInsightsLoading] = useState(false);
+  const [outcomeInsightsError, setOutcomeInsightsError] = useState<string | null>(null);
+  const [tuningSuggestions, setTuningSuggestions] = useState<OutcomeTuningSuggestions | null>(null);
 
   async function loadJobs() {
     setLoadingJobs(true);
@@ -345,7 +387,35 @@ export function JobsPageClient() {
     setOpsNextActionAt(toLocalInputValue(selectedJob.application_ops?.next_action_at ?? null));
     setNewStage(timeline.at(-1)?.stage ?? "applied");
     setStageOccurredAt(toLocalInputValue(new Date().toISOString()));
+    setNewOutcomeOccurredAt(toLocalInputValue(new Date().toISOString()));
   }, [selectedJob]);
+
+  useEffect(() => {
+    if (!selectedRoleId) {
+      setOutcomeEvents([]);
+      setOutcomesError(null);
+      return;
+    }
+
+    const fetchOutcomes = async () => {
+      setOutcomesLoading(true);
+      setOutcomesError(null);
+      try {
+        const response = await listOutcomeEvents(selectedRoleId);
+        setOutcomeEvents(response);
+      } catch (error) {
+        if (error instanceof Error) {
+          setOutcomesError(error.message);
+        } else {
+          setOutcomesError("Failed to load outcome events.");
+        }
+      } finally {
+        setOutcomesLoading(false);
+      }
+    };
+
+    fetchOutcomes();
+  }, [selectedRoleId]);
 
   useEffect(() => {
     if (!showPipeline) {
@@ -504,6 +574,57 @@ export function JobsPageClient() {
       } else {
         setOpsError("Failed to update next action.");
       }
+    }
+  }
+
+  async function handleAddOutcomeEvent() {
+    if (!selectedJob || !newOutcomeOccurredAt) {
+      return;
+    }
+
+    setSavingOutcome(true);
+    setOutcomesError(null);
+    try {
+      await createOutcomeEvent(selectedJob.id, {
+        event_type: newOutcomeType,
+        occurred_at: new Date(newOutcomeOccurredAt).toISOString(),
+        notes: newOutcomeNotes || null,
+        fit_analysis_id: selectedJob.latest_fit_analysis?.id ?? null,
+        desirability_score_id: selectedJob.latest_desirability_score?.id ?? null,
+        application_material_id: selectedMaterialId,
+      });
+      const refreshed = await listOutcomeEvents(selectedJob.id);
+      setOutcomeEvents(refreshed);
+      setNewOutcomeNotes("");
+    } catch (error) {
+      if (error instanceof Error) {
+        setOutcomesError(error.message);
+      } else {
+        setOutcomesError("Failed to log outcome event.");
+      }
+    } finally {
+      setSavingOutcome(false);
+    }
+  }
+
+  async function loadOutcomeInsights() {
+    setOutcomeInsightsLoading(true);
+    setOutcomeInsightsError(null);
+    try {
+      const [insights, suggestions] = await Promise.all([
+        getOutcomeInsights(),
+        getOutcomeTuningSuggestions(),
+      ]);
+      setOutcomeInsights(insights);
+      setTuningSuggestions(suggestions);
+    } catch (error) {
+      if (error instanceof Error) {
+        setOutcomeInsightsError(error.message);
+      } else {
+        setOutcomeInsightsError("Failed to load outcome insights.");
+      }
+    } finally {
+      setOutcomeInsightsLoading(false);
     }
   }
 
@@ -1204,6 +1325,15 @@ export function JobsPageClient() {
         </button>
         <button
           onClick={() => {
+            setShowOutcomeInsights(true);
+            loadOutcomeInsights();
+          }}
+          type="button"
+        >
+          Outcome Insights
+        </button>
+        <button
+          onClick={() => {
             setShowFactorSettings(true);
             loadFactors();
           }}
@@ -1617,6 +1747,60 @@ export function JobsPageClient() {
                   </div>
                 ) : (
                   <p>No desirability score generated yet.</p>
+                )}
+              </section>
+
+              <section>
+                <h4>Outcome Feedback</h4>
+                {outcomesLoading ? <p>Loading outcomes...</p> : null}
+                {outcomesError ? <p role="alert">{outcomesError}</p> : null}
+                <div style={{ display: "grid", gap: "0.5rem", gridTemplateColumns: "1fr 1fr" }}>
+                  <label style={{ display: "grid", gap: "0.25rem" }}>
+                    Outcome type
+                    <select
+                      onChange={(event) =>
+                        setNewOutcomeType(event.target.value as OutcomeEventType)
+                      }
+                      value={newOutcomeType}
+                    >
+                      <option value="screen">Screen</option>
+                      <option value="interview">Interview</option>
+                      <option value="offer">Offer</option>
+                      <option value="rejected">Rejected</option>
+                    </select>
+                  </label>
+                  <label style={{ display: "grid", gap: "0.25rem" }}>
+                    Occurred at
+                    <input
+                      onChange={(event) => setNewOutcomeOccurredAt(event.target.value)}
+                      type="datetime-local"
+                      value={newOutcomeOccurredAt}
+                    />
+                  </label>
+                  <label style={{ display: "grid", gap: "0.25rem", gridColumn: "1 / -1" }}>
+                    Outcome notes
+                    <textarea
+                      onChange={(event) => setNewOutcomeNotes(event.target.value)}
+                      rows={2}
+                      value={newOutcomeNotes}
+                    />
+                  </label>
+                </div>
+                <button disabled={savingOutcome} onClick={handleAddOutcomeEvent} type="button">
+                  {savingOutcome ? "Logging outcome..." : "Log Outcome Event"}
+                </button>
+                {outcomeEvents.length ? (
+                  <ul>
+                    {outcomeEvents.map((event) => (
+                      <li key={event.id}>
+                        {outcomeEventLabel(event.event_type)} —{" "}
+                        {new Date(event.occurred_at).toLocaleString()}
+                        {event.notes ? ` (${event.notes})` : ""}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>No outcomes logged yet.</p>
                 )}
               </section>
 
@@ -2319,6 +2503,73 @@ export function JobsPageClient() {
                   </li>
                 ))}
             </ul>
+          ) : null}
+        </Modal>
+      ) : null}
+
+      {showOutcomeInsights ? (
+        <Modal
+          onClose={() => {
+            setShowOutcomeInsights(false);
+            setOutcomeInsightsError(null);
+          }}
+          title="Outcome Insights"
+        >
+          {outcomeInsightsLoading ? <p>Loading outcome insights...</p> : null}
+          {outcomeInsightsError ? <p role="alert">{outcomeInsightsError}</p> : null}
+          {outcomeInsights ? (
+            <>
+              <p>
+                <strong>Confidence:</strong> {outcomeInsights.confidence_message}
+              </p>
+              <p>
+                <strong>Total events:</strong> {outcomeInsights.total_events} •{" "}
+                <strong>Roles:</strong> {outcomeInsights.total_roles_with_outcomes}
+              </p>
+
+              <h4>Conversion by Fit Band</h4>
+              <ul>
+                {outcomeInsights.conversion_by_fit_band.map((row) => (
+                  <li key={`fit-${row.segment}`}>
+                    {row.segment}: {row.hires}/{row.attempts} ({toPercent(row.conversion_rate)})
+                  </li>
+                ))}
+              </ul>
+
+              <h4>Conversion by Desirability Band</h4>
+              <ul>
+                {outcomeInsights.conversion_by_desirability_band.map((row) => (
+                  <li key={`des-${row.segment}`}>
+                    {row.segment}: {row.hires}/{row.attempts} ({toPercent(row.conversion_rate)})
+                  </li>
+                ))}
+              </ul>
+
+              <h4>Conversion by Model Family</h4>
+              <ul>
+                {outcomeInsights.conversion_by_model_family.map((row) => (
+                  <li key={`model-${row.segment}`}>
+                    {row.segment}: {row.hires}/{row.attempts} ({toPercent(row.conversion_rate)})
+                  </li>
+                ))}
+              </ul>
+
+              <h4>Manual Tuning Suggestions</h4>
+              <p>{tuningSuggestions?.confidence_message}</p>
+              <ul>
+                {(tuningSuggestions?.suggestions ?? []).map((suggestion) => (
+                  <li key={`${suggestion.recommendation}-${suggestion.reversible_action}`}>
+                    <p>
+                      <strong>{suggestion.recommendation}</strong>
+                    </p>
+                    <p>{suggestion.rationale}</p>
+                    <p>
+                      <em>Reversible action:</em> {suggestion.reversible_action}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </>
           ) : null}
         </Modal>
       ) : null}
