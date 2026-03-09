@@ -142,6 +142,52 @@ async def test_capture_from_url_rolls_back_on_persistence_failure(db_session):
 
 
 @pytest.mark.asyncio
+async def test_capture_from_url_cleans_up_written_files_when_commit_fails(db_session):
+    """Written files are cleaned up if DB commit fails after persistence staging."""
+    service = JobCaptureService(db_session)
+
+    mock_scraper = MagicMock()
+    mock_scraper.scrape = AsyncMock(return_value="<html><body>job</body></html>")
+    mock_scraper.extract_text_from_html.return_value = "raw job text"
+
+    mock_llm = MagicMock()
+    mock_llm.denoise_job_posting = AsyncMock(return_value="# Broken Commit")
+    mock_llm.extract_job_data = AsyncMock(
+        return_value={
+            "company": "CleanupCo",
+            "title": "Cleanup Role",
+            "team_division": None,
+            "salary_min": None,
+            "salary_max": None,
+            "salary_currency": "USD",
+            "required_skills": ["Python"],
+            "preferred_skills": [],
+        }
+    )
+
+    original_commit = db_session.commit
+    commit_calls = 0
+
+    def flaky_commit() -> None:
+        nonlocal commit_calls
+        commit_calls += 1
+        if commit_calls == 1:
+            raise RuntimeError("commit exploded")
+        original_commit()
+
+    with (
+        patch("backend.services.job_capture.ScraperService", return_value=mock_scraper),
+        patch("backend.services.job_capture.LLMService", return_value=mock_llm),
+        patch.object(db_session, "commit", side_effect=flaky_commit),
+        patch("backend.services.job_capture.delete_file") as delete_file_mock,
+    ):
+        with pytest.raises(JobCapturePersistenceError):
+            await service.capture_from_url("https://example.com/jobs/cleanup")
+
+    assert delete_file_mock.call_count == 2
+
+
+@pytest.mark.asyncio
 async def test_capture_from_url_duplicate_returns_existing(db_session):
     """Existing URL short-circuits to already_exists result."""
     company = Company(name="DupCo", slug="dupco")

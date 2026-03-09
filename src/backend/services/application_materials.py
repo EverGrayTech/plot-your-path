@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import json
 from typing import Any, cast
 
@@ -19,8 +18,9 @@ from backend.schemas.job import ApplicationArtifactType, InterviewPrepSectionKey
 from backend.services.ai_settings import AISettingsService
 from backend.services.career_evidence import CareerEvidenceService
 from backend.services.fit_analyzer import FitAnalysisService
-from backend.services.llm_service import LLMService
-from backend.utils.file_storage import save_file
+from backend.services.llm_service import LLMError, LLMService
+from backend.utils.async_utils import run_async_task
+from backend.utils.file_storage import delete_file, save_file
 
 COVER_LETTER_PROMPT_VERSION = "cover-letter-v1"
 INTERVIEW_PREP_PROMPT_VERSION = "interview-prep-pack-v1"
@@ -539,9 +539,14 @@ class ApplicationMaterialsService:
             prompt_version=prompt_version,
         )
         self.db.add(material)
-        self.db.commit()
-        self.db.refresh(material)
-        return material
+        try:
+            self.db.commit()
+            self.db.refresh(material)
+            return material
+        except Exception:
+            self.db.rollback()
+            delete_file(stored_path)
+            raise
 
     def _latest_interview_prep_pack(self, role_id: int) -> ApplicationMaterial | None:
         return (
@@ -570,8 +575,8 @@ class ApplicationMaterialsService:
         prompt = self._build_cover_letter_prompt(fit_rationale, profile_text, role)
         output = ""
         try:
-            output = self._clean_output(asyncio.run(self.llm_service.complete(prompt)))
-        except Exception:
+            output = self._clean_output(run_async_task(self.llm_service.complete(prompt)))
+        except LLMError:
             output = ""
         if not output:
             output = self._fallback_cover_letter(role, fit_rationale)
@@ -609,8 +614,8 @@ class ApplicationMaterialsService:
         prompt = self._build_qa_prompt(fit_rationale, profile_text, cleaned_questions, role)
         output = ""
         try:
-            output = self._clean_output(asyncio.run(self.llm_service.complete(prompt)))
-        except Exception:
+            output = self._clean_output(run_async_task(self.llm_service.complete(prompt)))
+        except LLMError:
             output = ""
         if not output:
             output = self._fallback_question_answers(cleaned_questions, role, fit_rationale)
@@ -652,9 +657,9 @@ class ApplicationMaterialsService:
 
         sections: dict[str, list[str]] | None = None
         try:
-            output = self._clean_output(asyncio.run(self.llm_service.complete(prompt)))
+            output = self._clean_output(run_async_task(self.llm_service.complete(prompt)))
             sections = self._parse_interview_prep_sections(output)
-        except Exception:
+        except (json.JSONDecodeError, LLMError, TypeError, ValueError):
             sections = None
 
         if not sections:
@@ -774,9 +779,9 @@ class ApplicationMaterialsService:
 
         regenerated_items: list[str] | None = None
         try:
-            output = self._clean_output(asyncio.run(self.llm_service.complete(prompt)))
+            output = self._clean_output(run_async_task(self.llm_service.complete(prompt)))
             regenerated_items = self._parse_interview_prep_items(output)
-        except Exception:
+        except (json.JSONDecodeError, LLMError, TypeError, ValueError):
             regenerated_items = None
 
         if not regenerated_items:
@@ -822,9 +827,13 @@ class ApplicationMaterialsService:
         traceability, unsupported_claims = self._build_section_traceability(sections, [])
         cast(Any, material).section_traceability = traceability
         cast(Any, material).unsupported_claims = unsupported_claims
-        self.db.commit()
-        self.db.refresh(material)
-        return material
+        try:
+            self.db.commit()
+            self.db.refresh(material)
+            return material
+        except Exception:
+            self.db.rollback()
+            raise
 
     def generate_resume_tuning_suggestion(self, role_id: int) -> ApplicationMaterial:
         role = self._require_role(role_id)
@@ -843,9 +852,9 @@ class ApplicationMaterialsService:
 
         sections: dict[str, list[str]] | None = None
         try:
-            output = self._clean_output(asyncio.run(self.llm_service.complete(prompt)))
+            output = self._clean_output(run_async_task(self.llm_service.complete(prompt)))
             sections = self._parse_resume_tuning_sections(output)
-        except Exception:
+        except (json.JSONDecodeError, LLMError, TypeError, ValueError):
             sections = None
 
         if not sections:

@@ -17,7 +17,7 @@ from backend.services.llm_service import LLMError, LLMService
 from backend.services.scraper import ScraperError, ScraperService
 from backend.services.skill_extractor import SkillExtractorService
 from backend.services.title_normalizer import normalize_job_title
-from backend.utils.file_storage import save_file
+from backend.utils.file_storage import delete_file, save_file
 from backend.utils.slug import create_slug
 
 
@@ -111,6 +111,7 @@ class JobCaptureService:
         raw_html: str | None,
     ) -> JobCaptureResult:
         llm = LLMService(config=self.llm_cfg)
+        cleanup_paths: list[str] = []
 
         try:
             markdown = await llm.denoise_job_posting(raw_text)
@@ -153,8 +154,10 @@ class JobCaptureService:
             else:
                 assert raw_html is not None, "raw_html is required for non-clipboard sources"
                 role.raw_html_path = save_file(raw_html, f"jobs/raw/{company.slug}/{role.id}.html")
+                cleanup_paths.append(role.raw_html_path)
 
             role.cleaned_md_path = save_file(markdown, f"jobs/cleaned/{company.slug}/{role.id}.md")
+            cleanup_paths.append(role.cleaned_md_path)
 
             extractor = SkillExtractorService(self.db)
             required_skills: list[str] = job_data.get("required_skills") or []
@@ -172,6 +175,8 @@ class JobCaptureService:
             )
         except Exception as exc:
             self.db.rollback()
+            for stored_path in cleanup_paths:
+                delete_file(stored_path)
             raise JobCapturePersistenceError(str(exc)) from exc
 
     def _find_existing(self, url: str, start: float) -> JobCaptureResult | None:

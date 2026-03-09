@@ -1,5 +1,7 @@
 """Database initialization script."""
 
+# Import models so SQLAlchemy metadata is fully populated before create_all.
+import backend.models  # noqa: F401
 from backend.database import Base, engine
 
 

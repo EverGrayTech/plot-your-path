@@ -7,17 +7,15 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.config import settings
-from backend.database import Base, engine
 from backend.routers import ai_settings, desirability, jobs, skills
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-    """Ensure all known SQLAlchemy tables exist for the current database."""
-    # Import models so SQLAlchemy metadata is fully populated before create_all.
+    """Load application metadata needed during runtime startup."""
+    # Import models so SQLAlchemy metadata is populated for explicit init/migration commands.
     import backend.models  # noqa: F401
 
-    Base.metadata.create_all(bind=engine)
     yield
 
 
