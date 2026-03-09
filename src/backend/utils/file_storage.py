@@ -104,3 +104,13 @@ def save_file(content: str, filepath: str) -> str:
     with open(resolved, "w", encoding="utf-8") as f:
         f.write(content)
     return stored
+
+
+def delete_file(filepath: str) -> None:
+    """Delete a stored file if it exists."""
+
+    resolved = _resolve_path(filepath)
+    try:
+        os.remove(resolved)
+    except FileNotFoundError:
+        return

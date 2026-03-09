@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-import asyncio
 import hashlib
 import json
+from typing import Any, cast
 
 from sqlalchemy.orm import Session
 
@@ -14,7 +14,8 @@ from backend.models.desirability_score_result import DesirabilityScoreResult
 from backend.models.role import Role
 from backend.schemas.ai_settings import OperationFamily
 from backend.services.ai_settings import AISettingsService
-from backend.services.llm_service import LLMService
+from backend.services.llm_service import LLMError, LLMService
+from backend.utils.async_utils import run_async_task
 
 DESIRABILITY_VERSION = "desirability-v1"
 
@@ -77,14 +78,15 @@ class DesirabilityScoringService:
             raise ValueError("No active desirability factors configured")
 
         for factor in factors:
-            if factor.weight < 0 or factor.weight > 1:
+            weight = float(cast(Any, factor.weight))
+            if weight < 0 or weight > 1:
                 raise ValueError("Factor weights must be between 0.0 and 1.0")
 
-        total = sum(factor.weight for factor in factors)
+        total = sum(float(cast(Any, factor.weight)) for factor in factors)
         if total <= 0:
             raise ValueError("Sum of active factor weights must be greater than zero")
 
-        return [factor.weight / total for factor in factors]
+        return [float(cast(Any, factor.weight)) / total for factor in factors]
 
     @staticmethod
     def _build_fallback_factor_score(company: Company, factor: DesirabilityFactorConfig) -> int:
@@ -132,7 +134,7 @@ class DesirabilityScoringService:
             if not reasoning:
                 reasoning = fallback_reasoning
             return score, reasoning
-        except Exception:
+        except (json.JSONDecodeError, KeyError, LLMError, TypeError, ValueError):
             return fallback_score, fallback_reasoning
 
     def create_factor(
@@ -201,11 +203,13 @@ class DesirabilityScoringService:
         self.ensure_default_factors()
 
         if not force_refresh:
-            latest = self.get_latest_for_company(role.company_id)
+            latest = self.get_latest_for_company(int(cast(Any, role.company_id)))
             if latest is not None:
                 return latest
 
-        company = self.db.query(Company).filter(Company.id == role.company_id).first()
+        company = (
+            self.db.query(Company).filter(Company.id == int(cast(Any, role.company_id))).first()
+        )
         if company is None:
             raise ValueError("Company not found for role")
 
@@ -220,7 +224,7 @@ class DesirabilityScoringService:
         )
         normalized_weights = self._normalize_weights(factors)
 
-        scores = [asyncio.run(self._score_factor_async(company, factor)) for factor in factors]
+        scores = [run_async_task(self._score_factor_async(company, factor)) for factor in factors]
 
         breakdown: list[dict[str, object]] = []
         weighted_total = 0.0
@@ -275,16 +279,16 @@ class DesirabilityScoringService:
         role = self.db.query(Role).filter(Role.id == role_id).first()
         if role is None:
             return None
-        return self.get_latest_for_company(role.company_id)
+        return self.get_latest_for_company(int(cast(Any, role.company_id)))
 
     def reorder_factors(self, factor_ids: list[int]) -> list[DesirabilityFactorConfig]:
         factors = self.get_factors()
-        by_id = {factor.id: factor for factor in factors}
+        by_id = {int(cast(Any, factor.id)): factor for factor in factors}
         if set(factor_ids) != set(by_id.keys()):
             raise ValueError("factor_ids must include each existing factor exactly once")
 
         for index, factor_id in enumerate(factor_ids):
-            by_id[factor_id].display_order = index
+            cast(Any, by_id[factor_id]).display_order = index
 
         self.db.commit()
         return self.get_factors()
@@ -315,15 +319,15 @@ class DesirabilityScoringService:
             )
             if duplicate:
                 raise ValueError("Factor name already exists")
-            factor.name = name.strip()
+            cast(Any, factor).name = name.strip()
         if prompt is not None:
-            factor.prompt = prompt.strip()
+            cast(Any, factor).prompt = prompt.strip()
         if weight is not None:
-            factor.weight = weight
+            cast(Any, factor).weight = weight
         if is_active is not None:
-            factor.is_active = is_active
+            cast(Any, factor).is_active = is_active
         if display_order is not None:
-            factor.display_order = display_order
+            cast(Any, factor).display_order = display_order
 
         self.db.commit()
         self.db.refresh(factor)

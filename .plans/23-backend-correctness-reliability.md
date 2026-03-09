@@ -92,32 +92,32 @@ Refactor direction:
 ## Implementation Steps
 
 ### 1. Execution model definition
-- [ ] Document the backend execution model for CRUD, orchestration, file I/O, and LLM calls.
-- [ ] Identify all nested event-loop usage and replace it with the chosen boundary pattern.
+- [x] Document the backend execution model for CRUD, orchestration, file I/O, and LLM calls.
+- [x] Identify all nested event-loop usage and replace it with the chosen boundary pattern.
 
 ### 2. Persistence workflow hardening
 - [ ] Separate source metadata from file path metadata where currently overloaded.
-- [ ] Introduce deterministic staged-write and cleanup behavior for file-backed artifacts.
-- [ ] Add compatibility rules for legacy stored values.
+- [x] Introduce deterministic staged-write and cleanup behavior for file-backed artifacts.
+- [x] Add compatibility rules for legacy stored values.
 
 ### 3. Datetime normalization
-- [ ] Define one canonical time policy.
-- [ ] Replace repeated naive/aware conversion patterns with shared helpers.
-- [ ] Verify pipeline, deadline, and history views behave consistently under the new policy.
+- [x] Define one canonical time policy.
+- [x] Replace repeated naive/aware conversion patterns with shared helpers.
+- [x] Verify pipeline, deadline, and history views behave consistently under the new policy.
 
 ### 4. Schema lifecycle cleanup
-- [ ] Remove implicit schema mutation from app startup.
-- [ ] Introduce or document the supported init/migration path for local and future production use.
+- [x] Remove implicit schema mutation from app startup.
+- [x] Introduce or document the supported init/migration path for local and future production use.
 
 ### 5. Exception handling refinement
-- [ ] Replace broad catch-all blocks in critical workflows with typed failure handling.
-- [ ] Preserve intentional fallback behavior only where product requirements explicitly allow it.
+- [x] Replace broad catch-all blocks in critical workflows with typed failure handling.
+- [x] Preserve intentional fallback behavior only where product requirements explicitly allow it.
 
 ### 6. Test coverage
-- [ ] Add regression tests for async/sync boundary behavior.
-- [ ] Add tests for failed persistence cleanup behavior.
+- [x] Add regression tests for async/sync boundary behavior.
+- [x] Add tests for failed persistence cleanup behavior.
 - [ ] Add tests for timezone-sensitive comparisons and serialized responses.
-- [ ] Add tests for startup/init behavior without implicit table creation.
+- [x] Add tests for startup/init behavior without implicit table creation.
 
 ---
 
@@ -136,8 +136,8 @@ Refactor direction:
 
 ## Success Criteria
 
-- [ ] No backend workflow relies on nested `asyncio.run(...)` during request handling.
-- [ ] File-backed persistence either completes atomically from the caller’s perspective or cleans up safely on failure.
-- [ ] Datetime storage and comparisons use one documented policy across the backend.
-- [ ] Application startup no longer mutates schema implicitly.
-- [ ] API and service layers expose clearer, typed failure behavior with targeted fallbacks only where intended.
+- [x] No backend workflow relies on nested `asyncio.run(...)` during request handling.
+- [x] File-backed persistence either completes atomically from the caller’s perspective or cleans up safely on failure.
+- [x] Datetime storage and comparisons use one documented policy across the backend.
+- [x] Application startup no longer mutates schema implicitly.
+- [x] API and service layers expose clearer, typed failure behavior with targeted fallbacks only where intended.

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 from typing import Any
 
 from sqlalchemy.orm import Session
@@ -16,7 +15,8 @@ from backend.schemas.career_evidence import EvidenceQuery
 from backend.schemas.job import FitRecommendation
 from backend.services.ai_settings import AISettingsService
 from backend.services.career_evidence import CareerEvidenceService
-from backend.services.llm_service import LLMService
+from backend.services.llm_service import LLMError, LLMService
+from backend.utils.async_utils import run_async_task
 
 FIT_ANALYSIS_VERSION = "fit-v1"
 
@@ -217,11 +217,9 @@ class FitAnalysisService:
                 missing_required_skills=missing_required,
                 recommendation=recommendation,
             )
-            llm_rationale = self._clean_llm_rationale(
-                asyncio.run(self.llm_service.complete(rationale_prompt))
-            )
+            llm_rationale = self._clean_llm_rationale(run_async_task(self.llm_service.complete(rationale_prompt)))
             rationale = llm_rationale or fallback_rationale
-        except Exception:
+        except LLMError:
             rationale = fallback_rationale
 
         analysis = RoleFitAnalysis(

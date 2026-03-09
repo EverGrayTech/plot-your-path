@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-import asyncio
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -68,7 +68,9 @@ from backend.services.job_capture import (
 )
 from backend.services.outcome_feedback import OutcomeFeedbackService
 from backend.services.skill_extractor import SkillExtractorService
+from backend.utils.async_utils import run_async_task
 from backend.utils.file_storage import file_exists, load_file
+from backend.utils.time import utc_now_naive
 
 router = APIRouter()
 
@@ -355,7 +357,7 @@ def list_jobs(db: Annotated[Session, Depends(get_db)]) -> list[JobListItem]:
     )
 
     result: list[JobListItem] = []
-    now = datetime.now(UTC).replace(tzinfo=None)
+    now = utc_now_naive()
     for role, company in rows:
         application_ops = (
             db.query(ApplicationOpsModel).filter(ApplicationOpsModel.role_id == role.id).first()
@@ -405,7 +407,7 @@ def list_jobs_pipeline(
     recently_updated: bool = False,
 ) -> PipelineResponse:
     """List operational pipeline view with urgency filters and counters."""
-    now = datetime.now(UTC).replace(tzinfo=None)
+    now = utc_now_naive()
     week_end = now + timedelta(days=7)
     recently_cutoff = now - timedelta(days=3)
 
@@ -492,7 +494,7 @@ def get_job(role_id: int, db: Annotated[Session, Depends(get_db)]) -> JobDetail:
     application_ops = (
         db.query(ApplicationOpsModel).filter(ApplicationOpsModel.role_id == role_id).first()
     )
-    now = datetime.now(UTC).replace(tzinfo=None)
+    now = utc_now_naive()
 
     return JobDetail(
         id=role.id,
@@ -533,7 +535,7 @@ def get_application_ops(
     row = db.query(ApplicationOpsModel).filter(ApplicationOpsModel.role_id == role_id).first()
     if row is None:
         raise HTTPException(status_code=404, detail="Application ops not found")
-    now = datetime.now(UTC).replace(tzinfo=None)
+    now = utc_now_naive()
     return _to_application_ops_schema(role_id, row, now=now)
 
 
@@ -559,7 +561,7 @@ def upsert_application_ops(
 
     db.commit()
     db.refresh(row)
-    now = datetime.now(UTC).replace(tzinfo=None)
+    now = utc_now_naive()
     return _to_application_ops_schema(role_id, row, now=now)
 
 
@@ -579,7 +581,7 @@ def update_next_action(
 
     db.commit()
     db.refresh(row)
-    now = datetime.now(UTC).replace(tzinfo=None)
+    now = utc_now_naive()
     return _to_application_ops_schema(role_id, row, now=now)
 
 
@@ -687,7 +689,7 @@ def get_outcome_tuning_suggestions(
 
 
 @router.post("/jobs/{role_id}/desirability-score", response_model=DesirabilityScore)
-def score_job_desirability(
+async def score_job_desirability(
     role_id: int,
     db: Annotated[Session, Depends(get_db)],
     force_refresh: bool = False,
@@ -695,7 +697,11 @@ def score_job_desirability(
     """Generate (or fetch cached) desirability score for a role."""
     service = DesirabilityScoringService(db)
     try:
-        score = service.generate_for_role(role_id, force_refresh=force_refresh)
+        score = await run_in_threadpool(
+            service.generate_for_role,
+            role_id,
+            force_refresh=force_refresh,
+        )
         return _to_desirability_score_schema(score)
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
@@ -707,14 +713,14 @@ def score_job_desirability(
 
 
 @router.post("/jobs/{role_id}/desirability-score/refresh", response_model=DesirabilityScore)
-def refresh_job_desirability(
+async def refresh_job_desirability(
     role_id: int,
     db: Annotated[Session, Depends(get_db)],
 ) -> DesirabilityScore:
     """Force recomputation of desirability score for a role."""
     service = DesirabilityScoringService(db)
     try:
-        score = service.generate_for_role(role_id, force_refresh=True)
+        score = await run_in_threadpool(service.generate_for_role, role_id, force_refresh=True)
         return _to_desirability_score_schema(score)
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
@@ -726,7 +732,7 @@ def refresh_job_desirability(
 
 
 @router.post("/jobs/{role_id}/fit-analysis", response_model=FitAnalysis)
-def analyze_job_fit(role_id: int, db: Annotated[Session, Depends(get_db)]) -> FitAnalysis:
+async def analyze_job_fit(role_id: int, db: Annotated[Session, Depends(get_db)]) -> FitAnalysis:
     """
     Generate and persist a deterministic fit analysis record for a role.
 
@@ -742,7 +748,7 @@ def analyze_job_fit(role_id: int, db: Annotated[Session, Depends(get_db)]) -> Fi
     """
     service = FitAnalysisService(db)
     try:
-        analysis = service.generate_for_role(role_id)
+        analysis = await run_in_threadpool(service.generate_for_role, role_id)
         return _to_fit_analysis_schema(analysis)
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
@@ -773,14 +779,14 @@ def sync_resume_profile(
 @router.post(
     "/jobs/{role_id}/application-materials/cover-letter", response_model=ApplicationMaterial
 )
-def generate_cover_letter(
+async def generate_cover_letter(
     role_id: int,
     db: Annotated[Session, Depends(get_db)],
 ) -> ApplicationMaterial:
     """Generate and persist a cover-letter draft for a role."""
     service = ApplicationMaterialsService(db)
     try:
-        material = service.generate_cover_letter(role_id)
+        material = await run_in_threadpool(service.generate_cover_letter, role_id)
         return _to_application_material_schema(material)
     except LookupError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
@@ -795,7 +801,7 @@ def generate_cover_letter(
 @router.post(
     "/jobs/{role_id}/application-materials/question-answers", response_model=ApplicationMaterial
 )
-def generate_question_answers(
+async def generate_question_answers(
     role_id: int,
     payload: ApplicationMaterialQARequest,
     db: Annotated[Session, Depends(get_db)],
@@ -803,7 +809,7 @@ def generate_question_answers(
     """Generate and persist Q&A draft answers for a role."""
     service = ApplicationMaterialsService(db)
     try:
-        material = service.generate_question_answers(payload.questions, role_id)
+        material = await run_in_threadpool(service.generate_question_answers, payload.questions, role_id)
         return _to_application_material_schema(material)
     except LookupError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
@@ -830,14 +836,14 @@ def list_application_materials(
 
 
 @router.post("/jobs/{role_id}/interview-prep-pack", response_model=InterviewPrepPack)
-def generate_interview_prep_pack(
+async def generate_interview_prep_pack(
     role_id: int,
     db: Annotated[Session, Depends(get_db)],
 ) -> InterviewPrepPack:
     """Generate and persist interview prep pack for a role."""
     service = ApplicationMaterialsService(db)
     try:
-        material = service.generate_interview_prep_pack(role_id)
+        material = await run_in_threadpool(service.generate_interview_prep_pack, role_id)
         return _to_interview_prep_pack_schema(material)
     except LookupError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
@@ -883,7 +889,7 @@ def get_interview_prep_pack(
     "/jobs/{role_id}/interview-prep-pack/regenerate",
     response_model=InterviewPrepPack,
 )
-def regenerate_interview_prep_section(
+async def regenerate_interview_prep_section(
     role_id: int,
     payload: InterviewPrepPackRegenerateRequest,
     db: Annotated[Session, Depends(get_db)],
@@ -891,7 +897,11 @@ def regenerate_interview_prep_section(
     """Regenerate one section and persist as a new interview prep pack version."""
     service = ApplicationMaterialsService(db)
     try:
-        material = service.regenerate_interview_prep_section(role_id, payload.section)
+        material = await run_in_threadpool(
+            service.regenerate_interview_prep_section,
+            role_id,
+            payload.section,
+        )
         return _to_interview_prep_pack_schema(material)
     except LookupError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
@@ -936,14 +946,14 @@ def update_interview_prep_pack(
 
 
 @router.post("/jobs/{role_id}/resume-tuning", response_model=ResumeTuningSuggestion)
-def generate_resume_tuning(
+async def generate_resume_tuning(
     role_id: int,
     db: Annotated[Session, Depends(get_db)],
 ) -> ResumeTuningSuggestion:
     """Generate and persist resume tuning suggestions for a role."""
     service = ApplicationMaterialsService(db)
     try:
-        material = service.generate_resume_tuning_suggestion(role_id)
+        material = await run_in_threadpool(service.generate_resume_tuning_suggestion, role_id)
         return _to_resume_tuning_schema(material)
     except LookupError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
@@ -1060,7 +1070,7 @@ def update_job_status(
 
 
 @router.post("/jobs/scrape", response_model=JobScrapeResponse)
-def scrape_job(
+async def scrape_job(
     request: JobScrapeRequest,
     db: Annotated[Session, Depends(get_db)],
 ) -> JobScrapeResponse:
@@ -1092,9 +1102,12 @@ def scrape_job(
     service = JobCaptureService(db)
     try:
         if fallback_text:
-            result = asyncio.run(service.capture_from_clipboard_text(url, fallback_text))
+            result = await run_in_threadpool(
+                run_async_task,
+                service.capture_from_clipboard_text(url, fallback_text),
+            )
         else:
-            result = asyncio.run(service.capture_from_url(url))
+            result = await run_in_threadpool(run_async_task, service.capture_from_url(url))
     except JobCaptureScrapingError as exc:
         raise HTTPException(
             status_code=422,
