@@ -648,6 +648,45 @@ class TestFitAnalysis:
         assert isinstance(data["covered_required_skills"], list)
         assert isinstance(data["missing_required_skills"], list)
 
+    def test_fit_analysis_includes_traceability_fields(self, client, sample_role, sample_skills):
+        traced = SimpleNamespace(
+            id=42,
+            role_id=sample_role.id,
+            fit_score=81,
+            recommendation="go",
+            covered_required_skills=["Python"],
+            missing_required_skills=[],
+            covered_preferred_skills=["FastAPI"],
+            missing_preferred_skills=[],
+            rationale="Strong fit.",
+            rationale_citations=[
+                {
+                    "source_type": "career_evidence",
+                    "source_id": 10,
+                    "source_record_id": "resume.md",
+                    "source_key": "experience.delivery",
+                    "snippet_reference": "Built API platform",
+                    "confidence": 0.92,
+                }
+            ],
+            unsupported_claims=["No direct Kubernetes ownership evidence"],
+            provider="openai",
+            model="gpt-4o",
+            version="fit-v1",
+            created_at=datetime.now(UTC),
+        )
+        with patch(
+            "backend.routers.jobs.FitAnalysisService.generate_for_role",
+            return_value=traced,
+        ):
+            response = client.post(f"/api/jobs/{sample_role.id}/fit-analysis")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data["rationale_citations"]) == 1
+        assert data["rationale_citations"][0]["source_record_id"] == "resume.md"
+        assert data["unsupported_claims"] == ["No direct Kubernetes ownership evidence"]
+
     def test_fit_analysis_malformed_model_output_returns_422(
         self, client, sample_role, sample_skills
     ):
@@ -802,6 +841,41 @@ class TestApplicationMaterials:
         data = response.json()
         assert data["artifact_type"] == "cover_letter"
         assert data["content"] == "Dear hiring manager..."
+
+    def test_generate_cover_letter_includes_traceability_fields(self, client, sample_role):
+        fake_material = self._material_result(sample_role.id, artifact_type="cover_letter")
+        fake_material.section_traceability = [
+            {
+                "section_key": "intro",
+                "citations": [
+                    {
+                        "source_type": "career_evidence",
+                        "source_id": 7,
+                        "source_record_id": "resume.md",
+                        "source_key": "experience.platform",
+                        "snippet_reference": "Scaled job ingestion pipeline",
+                        "confidence": 0.88,
+                    }
+                ],
+                "unsupported_claims": [],
+            }
+        ]
+        fake_material.unsupported_claims = ["Leadership scope not fully evidenced"]
+
+        with (
+            patch(
+                "backend.routers.jobs.ApplicationMaterialsService.generate_cover_letter",
+                return_value=fake_material,
+            ),
+            patch("backend.routers.jobs.file_exists", return_value=True),
+            patch("backend.routers.jobs.load_file", return_value="Dear hiring manager..."),
+        ):
+            response = client.post(f"/api/jobs/{sample_role.id}/application-materials/cover-letter")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["section_traceability"][0]["section_key"] == "intro"
+        assert data["unsupported_claims"] == ["Leadership scope not fully evidenced"]
 
     def test_generate_cover_letter_validation_failure(self, client, sample_role):
         with patch(

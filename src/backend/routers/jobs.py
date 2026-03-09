@@ -216,6 +216,8 @@ def _to_fit_analysis_schema(analysis: RoleFitAnalysis) -> FitAnalysis:
         covered_preferred_skills=list(analysis.covered_preferred_skills or []),
         missing_preferred_skills=list(analysis.missing_preferred_skills or []),
         rationale=analysis.rationale,
+        rationale_citations=list(analysis.rationale_citations or []),
+        unsupported_claims=list(analysis.unsupported_claims or []),
         provider=analysis.provider,
         model=analysis.model,
         version=analysis.version,
@@ -233,6 +235,8 @@ def _to_application_material_schema(material: ApplicationMaterialModel) -> Appli
         version=material.version,
         content=content,
         questions=list(material.questions or []) or None,
+        section_traceability=list(getattr(material, "section_traceability", []) or []),
+        unsupported_claims=list(getattr(material, "unsupported_claims", []) or []),
         provider=material.provider,
         model=material.model,
         prompt_version=material.prompt_version,
@@ -256,6 +260,8 @@ def _to_interview_prep_pack_schema(material: ApplicationMaterialModel) -> Interv
         provider=material.provider,
         model=material.model,
         prompt_version=material.prompt_version,
+        section_traceability=list(getattr(material, "section_traceability", []) or []),
+        unsupported_claims=list(getattr(material, "unsupported_claims", []) or []),
         created_at=material.created_at,
     )
 
@@ -279,6 +285,8 @@ def _to_resume_tuning_schema(material: ApplicationMaterialModel) -> ResumeTuning
         provider=material.provider,
         model=material.model,
         prompt_version=material.prompt_version,
+        section_traceability=list(getattr(material, "section_traceability", []) or []),
+        unsupported_claims=list(getattr(material, "unsupported_claims", []) or []),
         created_at=material.created_at,
     )
 

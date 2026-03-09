@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+from typing import Any
 
 from sqlalchemy.orm import Session
 
@@ -114,14 +115,39 @@ class FitAnalysisService:
 
         return covered_required, missing_required, covered_preferred, missing_preferred
 
-    def _load_profile_text(self, preferred_skills: list[str], required_skills: list[str]) -> str:
-        """Load profile source text from shared evidence with deterministic fallback."""
+    @staticmethod
+    def _build_rationale_citations(evidence_items: list[Any]) -> list[dict[str, Any]]:
+        """Build lightweight rationale citations from retrieved evidence items."""
+        citations: list[dict[str, Any]] = []
+        for index, item in enumerate(evidence_items[:3]):
+            snippet_reference = item.body.strip().splitlines()[0][:220] if item.body else ""
+            citations.append(
+                {
+                    "source_type": item.source_type,
+                    "source_id": item.id,
+                    "source_record_id": item.source_record_id,
+                    "source_key": item.source_key,
+                    "snippet_reference": snippet_reference,
+                    "confidence": round(max(0.45, 0.9 - (index * 0.15)), 2),
+                }
+            )
+        return citations
+
+    @staticmethod
+    def _extract_unsupported_claims(rationale: str) -> list[str]:
+        """Identify potentially unsupported claims for visible flagging."""
+        claims: list[str] = []
+        normalized = rationale.lower()
+        if "expert" in normalized or "world-class" in normalized:
+            claims.append("Rationale contains strong claim language that may need verification.")
+        return claims
+
+    def _load_profile_evidence(self, preferred_skills: list[str], required_skills: list[str]):
+        """Load ranked profile evidence used for fit analysis and citations."""
         evidence_service = CareerEvidenceService(self.db)
-        return evidence_service.load_context_text(
+        return evidence_service.retrieve(
             EvidenceQuery(
-                skills=sorted(set(preferred_skills + required_skills)),
-                min_results=3,
-                limit=8,
+                skills=sorted(set(preferred_skills + required_skills)), min_results=3, limit=8
             )
         )
 
@@ -153,7 +179,10 @@ class FitAnalysisService:
             ]
         )
 
-        profile_text = self._load_profile_text(preferred_skills, required_skills)
+        evidence_result = self._load_profile_evidence(preferred_skills, required_skills)
+        profile_text = "\n\n".join(
+            item.body.strip() for item in evidence_result.items if item.body.strip()
+        )
         (
             covered_required,
             missing_required,
@@ -204,6 +233,8 @@ class FitAnalysisService:
             covered_preferred_skills=covered_preferred,
             missing_preferred_skills=missing_preferred,
             rationale=rationale,
+            rationale_citations=self._build_rationale_citations(evidence_result.items),
+            unsupported_claims=self._extract_unsupported_claims(rationale),
             provider=self.llm_service.config.provider,
             model=self.llm_service.config.model,
             version=FIT_ANALYSIS_VERSION,

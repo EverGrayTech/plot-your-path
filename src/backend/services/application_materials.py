@@ -434,7 +434,7 @@ class ApplicationMaterialsService:
         latest_fit = FitAnalysisService(self.db).get_latest_for_role(role_id)
         if latest_fit is None:
             latest_fit = FitAnalysisService(self.db).generate_for_role(role_id)
-        return latest_fit.rationale
+        return cast(str, latest_fit.rationale)
 
     def _load_profile_text(self) -> str:
         evidence_service = CareerEvidenceService(self.db)
@@ -444,6 +444,62 @@ class ApplicationMaterialsService:
         if profile_text:
             return profile_text
         raise ValueError("Candidate profile source is missing or empty")
+
+    def _load_profile_context(self) -> tuple[str, list[Any]]:
+        evidence_service = CareerEvidenceService(self.db)
+        retrieval = evidence_service.retrieve(EvidenceQuery(limit=8, min_results=3))
+        profile_text = "\n\n".join(
+            item.body.strip() for item in retrieval.items if item.body.strip()
+        ).strip()
+        if not profile_text:
+            raise ValueError("Candidate profile source is missing or empty")
+        return profile_text, list(retrieval.items)
+
+    @staticmethod
+    def _build_citations(evidence_items: list[Any], *, max_items: int = 3) -> list[dict[str, Any]]:
+        citations: list[dict[str, Any]] = []
+        for index, item in enumerate(evidence_items[:max_items]):
+            snippet_reference = item.body.strip().splitlines()[0][:220] if item.body else ""
+            citations.append(
+                {
+                    "source_type": item.source_type,
+                    "source_id": item.id,
+                    "source_record_id": item.source_record_id,
+                    "source_key": item.source_key,
+                    "snippet_reference": snippet_reference,
+                    "confidence": round(max(0.45, 0.9 - (index * 0.15)), 2),
+                }
+            )
+        return citations
+
+    @staticmethod
+    def _extract_unsupported_claims(items: list[str]) -> list[str]:
+        flags: list[str] = []
+        for item in items:
+            lower = item.lower()
+            if "world-class" in lower or "best-in-class" in lower or "expert" in lower:
+                flags.append(item)
+        return flags
+
+    def _build_section_traceability(
+        self,
+        sections: dict[str, list[str]],
+        evidence_items: list[Any],
+    ) -> tuple[list[dict[str, Any]], list[str]]:
+        citations = self._build_citations(evidence_items)
+        traceability: list[dict[str, Any]] = []
+        unsupported_claims: list[str] = []
+        for section_key, items in sections.items():
+            section_unsupported = self._extract_unsupported_claims(items)
+            unsupported_claims.extend(section_unsupported)
+            traceability.append(
+                {
+                    "section_key": section_key,
+                    "citations": citations,
+                    "unsupported_claims": section_unsupported,
+                }
+            )
+        return traceability, unsupported_claims
 
     def _next_version(self, artifact_type: ApplicationArtifactType, role_id: int) -> int:
         latest_version = (
@@ -462,6 +518,8 @@ class ApplicationMaterialsService:
         role_id: int,
         questions: list[str] | None,
         sections: dict[str, list[str]] | None,
+        section_traceability: list[dict[str, Any]] | None,
+        unsupported_claims: list[str] | None,
         version: int,
     ) -> ApplicationMaterial:
         path = self._build_content_path(artifact_type, role_id, version)
@@ -474,6 +532,8 @@ class ApplicationMaterialsService:
             content_path=stored_path,
             questions=questions,
             sections=sections,
+            section_traceability=section_traceability or [],
+            unsupported_claims=unsupported_claims or [],
             provider=self.llm_service.config.provider,
             model=self.llm_service.config.model,
             prompt_version=prompt_version,
@@ -504,7 +564,7 @@ class ApplicationMaterialsService:
     def generate_cover_letter(self, role_id: int) -> ApplicationMaterial:
         role = self._require_role(role_id)
         fit_rationale = self._get_fit_rationale(role_id)
-        profile_text = self._load_profile_text()
+        profile_text, evidence_items = self._load_profile_context()
         version = self._next_version(ApplicationArtifactType.COVER_LETTER, role_id)
 
         prompt = self._build_cover_letter_prompt(fit_rationale, profile_text, role)
@@ -516,6 +576,14 @@ class ApplicationMaterialsService:
         if not output:
             output = self._fallback_cover_letter(role, fit_rationale)
 
+        traceability = [
+            {
+                "section_key": "body",
+                "citations": self._build_citations(evidence_items),
+                "unsupported_claims": self._extract_unsupported_claims([output]),
+            }
+        ]
+
         return self._persist_material(
             artifact_type=ApplicationArtifactType.COVER_LETTER,
             content=output,
@@ -523,6 +591,8 @@ class ApplicationMaterialsService:
             role_id=role_id,
             questions=None,
             sections=None,
+            section_traceability=traceability,
+            unsupported_claims=list(traceability[0]["unsupported_claims"]),
             version=version,
         )
 
@@ -533,7 +603,7 @@ class ApplicationMaterialsService:
             raise ValueError("Question list must contain at least one non-empty question")
 
         fit_rationale = self._get_fit_rationale(role_id)
-        profile_text = self._load_profile_text()
+        profile_text, evidence_items = self._load_profile_context()
         version = self._next_version(ApplicationArtifactType.APPLICATION_QA, role_id)
 
         prompt = self._build_qa_prompt(fit_rationale, profile_text, cleaned_questions, role)
@@ -545,6 +615,14 @@ class ApplicationMaterialsService:
         if not output:
             output = self._fallback_question_answers(cleaned_questions, role, fit_rationale)
 
+        traceability = [
+            {
+                "section_key": "answers",
+                "citations": self._build_citations(evidence_items),
+                "unsupported_claims": self._extract_unsupported_claims([output]),
+            }
+        ]
+
         return self._persist_material(
             artifact_type=ApplicationArtifactType.APPLICATION_QA,
             content=output,
@@ -552,13 +630,15 @@ class ApplicationMaterialsService:
             role_id=role_id,
             questions=cleaned_questions,
             sections=None,
+            section_traceability=traceability,
+            unsupported_claims=list(traceability[0]["unsupported_claims"]),
             version=version,
         )
 
     def generate_interview_prep_pack(self, role_id: int) -> ApplicationMaterial:
         role = self._require_role(role_id)
         fit_rationale = self._get_fit_rationale(role_id)
-        profile_text = self._load_profile_text()
+        profile_text, evidence_items = self._load_profile_context()
         required_skills, preferred_skills = self._load_role_skills(role_id)
         version = self._next_version(ApplicationArtifactType.INTERVIEW_PREP_PACK, role_id)
 
@@ -585,6 +665,11 @@ class ApplicationMaterialsService:
                 role,
             )
 
+        section_traceability, unsupported_claims = self._build_section_traceability(
+            sections,
+            evidence_items,
+        )
+
         return self._persist_material(
             artifact_type=ApplicationArtifactType.INTERVIEW_PREP_PACK,
             content=self._render_interview_prep_markdown(sections),
@@ -592,6 +677,8 @@ class ApplicationMaterialsService:
             role_id=role_id,
             questions=None,
             sections=sections,
+            section_traceability=section_traceability,
+            unsupported_claims=unsupported_claims,
             version=version,
         )
 
@@ -673,7 +760,7 @@ class ApplicationMaterialsService:
             ),
         }
         fit_rationale = self._get_fit_rationale(role_id)
-        profile_text = self._load_profile_text()
+        profile_text, evidence_items = self._load_profile_context()
         required_skills, preferred_skills = self._load_role_skills(role_id)
         prompt = self._build_interview_prep_regenerate_prompt(
             fit_rationale,
@@ -703,6 +790,10 @@ class ApplicationMaterialsService:
 
         next_sections = dict(existing_sections)
         next_sections[section.value] = regenerated_items
+        section_traceability, unsupported_claims = self._build_section_traceability(
+            next_sections,
+            evidence_items,
+        )
         version = self._next_version(ApplicationArtifactType.INTERVIEW_PREP_PACK, role_id)
         return self._persist_material(
             artifact_type=ApplicationArtifactType.INTERVIEW_PREP_PACK,
@@ -711,6 +802,8 @@ class ApplicationMaterialsService:
             role_id=role_id,
             questions=None,
             sections=next_sections,
+            section_traceability=section_traceability,
+            unsupported_claims=unsupported_claims,
             version=version,
         )
 
@@ -726,6 +819,9 @@ class ApplicationMaterialsService:
             self._render_interview_prep_markdown(sections),
             cast(str, material.content_path),
         )
+        traceability, unsupported_claims = self._build_section_traceability(sections, [])
+        cast(Any, material).section_traceability = traceability
+        cast(Any, material).unsupported_claims = unsupported_claims
         self.db.commit()
         self.db.refresh(material)
         return material
@@ -733,7 +829,7 @@ class ApplicationMaterialsService:
     def generate_resume_tuning_suggestion(self, role_id: int) -> ApplicationMaterial:
         role = self._require_role(role_id)
         fit_rationale = self._get_fit_rationale(role_id)
-        profile_text = self._load_profile_text()
+        profile_text, evidence_items = self._load_profile_context()
         required_skills, preferred_skills = self._load_role_skills(role_id)
         version = self._next_version(ApplicationArtifactType.RESUME_TUNING, role_id)
 
@@ -759,6 +855,11 @@ class ApplicationMaterialsService:
                 required_skills,
             )
 
+        section_traceability, unsupported_claims = self._build_section_traceability(
+            sections,
+            evidence_items,
+        )
+
         return self._persist_material(
             artifact_type=ApplicationArtifactType.RESUME_TUNING,
             content=self._render_resume_tuning_markdown(sections),
@@ -766,6 +867,8 @@ class ApplicationMaterialsService:
             role_id=role_id,
             questions=None,
             sections=sections,
+            section_traceability=section_traceability,
+            unsupported_claims=unsupported_claims,
             version=version,
         )
 

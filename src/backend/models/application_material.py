@@ -18,6 +18,8 @@ class ApplicationMaterial(Base):
     content_path = Column(String, nullable=False)
     questions = Column(JSON, nullable=True)
     sections = Column(JSON, nullable=True)
+    section_traceability = Column(JSON, nullable=False, default=list)
+    unsupported_claims = Column(JSON, nullable=False, default=list)
     provider = Column(String, nullable=False)
     model = Column(String, nullable=False)
     prompt_version = Column(String, nullable=False)

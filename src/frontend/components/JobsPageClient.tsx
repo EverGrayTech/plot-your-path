@@ -16,6 +16,7 @@ import {
   type PipelineItem,
   type ResumeTuningSuggestion,
   type RoleStatus,
+  type SectionTraceability,
   type SkillDetail,
   analyzeJobFit,
   clearAISettingToken,
@@ -137,6 +138,51 @@ function resumeTuningToMarkdown(suggestion: ResumeTuningSuggestion): string {
     }
   }
   return `${lines.join("\n")}\n`;
+}
+
+function renderTraceability(
+  traceability: SectionTraceability[] | undefined,
+  unsupportedClaims: string[] | undefined,
+) {
+  const traces = traceability ?? [];
+  const unsupported = unsupportedClaims ?? [];
+  if (!traces.length && !unsupported.length) {
+    return null;
+  }
+
+  return (
+    <div style={{ marginTop: "0.5rem" }}>
+      <h5 style={{ marginBottom: "0.25rem" }}>Evidence Traceability</h5>
+      {traces.length ? (
+        <ul>
+          {traces.map((trace) => (
+            <li key={trace.section_key}>
+              <strong>{trace.section_key}</strong>
+              {trace.citations.length ? (
+                <ul>
+                  {trace.citations.map((citation) => (
+                    <li
+                      key={`${trace.section_key}-${citation.source_key}-${citation.snippet_reference}`}
+                    >
+                      [{citation.source_type}] {citation.source_record_id ?? citation.source_key}
+                      {citation.snippet_reference ? ` — ${citation.snippet_reference}` : ""}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>No citations available.</p>
+              )}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {unsupported.length ? (
+        <p>
+          <strong>Unsupported claim flags:</strong> {unsupported.join("; ")}
+        </p>
+      ) : null}
+    </div>
+  );
 }
 
 export function JobsPageClient() {
@@ -1502,6 +1548,26 @@ export function JobsPageClient() {
                     <p>
                       <strong>Rationale:</strong> {selectedJob.latest_fit_analysis.rationale}
                     </p>
+                    {selectedJob.latest_fit_analysis.rationale_citations?.length ? (
+                      <div>
+                        <strong>Evidence references:</strong>
+                        <ul>
+                          {selectedJob.latest_fit_analysis.rationale_citations.map((citation) => (
+                            <li key={`${citation.source_key}-${citation.snippet_reference}`}>
+                              [{citation.source_type}]{" "}
+                              {citation.source_record_id ?? citation.source_key}
+                              {citation.snippet_reference ? ` — ${citation.snippet_reference}` : ""}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : null}
+                    {selectedJob.latest_fit_analysis.unsupported_claims?.length ? (
+                      <p>
+                        <strong>Unsupported claim flags:</strong>{" "}
+                        {selectedJob.latest_fit_analysis.unsupported_claims.join("; ")}
+                      </p>
+                    ) : null}
                     <p>
                       <small>
                         Generated{" "}
@@ -1638,6 +1704,10 @@ export function JobsPageClient() {
                         >
                           {selectedMaterial.content}
                         </pre>
+                        {renderTraceability(
+                          selectedMaterial.section_traceability,
+                          selectedMaterial.unsupported_claims,
+                        )}
                       </article>
                     ) : null}
                   </>
@@ -1749,6 +1819,10 @@ export function JobsPageClient() {
                               : "Regenerate STAR Drafts"}
                           </button>
                         </div>
+                        {renderTraceability(
+                          selectedInterviewPrepPack.section_traceability,
+                          selectedInterviewPrepPack.unsupported_claims,
+                        )}
 
                         <div
                           style={{
@@ -1864,6 +1938,10 @@ export function JobsPageClient() {
                             </ul>
                           </div>
                         ))}
+                        {renderTraceability(
+                          selectedResumeTuning.section_traceability,
+                          selectedResumeTuning.unsupported_claims,
+                        )}
                         <div style={{ display: "flex", gap: "0.5rem" }}>
                           <button
                             onClick={() => handleCopyResumeTuning(selectedResumeTuning)}
