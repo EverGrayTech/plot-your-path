@@ -12,6 +12,7 @@ from backend.models.outcome_event import OutcomeEvent
 from backend.models.role import Role
 from backend.models.role_fit_analysis import RoleFitAnalysis
 from backend.schemas.job import OutcomeConversionRow, OutcomeEventCreate, TuningSuggestion
+from backend.utils.time import normalize_utc_naive
 
 
 class OutcomeFeedbackService:
@@ -206,7 +207,7 @@ class OutcomeFeedbackService:
             model=model,
             model_family=model_family,
             notes=payload.notes.strip() if payload.notes else None,
-            occurred_at=payload.occurred_at,
+            occurred_at=normalize_utc_naive(payload.occurred_at),
             prompt_version=prompt_version,
             role_id=role_id,
         )

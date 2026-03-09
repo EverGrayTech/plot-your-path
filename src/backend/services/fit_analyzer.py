@@ -217,7 +217,9 @@ class FitAnalysisService:
                 missing_required_skills=missing_required,
                 recommendation=recommendation,
             )
-            llm_rationale = self._clean_llm_rationale(run_async_task(self.llm_service.complete(rationale_prompt)))
+            llm_rationale = self._clean_llm_rationale(
+                run_async_task(self.llm_service.complete(rationale_prompt))
+            )
             rationale = llm_rationale or fallback_rationale
         except LLMError:
             rationale = fallback_rationale

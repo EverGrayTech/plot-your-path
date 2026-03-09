@@ -71,8 +71,8 @@ async def test_capture_from_url_persists_canonical_paths(db_session):
 
 
 @pytest.mark.asyncio
-async def test_capture_from_clipboard_sets_clipboard_sentinel(db_session):
-    """Clipboard capture stores sentinel raw path and canonical cleaned path."""
+async def test_capture_from_clipboard_sets_source_metadata_without_path_sentinel(db_session):
+    """Clipboard capture stores explicit source metadata and no fake raw path."""
     service = JobCaptureService(db_session)
 
     mock_llm = MagicMock()
@@ -98,7 +98,8 @@ async def test_capture_from_clipboard_sets_clipboard_sentinel(db_session):
     assert result.status == "success"
 
     role = db_session.query(Role).filter(Role.id == result.role_id).one()
-    assert role.raw_html_path == "clipboard"
+    assert role.raw_content_source == "clipboard"
+    assert role.raw_html_path is None
     assert role.cleaned_md_path.startswith("jobs/cleaned/")
 
 

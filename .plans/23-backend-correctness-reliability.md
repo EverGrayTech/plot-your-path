@@ -96,7 +96,7 @@ Refactor direction:
 - [x] Identify all nested event-loop usage and replace it with the chosen boundary pattern.
 
 ### 2. Persistence workflow hardening
-- [ ] Separate source metadata from file path metadata where currently overloaded.
+- [x] Separate source metadata from file path metadata where currently overloaded.
 - [x] Introduce deterministic staged-write and cleanup behavior for file-backed artifacts.
 - [x] Add compatibility rules for legacy stored values.
 
@@ -116,7 +116,7 @@ Refactor direction:
 ### 6. Test coverage
 - [x] Add regression tests for async/sync boundary behavior.
 - [x] Add tests for failed persistence cleanup behavior.
-- [ ] Add tests for timezone-sensitive comparisons and serialized responses.
+- [x] Add tests for timezone-sensitive comparisons and serialized responses.
 - [x] Add tests for startup/init behavior without implicit table creation.
 
 ---

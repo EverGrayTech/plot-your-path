@@ -540,6 +540,22 @@ class TestApplicationOps:
         assert get_data["recruiter_contact"] == "recruiter@example.com"
         assert get_data["notes"] == "Initial submission completed."
 
+    def test_application_ops_normalizes_offset_datetimes_to_naive_utc(self, client, sample_role):
+        response = client.put(
+            f"/api/jobs/{sample_role.id}/application-ops",
+            json={
+                "applied_at": "2099-03-01T09:00:00-05:00",
+                "deadline_at": "2099-03-10T17:00:00+02:00",
+                "next_action_at": "2099-03-15T09:00:00Z",
+            },
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["applied_at"].startswith("2099-03-01T14:00:00")
+        assert data["deadline_at"].startswith("2099-03-10T15:00:00")
+        assert data["next_action_at"].startswith("2099-03-15T09:00:00")
+
     def test_update_next_action_creates_ops_if_missing(self, client, sample_role):
         response = client.patch(
             f"/api/jobs/{sample_role.id}/application-ops/next-action",
@@ -574,6 +590,19 @@ class TestApplicationOps:
         listed = list_response.json()
         assert len(listed) == 1
         assert listed[0]["stage"] == "recruiter_screen"
+
+    def test_interview_stage_normalizes_offset_timestamp_to_naive_utc(self, client, sample_role):
+        response = client.post(
+            f"/api/jobs/{sample_role.id}/interview-stages",
+            json={
+                "stage": "recruiter_screen",
+                "notes": "timezone check",
+                "occurred_at": "2026-03-04T15:00:00-05:00",
+            },
+        )
+
+        assert response.status_code == 200
+        assert response.json()["occurred_at"].startswith("2026-03-04T20:00:00")
 
     def test_pipeline_view_filters_and_counters(self, client, db, sample_company, sample_role):
         role_two = Role(
@@ -702,6 +731,19 @@ class TestApplicationOps:
         assert len(listed) == 1
         assert listed[0]["event_type"] == "offer"
         assert listed[0]["notes"] == "Received verbal offer"
+
+    def test_outcome_event_normalizes_offset_timestamp_to_naive_utc(self, client, db, sample_role):
+        response = client.post(
+            f"/api/jobs/{sample_role.id}/outcomes",
+            json={
+                "event_type": "screen",
+                "occurred_at": "2026-03-09T17:00:00-05:00",
+                "notes": "Timezone normalized",
+            },
+        )
+
+        assert response.status_code == 200
+        assert response.json()["occurred_at"].startswith("2026-03-09T22:00:00")
 
     def test_outcome_event_rejects_cross_role_linkage(
         self, client, db, sample_company, sample_role

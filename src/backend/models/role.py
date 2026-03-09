@@ -1,5 +1,7 @@
 """Role database model."""
 
+from typing import Literal
+
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.sql import func
 
@@ -19,7 +21,8 @@ class Role(Base):
         salary_max: Maximum salary
         salary_currency: Currency code (default: USD)
         url: Original job posting URL (unique)
-        raw_html_path: Path to raw HTML file
+        raw_content_source: Source of raw role content (scrape or clipboard)
+        raw_html_path: Path to raw HTML file when source is scrape
         cleaned_md_path: Path to cleaned Markdown file
         status: Job status (open, submitted, interviewing, rejected)
         created_at: Timestamp when record was created
@@ -35,10 +38,17 @@ class Role(Base):
     salary_max = Column(Integer, nullable=True)
     salary_currency = Column(String, default="USD", nullable=False)
     url = Column(String, nullable=False, unique=True, index=True)
-    raw_html_path = Column(String, nullable=False)
-    cleaned_md_path = Column(String, nullable=False)
+    raw_content_source = Column(String, default="scrape", nullable=False)
+    raw_html_path = Column(String, nullable=True)
+    cleaned_md_path = Column(String, nullable=True)
     status = Column(String, default="open", nullable=False)
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
+
+    @property
+    def raw_content_source_value(self) -> Literal["clipboard", "scrape"]:
+        """Return the normalized raw-content source label."""
+
+        return "clipboard" if self.raw_content_source == "clipboard" else "scrape"
 
     def __repr__(self) -> str:
         """String representation of Role."""
