@@ -1011,4 +1011,136 @@ describe("JobsPageClient", () => {
     expect(screen.getByText(/Improved ingestion reliability/i)).toBeInTheDocument();
     expect(screen.getByText(/Team size estimate is inferred/i)).toBeInTheDocument();
   }, 20000);
+
+  it("logs outcome events and renders outcome insights with manual tuning suggestions", async () => {
+    vi.spyOn(api, "listJobs").mockResolvedValue(jobs);
+    vi.spyOn(api, "getJob").mockResolvedValue({
+      id: 2,
+      company: {
+        id: 10,
+        name: "Beta Co",
+        slug: "beta-co",
+        website: null,
+        created_at: "2026-03-05T10:00:00Z",
+      },
+      title: "Engineer",
+      team_division: "Platform",
+      salary: { min: 120000, max: 150000, currency: "USD" },
+      url: "https://example.com/jobs/2",
+      skills: {
+        required: [{ id: 1, name: "Python", requirement_level: "required" }],
+        preferred: [{ id: 2, name: "FastAPI", requirement_level: "preferred" }],
+      },
+      description_md: "",
+      created_at: "2026-03-05T10:00:00Z",
+      status: "open",
+      status_history: [],
+      latest_fit_analysis: {
+        id: 90,
+        role_id: 2,
+        fit_score: 84,
+        recommendation: "go",
+        covered_required_skills: ["Python"],
+        missing_required_skills: [],
+        covered_preferred_skills: ["FastAPI"],
+        missing_preferred_skills: [],
+        rationale: "Strong match.",
+        provider: "openai",
+        model: "gpt-4o",
+        version: "fit-v1",
+        created_at: "2026-03-07T18:00:00Z",
+      },
+      latest_desirability_score: {
+        id: 80,
+        company_id: 10,
+        role_id: 2,
+        total_score: 8.2,
+        factor_breakdown: [],
+        provider: "openai",
+        model: "gpt-4o",
+        version: "desirability-v1",
+        created_at: "2026-03-07T18:00:00Z",
+      },
+    });
+    const listOutcomesSpy = vi
+      .spyOn(api, "listOutcomeEvents")
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([
+        {
+          id: 10,
+          role_id: 2,
+          event_type: "offer",
+          occurred_at: "2026-03-09T12:00:00Z",
+          notes: "Verbal offer",
+          fit_analysis_id: 90,
+          desirability_score_id: 80,
+          application_material_id: null,
+          model_family: "openai",
+          model: "gpt-4o",
+          prompt_version: "cover-letter-v1",
+          created_at: "2026-03-09T12:00:30Z",
+        },
+      ]);
+    const createOutcomeSpy = vi.spyOn(api, "createOutcomeEvent").mockResolvedValue({
+      id: 10,
+      role_id: 2,
+      event_type: "offer",
+      occurred_at: "2026-03-09T12:00:00Z",
+      notes: "Verbal offer",
+      fit_analysis_id: 90,
+      desirability_score_id: 80,
+      application_material_id: null,
+      model_family: "openai",
+      model: "gpt-4o",
+      prompt_version: "cover-letter-v1",
+      created_at: "2026-03-09T12:00:30Z",
+    });
+
+    vi.spyOn(api, "getOutcomeInsights").mockResolvedValue({
+      confidence_message: "Low confidence: early signal only.",
+      conversion_by_fit_band: [{ segment: "70-100", attempts: 2, hires: 1, conversion_rate: 0.5 }],
+      conversion_by_desirability_band: [
+        { segment: "7.0-10.0", attempts: 2, hires: 1, conversion_rate: 0.5 },
+      ],
+      conversion_by_model_family: [
+        { segment: "openai", attempts: 2, hires: 1, conversion_rate: 0.5 },
+      ],
+      total_events: 2,
+      total_roles_with_outcomes: 1,
+    });
+    vi.spyOn(api, "getOutcomeTuningSuggestions").mockResolvedValue({
+      confidence_message: "Low confidence: early signal only.",
+      suggestions: [
+        {
+          recommendation: "Prefer openai for new drafts.",
+          rationale: "Current conversion appears stronger.",
+          reversible_action: "Re-check after 5 additional events.",
+        },
+      ],
+    });
+
+    render(<JobsPageClient />);
+
+    await screen.findByText("Engineer");
+    fireEvent.click(screen.getByRole("button", { name: /Engineer — Beta Co/i }));
+
+    fireEvent.change(await screen.findByLabelText("Outcome type"), {
+      target: { value: "offer" },
+    });
+    fireEvent.change(screen.getByLabelText("Outcome notes"), {
+      target: { value: "Verbal offer" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Log Outcome Event" }));
+
+    await waitFor(() => {
+      expect(createOutcomeSpy).toHaveBeenCalled();
+      expect(listOutcomesSpy).toHaveBeenCalledTimes(2);
+    });
+    expect(await screen.findByText(/Offer —/i)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Outcome Insights" }));
+    expect(await screen.findByRole("heading", { name: "Outcome Insights" })).toBeInTheDocument();
+    expect(await screen.findByText(/Conversion by Fit Band/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Prefer openai for new drafts/i)).toBeInTheDocument();
+  }, 20000);
 });

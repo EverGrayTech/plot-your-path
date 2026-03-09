@@ -20,6 +20,7 @@ from backend.models.company import Company
 from backend.models.desirability_factor_config import DesirabilityFactorConfig
 from backend.models.desirability_score_result import DesirabilityScoreResult
 from backend.models.interview_stage_event import InterviewStageEvent
+from backend.models.outcome_event import OutcomeEvent
 from backend.models.role import Role
 from backend.models.role_fit_analysis import RoleFitAnalysis
 from backend.models.role_skill import RoleSkill
@@ -628,6 +629,211 @@ class TestApplicationOps:
         overdue_payload = overdue_only.json()
         assert len(overdue_payload["items"]) >= 1
         assert all(item["next_action_at"] is not None for item in overdue_payload["items"])
+
+    def test_create_and_list_outcome_events_with_linkage(self, client, db, sample_role):
+        fit = RoleFitAnalysis(
+            role_id=sample_role.id,
+            fit_score=88,
+            recommendation="go",
+            covered_required_skills=["Python"],
+            missing_required_skills=[],
+            covered_preferred_skills=["FastAPI"],
+            missing_preferred_skills=[],
+            rationale="Strong fit and relevant profile evidence.",
+            provider="openai",
+            model="gpt-4o",
+            version="fit-v1",
+        )
+        db.add(fit)
+        db.flush()
+
+        desirability = DesirabilityScoreResult(
+            company_id=sample_role.company_id,
+            role_id=sample_role.id,
+            total_score=7.8,
+            factor_breakdown=[],
+            provider="openai",
+            model="gpt-4o",
+            version="desirability-v1",
+        )
+        db.add(desirability)
+        db.flush()
+
+        material = ApplicationMaterial(
+            role_id=sample_role.id,
+            artifact_type="cover_letter",
+            version=1,
+            content_path=f"applications/{sample_role.id}/cover_letter-v1.md",
+            questions=None,
+            provider="openai",
+            model="gpt-4o",
+            prompt_version="cover-letter-v1",
+        )
+        db.add(material)
+        db.commit()
+        db.refresh(fit)
+        db.refresh(desirability)
+        db.refresh(material)
+
+        create_response = client.post(
+            f"/api/jobs/{sample_role.id}/outcomes",
+            json={
+                "event_type": "offer",
+                "occurred_at": "2026-03-09T17:00:00",
+                "notes": "Received verbal offer",
+                "fit_analysis_id": fit.id,
+                "desirability_score_id": desirability.id,
+                "application_material_id": material.id,
+            },
+        )
+        assert create_response.status_code == 200
+        created = create_response.json()
+        assert created["event_type"] == "offer"
+        assert created["fit_analysis_id"] == fit.id
+        assert created["desirability_score_id"] == desirability.id
+        assert created["application_material_id"] == material.id
+        assert created["model_family"] == "openai"
+        assert created["model"] == "gpt-4o"
+        assert created["prompt_version"] == "cover-letter-v1"
+
+        list_response = client.get(f"/api/jobs/{sample_role.id}/outcomes")
+        assert list_response.status_code == 200
+        listed = list_response.json()
+        assert len(listed) == 1
+        assert listed[0]["event_type"] == "offer"
+        assert listed[0]["notes"] == "Received verbal offer"
+
+    def test_outcome_event_rejects_cross_role_linkage(
+        self, client, db, sample_company, sample_role
+    ):
+        other_role = Role(
+            company_id=sample_company.id,
+            title="Different Role",
+            team_division="Platform",
+            salary_min=110000,
+            salary_max=130000,
+            salary_currency="USD",
+            url="https://example.com/other-role",
+            raw_html_path="data/jobs/raw/acme-corp/other-role.html",
+            cleaned_md_path="data/jobs/cleaned/acme-corp/other-role.md",
+            status="open",
+        )
+        db.add(other_role)
+        db.flush()
+
+        material = ApplicationMaterial(
+            role_id=other_role.id,
+            artifact_type="cover_letter",
+            version=1,
+            content_path=f"applications/{other_role.id}/cover_letter-v1.md",
+            questions=None,
+            provider="openai",
+            model="gpt-4o",
+            prompt_version="cover-letter-v1",
+        )
+        db.add(material)
+        db.commit()
+
+        response = client.post(
+            f"/api/jobs/{sample_role.id}/outcomes",
+            json={
+                "event_type": "screen",
+                "occurred_at": "2026-03-08T09:30:00",
+                "application_material_id": material.id,
+            },
+        )
+        assert response.status_code == 422
+        assert "invalid for this role" in response.json()["detail"]
+
+    def test_outcome_insights_and_tuning_suggestions(self, client, db, sample_role):
+        db.add(
+            RoleFitAnalysis(
+                role_id=sample_role.id,
+                fit_score=85,
+                recommendation="go",
+                covered_required_skills=["Python"],
+                missing_required_skills=[],
+                covered_preferred_skills=["FastAPI"],
+                missing_preferred_skills=[],
+                rationale="Strong fit.",
+                provider="openai",
+                model="gpt-4o",
+                version="fit-v1",
+            )
+        )
+        db.add(
+            DesirabilityScoreResult(
+                company_id=sample_role.company_id,
+                role_id=sample_role.id,
+                total_score=8.2,
+                factor_breakdown=[],
+                provider="openai",
+                model="gpt-4o",
+                version="desirability-v1",
+            )
+        )
+        db.add_all(
+            [
+                OutcomeEvent(
+                    role_id=sample_role.id,
+                    event_type="screen",
+                    occurred_at=datetime(2026, 3, 8, 10, 0, 0),
+                    model_family="openai",
+                    model="gpt-4o",
+                    prompt_version="cover-letter-v1",
+                ),
+                OutcomeEvent(
+                    role_id=sample_role.id,
+                    event_type="offer",
+                    occurred_at=datetime(2026, 3, 9, 12, 0, 0),
+                    model_family="openai",
+                    model="gpt-4o",
+                    prompt_version="cover-letter-v1",
+                ),
+                OutcomeEvent(
+                    role_id=sample_role.id,
+                    event_type="rejected",
+                    occurred_at=datetime(2026, 3, 10, 12, 0, 0),
+                    model_family="anthropic",
+                    model="claude-3-5-sonnet",
+                    prompt_version="cover-letter-v1",
+                ),
+                OutcomeEvent(
+                    role_id=sample_role.id,
+                    event_type="offer",
+                    occurred_at=datetime(2026, 3, 11, 12, 0, 0),
+                    model_family="openai",
+                    model="gpt-4o",
+                    prompt_version="cover-letter-v1",
+                ),
+                OutcomeEvent(
+                    role_id=sample_role.id,
+                    event_type="rejected",
+                    occurred_at=datetime(2026, 3, 12, 12, 0, 0),
+                    model_family="anthropic",
+                    model="claude-3-5-sonnet",
+                    prompt_version="cover-letter-v1",
+                ),
+            ]
+        )
+        db.commit()
+
+        insights_response = client.get("/api/outcomes/insights")
+        assert insights_response.status_code == 200
+        insights = insights_response.json()
+        assert insights["total_events"] == 5
+        assert insights["total_roles_with_outcomes"] == 1
+        assert len(insights["conversion_by_fit_band"]) >= 1
+        assert len(insights["conversion_by_desirability_band"]) >= 1
+        assert len(insights["conversion_by_model_family"]) >= 2
+
+        tuning_response = client.get("/api/outcomes/tuning-suggestions")
+        assert tuning_response.status_code == 200
+        tuning = tuning_response.json()
+        assert tuning["confidence_message"]
+        assert len(tuning["suggestions"]) >= 1
+        assert tuning["suggestions"][0]["recommendation"]
+        assert tuning["suggestions"][0]["reversible_action"]
 
 
 class TestFitAnalysis:

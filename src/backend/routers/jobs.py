@@ -16,6 +16,7 @@ from backend.models.application_ops import ApplicationOps as ApplicationOpsModel
 from backend.models.company import Company
 from backend.models.desirability_score_result import DesirabilityScoreResult
 from backend.models.interview_stage_event import InterviewStageEvent as InterviewStageEventModel
+from backend.models.outcome_event import OutcomeEvent as OutcomeEventModel
 from backend.models.role import Role
 from backend.models.role_fit_analysis import RoleFitAnalysis
 from backend.models.role_skill import RoleSkill
@@ -40,6 +41,11 @@ from backend.schemas.job import (
     JobListItem,
     JobScrapeRequest,
     JobScrapeResponse,
+    OutcomeEvent,
+    OutcomeEventCreate,
+    OutcomeEventType,
+    OutcomeInsights,
+    OutcomeTuningSuggestions,
     PipelineCounters,
     PipelineItem,
     PipelineResponse,
@@ -60,6 +66,7 @@ from backend.services.job_capture import (
     JobCaptureScrapingError,
     JobCaptureService,
 )
+from backend.services.outcome_feedback import OutcomeFeedbackService
 from backend.services.skill_extractor import SkillExtractorService
 from backend.utils.file_storage import file_exists, load_file
 
@@ -303,6 +310,24 @@ def _to_desirability_score_schema(score: DesirabilityScoreResult) -> Desirabilit
         model=score.model,
         version=score.version,
         created_at=score.created_at,
+    )
+
+
+def _to_outcome_event_schema(row: OutcomeEventModel) -> OutcomeEvent:
+    """Convert ORM outcome-event row to API schema."""
+    return OutcomeEvent(
+        application_material_id=row.application_material_id,
+        created_at=row.created_at,
+        desirability_score_id=row.desirability_score_id,
+        event_type=OutcomeEventType(row.event_type),
+        fit_analysis_id=row.fit_analysis_id,
+        id=row.id,
+        model=row.model,
+        model_family=row.model_family,
+        notes=row.notes,
+        occurred_at=row.occurred_at,
+        prompt_version=row.prompt_version,
+        role_id=row.role_id,
     )
 
 
@@ -592,6 +617,72 @@ def create_interview_stage_event(
         notes=row.notes,
         occurred_at=row.occurred_at,
         created_at=row.created_at,
+    )
+
+
+@router.get("/jobs/{role_id}/outcomes", response_model=list[OutcomeEvent])
+def list_outcome_events(
+    role_id: int,
+    db: Annotated[Session, Depends(get_db)],
+) -> list[OutcomeEvent]:
+    """List downstream outcome events for a role."""
+    service = OutcomeFeedbackService(db)
+    try:
+        rows = service.list_events_for_role(role_id)
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    return [_to_outcome_event_schema(row) for row in rows]
+
+
+@router.post("/jobs/{role_id}/outcomes", response_model=OutcomeEvent)
+def create_outcome_event(
+    role_id: int,
+    payload: OutcomeEventCreate,
+    db: Annotated[Session, Depends(get_db)],
+) -> OutcomeEvent:
+    """Create downstream outcome event linked to role/application context."""
+    service = OutcomeFeedbackService(db)
+    try:
+        row = service.create_event(payload, role_id)
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    return _to_outcome_event_schema(row)
+
+
+@router.get("/outcomes/insights", response_model=OutcomeInsights)
+def get_outcome_insights(db: Annotated[Session, Depends(get_db)]) -> OutcomeInsights:
+    """Get aggregate conversion insights for fit/desirability/model dimensions."""
+    service = OutcomeFeedbackService(db)
+    (
+        confidence_message,
+        conversion_by_fit_band,
+        conversion_by_desirability_band,
+        conversion_by_model_family,
+        total_events,
+        total_roles_with_outcomes,
+    ) = service.get_insights()
+    return OutcomeInsights(
+        confidence_message=confidence_message,
+        conversion_by_desirability_band=conversion_by_desirability_band,
+        conversion_by_fit_band=conversion_by_fit_band,
+        conversion_by_model_family=conversion_by_model_family,
+        total_events=total_events,
+        total_roles_with_outcomes=total_roles_with_outcomes,
+    )
+
+
+@router.get("/outcomes/tuning-suggestions", response_model=OutcomeTuningSuggestions)
+def get_outcome_tuning_suggestions(
+    db: Annotated[Session, Depends(get_db)],
+) -> OutcomeTuningSuggestions:
+    """Get explainable, manual tuning suggestions from logged outcomes."""
+    service = OutcomeFeedbackService(db)
+    confidence_message, suggestions = service.get_tuning_suggestions()
+    return OutcomeTuningSuggestions(
+        confidence_message=confidence_message,
+        suggestions=suggestions,
     )
 
 

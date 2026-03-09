@@ -22,24 +22,24 @@ Capture downstream outcomes (screen/reject/interview/offer) and tie them back to
 ## Implementation Checklist
 
 ### 1. Outcome Data Capture
-- [ ] Add outcome event model (event type, timestamp, role linkage, optional notes)
-- [ ] Add API/UI hooks to log important milestones and rejection/offer outcomes
-- [ ] Add linkage fields to associated fit scores and generated artifact versions
+- [x] Add outcome event model (event type, timestamp, role linkage, optional notes)
+- [x] Add API/UI hooks to log important milestones and rejection/offer outcomes
+- [x] Add linkage fields to associated fit scores and generated artifact versions
 
 ### 2. Insight Layer
-- [ ] Add basic reporting queries for conversion by fit band/desirability band/model family
-- [ ] Add dashboard summaries for “what seems to work” trends
-- [ ] Add confidence/insufficient-data messaging to avoid false certainty
+- [x] Add basic reporting queries for conversion by fit band/desirability band/model family
+- [x] Add dashboard summaries for “what seems to work” trends
+- [x] Add confidence/insufficient-data messaging to avoid false certainty
 
 ### 3. Manual Tuning Support
-- [ ] Add settings suggestions panel (non-automatic) for prompt/model adjustments based on outcomes
-- [ ] Keep all recommendations explainable and reversible by user
+- [x] Add settings suggestions panel (non-automatic) for prompt/model adjustments based on outcomes
+- [x] Keep all recommendations explainable and reversible by user
 
 ### 4. Tests + Verification
-- [ ] Add backend tests for outcome linkage and aggregation integrity
-- [ ] Add frontend tests for logging outcomes and viewing trend summaries
+- [x] Add backend tests for outcome linkage and aggregation integrity
+- [x] Add frontend tests for logging outcomes and viewing trend summaries
 
 ## Acceptance Criteria
-- [ ] User can log downstream hiring outcomes in-app
-- [ ] App surfaces actionable trend insights tied to fit/materials/settings context
-- [ ] User can use insights to manually improve prompts/models over time
+- [x] User can log downstream hiring outcomes in-app
+- [x] App surfaces actionable trend insights tied to fit/materials/settings context
+- [x] User can use insights to manually improve prompts/models over time

@@ -32,6 +32,15 @@ class InterviewStage(StrEnum):
     CLOSED = "closed"
 
 
+class OutcomeEventType(StrEnum):
+    """Downstream hiring outcome events for learning-loop feedback."""
+
+    INTERVIEW = "interview"
+    OFFER = "offer"
+    REJECTED = "rejected"
+    SCREEN = "screen"
+
+
 class RoleStatusChange(BaseModel):
     """Audit entry for a role status transition."""
 
@@ -57,6 +66,69 @@ class InterviewStageEventCreate(BaseModel):
     stage: InterviewStage
     notes: str | None = None
     occurred_at: datetime
+
+
+class OutcomeEvent(BaseModel):
+    """Logged downstream outcome event linked to fit/material/model context."""
+
+    application_material_id: int | None
+    created_at: datetime
+    desirability_score_id: int | None
+    event_type: OutcomeEventType
+    fit_analysis_id: int | None
+    id: int
+    model: str | None
+    model_family: str | None
+    notes: str | None
+    occurred_at: datetime
+    prompt_version: str | None
+    role_id: int
+
+
+class OutcomeEventCreate(BaseModel):
+    """Payload for adding an outcome event for a role."""
+
+    application_material_id: int | None = None
+    desirability_score_id: int | None = None
+    event_type: OutcomeEventType
+    fit_analysis_id: int | None = None
+    notes: str | None = None
+    occurred_at: datetime
+
+
+class OutcomeConversionRow(BaseModel):
+    """Grouped conversion metrics row for a single segment."""
+
+    attempts: int
+    conversion_rate: float | None
+    hires: int
+    segment: str
+
+
+class OutcomeInsights(BaseModel):
+    """Aggregated conversion insights with confidence guardrails."""
+
+    confidence_message: str
+    conversion_by_desirability_band: list[OutcomeConversionRow]
+    conversion_by_fit_band: list[OutcomeConversionRow]
+    conversion_by_model_family: list[OutcomeConversionRow]
+    total_events: int
+    total_roles_with_outcomes: int
+
+
+class TuningSuggestion(BaseModel):
+    """Explainable manual tuning suggestion derived from outcomes."""
+
+    recommendation: str
+    rationale: str
+    reversible_action: str
+
+
+class OutcomeTuningSuggestions(BaseModel):
+    """Suggestion payload for manual, reversible model/prompt tuning."""
+
+    confidence_message: str
+    suggestions: list[TuningSuggestion]
 
 
 class ApplicationOps(BaseModel):
