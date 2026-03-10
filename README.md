@@ -2,100 +2,171 @@
 
 Turn job goals into a clear direction by mapping skill gaps, readiness, and next steps.
 
-## Run the web app locally
+Plot Your Path is a **career intelligence system** that helps professionals evaluate opportunities, prepare stronger applications, and understand how to grow their careers strategically.
 
-These steps are optimized for running the app from **WSL** while viewing it in your browser.
+Instead of treating job searches as a stressful scramble, Plot Your Path turns them into a **structured, data-driven process**.
 
-### 1. Install dependencies
+---
 
-```bash
-# Python/backend deps
-uv sync
+# Why This Exists
 
-# Node/frontend deps
-pnpm install
-```
+Job searching is surprisingly chaotic.
 
-### 2. Configure environment
+People often struggle to:
 
-```bash
-cp .env.example .env
-```
+- remember the details of jobs they applied for
+- determine whether a role is actually a good fit
+- prepare thoughtful application materials quickly
+- reconstruct years of experience during interviews
+- understand which skills would unlock better opportunities
 
-Defaults already work for local development:
+Plot Your Path helps solve these problems by organizing career data and turning it into actionable insights.
 
-- Backend API: `http://localhost:8000`
-- Frontend app: `http://localhost:3000`
+---
 
-### 3. Start backend (terminal 1)
+# What Plot Your Path Does
 
-```bash
-uv run uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
-```
+Plot Your Path helps you:
 
-### 4. Start frontend (terminal 2)
+### Evaluate Job Opportunities
 
-```bash
-pnpm dev src/frontend --hostname 0.0.0.0 --port 3000
-```
+Paste a job posting and instantly see how well it aligns with your experience.
 
-Why this command: the Next.js app lives in `src/frontend`, so it must be passed
-as the Next.js app directory when running from the repository root.
+The system analyzes:
 
-### 5. Open the app
+- role requirements
+- skill alignment
+- company desirability
 
-From Windows or WSL browser, open:
+This helps you focus on opportunities that are worth pursuing.
 
-- `http://localhost:3000`
+---
 
-If localhost forwarding is unavailable in your setup, use your WSL IP instead:
+### Prepare Better Applications
 
-```bash
-hostname -I
-```
+When you decide to apply, Plot Your Path can help generate or refine:
 
-Then open `http://<wsl-ip>:3000`.
+- cover letters
+- responses to application questions
+- positioning statements
 
-## Running tests
+These suggestions are informed by your career history and skills.
 
-This project has both backend (Python) and frontend (TypeScript) tests.
+---
 
-### Backend tests (pytest)
+### Prepare for Interviews
 
-Make sure dev dependencies are installed:
+When a company responds, the system becomes your interview preparation workspace.
 
-```bash
-uv sync --extra dev
-```
+It can help you review:
 
-Run all backend tests:
+- the role you applied for
+- your relevant experiences
+- likely interview questions
+- structured answers based on your background
 
-```bash
-uv run pytest tests/backend
-```
+Preparation materials evolve as you progress through interview rounds.
 
-Run backend tests with coverage output (terminal + htmlcov/):
+---
 
-```bash
-uv run pytest --cov=src/backend --cov-report=term-missing --cov-report=html tests/backend
-```
+### Capture Career Experiences
 
-### Frontend tests (vitest)
+Plot Your Path also helps you record meaningful experiences from your work.
 
-Run all frontend tests:
+Over time this builds a rich knowledge base of:
 
-```bash
-pnpm test
-```
+- achievements
+- projects
+- technical work
+- leadership experiences
 
-Run frontend tests with coverage:
+These experiences can later be used to generate resume content, interview stories, and application narratives.
 
-```bash
-pnpm test:coverage
-```
+---
 
-Run a single frontend test file (example):
+### Discover Skill Gaps
 
-```bash
-pnpm vitest run tests/frontend/app/jobs.page.test.tsx
-```
+As you analyze more roles, Plot Your Path begins to detect patterns.
+
+It can highlight skills that frequently appear in desirable roles but are missing from your profile.
+
+This helps you understand **what to learn next** to unlock better career opportunities.
+
+---
+
+# How It Works
+
+Plot Your Path connects three types of information:
+
+- Job Market Data
+- Your Career History
+- AI Analysis
+
+This combination allows the system to transform unstructured job postings and personal experience into structured career intelligence.
+
+---
+
+# Typical Workflow
+
+A typical workflow looks like this:
+
+1. Upload your resume  
+2. Paste job posting URLs  
+3. Review role analysis and fit  
+4. Apply to promising opportunities  
+5. Prepare for interviews  
+6. Capture experiences from your work  
+7. Identify skill gaps and growth opportunities  
+
+Over time the system becomes an increasingly valuable career companion.
+
+---
+
+# Privacy First
+
+Career data is highly personal.
+
+Plot Your Path is designed to run **locally**, allowing you to retain full control over your data.
+
+No external service is required.
+
+---
+
+# Project Status
+
+Plot Your Path is an open-source project under active development.
+
+Current priorities include:
+
+- job role ingestion
+- skill extraction
+- company desirability scoring
+- role fit analysis
+- interview preparation support
+
+Future capabilities may include:
+
+- company recommendations
+- skill roadmap planning
+- resume optimization
+- portfolio project suggestions
+
+---
+
+# Contributing
+
+Contributions are welcome.
+
+Before implementing major features, please review:
+
+- `docs/SYSTEM_SPEC.md`
+- `docs/PRODUCT_OVERVIEW.md`
+- `docs/CONCEPT_MODEL.md`
+
+These documents describe the architectural and conceptual foundations of the system.
+
+---
+
+# Vision
+
+Plot Your Path aims to become a long-term **career intelligence companion** that helps professionals make thoughtful, strategic decisions about their work and growth.
