@@ -80,25 +80,25 @@ Refactor direction:
 ## Implementation Steps
 
 ### 1. Establish component boundaries
-- [ ] Define the new jobs-page component structure and ownership map.
-- [ ] Extract purely presentational sections first.
+- [x] Define the new jobs-page component structure and ownership map.
+- [x] Extract purely presentational sections first.
 
 ### 2. Extract domain hooks
-- [ ] Move jobs loading/filter/sort state into focused hooks.
-- [ ] Move selected-job detail workflows into separate hooks.
-- [ ] Move modal-specific data orchestration into feature hooks.
+- [x] Move jobs loading/filter/sort state into focused hooks.
+- [x] Move selected-job detail workflows into separate hooks.
+- [x] Move modal-specific data orchestration into feature hooks.
 
 ### 3. Extract utilities
-- [ ] Move formatting/export/traceability helpers into shared modules.
-- [ ] Remove non-UI logic from page-level render files.
+- [x] Move formatting/export/traceability helpers into shared modules.
+- [x] Remove non-UI logic from page-level render files.
 
 ### 4. Simplify page shell
-- [ ] Keep the top-level client page as a coordinator rather than the entire application surface.
-- [ ] Ensure state resets and cross-modal navigation remain explicit and understandable.
+- [x] Keep the top-level client page as a coordinator rather than the entire application surface.
+- [x] Ensure state resets and cross-modal navigation remain explicit and understandable.
 
 ### 5. Testing
-- [ ] Add or update feature-level tests for extracted sections/hooks.
-- [ ] Preserve page-level integration coverage for core flows.
+- [x] Add or update feature-level tests for extracted sections/hooks.
+- [x] Preserve page-level integration coverage for core flows.
 
 ---
 
@@ -112,8 +112,8 @@ Refactor direction:
 
 ## Success Criteria
 
-- [ ] `JobsPageClient.tsx` is reduced to a manageable orchestration shell.
-- [ ] Feature sections own their own rendering concerns.
-- [ ] Data loading and mutation logic are moved into focused hooks/utilities.
-- [ ] Existing jobs workflows continue to work without user-visible regression.
-- [ ] Frontend tests cover extracted feature slices with clearer ownership.
+- [x] `JobsPageClient.tsx` is reduced to a manageable orchestration shell.
+- [x] Feature sections own their own rendering concerns.
+- [x] Data loading and mutation logic are moved into focused hooks/utilities.
+- [x] Existing jobs workflows continue to work without user-visible regression.
+- [x] Frontend tests cover extracted feature slices with clearer ownership.
