@@ -1,6 +1,6 @@
 """Role fit-analysis persistence model."""
 
-from sqlalchemy import JSON, Column, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import JSON, Boolean, Column, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.sql import func
 
 from backend.database import Base
@@ -33,12 +33,16 @@ class RoleFitAnalysis(Base):
     fit_score = Column(Integer, nullable=False)
     recommendation = Column(String, nullable=False, index=True)
     covered_required_skills = Column(JSON, nullable=False, default=list)
+    adjacent_required_skills = Column(JSON, nullable=False, default=list)
     missing_required_skills = Column(JSON, nullable=False, default=list)
     covered_preferred_skills = Column(JSON, nullable=False, default=list)
+    adjacent_preferred_skills = Column(JSON, nullable=False, default=list)
     missing_preferred_skills = Column(JSON, nullable=False, default=list)
     rationale = Column(Text, nullable=False)
     rationale_citations = Column(JSON, nullable=False, default=list)
     unsupported_claims = Column(JSON, nullable=False, default=list)
+    fallback_used = Column(Boolean, nullable=False, default=False)
+    confidence_label = Column(String, nullable=False, default="high")
     provider = Column(String, nullable=False)
     model = Column(String, nullable=False)
     version = Column(String, nullable=False)

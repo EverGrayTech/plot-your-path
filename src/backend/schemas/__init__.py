@@ -24,6 +24,7 @@ from backend.schemas.desirability import (
     DesirabilityFactorScore,
     DesirabilityFactorUpdate,
     DesirabilityScore,
+    DesirabilityScoreScope,
 )
 from backend.schemas.job import (
     ApplicationArtifactType,
@@ -77,6 +78,7 @@ __all__ = [
     "DesirabilityFactorCreate",
     "DesirabilityFactorReorderRequest",
     "DesirabilityFactorScore",
+    "DesirabilityScoreScope",
     "DesirabilityFactorUpdate",
     "DesirabilityScore",
     "ApplicationOps",

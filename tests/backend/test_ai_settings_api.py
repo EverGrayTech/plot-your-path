@@ -43,7 +43,12 @@ def test_ai_settings_list_update_token_and_health_flow() -> None:
         assert listed.status_code == 200
         payload = listed.json()
         families = {item["operation_family"] for item in payload}
-        assert families == {"job_parsing", "desirability_scoring", "application_generation"}
+        assert families == {
+            "job_parsing",
+            "desirability_scoring",
+            "application_generation",
+            "fit_analysis",
+        }
 
         updated = client.patch(
             "/api/ai-settings/desirability_scoring",

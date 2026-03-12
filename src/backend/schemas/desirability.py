@@ -1,8 +1,15 @@
 """Desirability-related API schemas."""
 
 from datetime import datetime
+from enum import StrEnum
 
 from pydantic import BaseModel, ConfigDict, Field
+
+
+class DesirabilityScoreScope(StrEnum):
+    """Canonical scope for desirability score caching and reuse."""
+
+    COMPANY = "company"
 
 
 class DesirabilityFactorBase(BaseModel):
@@ -53,6 +60,7 @@ class DesirabilityFactorScore(BaseModel):
     weight: float
     score: int = Field(ge=1, le=10)
     reasoning: str
+    fallback_used: bool = False
 
 
 class DesirabilityScore(BaseModel):
@@ -63,6 +71,10 @@ class DesirabilityScore(BaseModel):
     role_id: int
     total_score: float = Field(ge=1.0, le=10.0)
     factor_breakdown: list[DesirabilityFactorScore]
+    score_scope: DesirabilityScoreScope = DesirabilityScoreScope.COMPANY
+    fallback_used: bool = False
+    cache_expires_at: datetime
+    is_stale: bool
     provider: str
     model: str
     version: str

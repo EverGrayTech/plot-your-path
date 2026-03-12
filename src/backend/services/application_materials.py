@@ -514,6 +514,7 @@ class ApplicationMaterialsService:
         self,
         artifact_type: ApplicationArtifactType,
         content: str,
+        fallback_used: bool,
         prompt_version: str,
         role_id: int,
         questions: list[str] | None,
@@ -534,6 +535,7 @@ class ApplicationMaterialsService:
             sections=sections,
             section_traceability=section_traceability or [],
             unsupported_claims=unsupported_claims or [],
+            fallback_used=fallback_used,
             provider=self.llm_service.config.provider,
             model=self.llm_service.config.model,
             prompt_version=prompt_version,
@@ -574,12 +576,14 @@ class ApplicationMaterialsService:
 
         prompt = self._build_cover_letter_prompt(fit_rationale, profile_text, role)
         output = ""
+        fallback_used = False
         try:
             output = self._clean_output(run_async_task(self.llm_service.complete(prompt)))
         except LLMError:
             output = ""
         if not output:
             output = self._fallback_cover_letter(role, fit_rationale)
+            fallback_used = True
 
         traceability = [
             {
@@ -592,6 +596,7 @@ class ApplicationMaterialsService:
         return self._persist_material(
             artifact_type=ApplicationArtifactType.COVER_LETTER,
             content=output,
+            fallback_used=fallback_used,
             prompt_version=COVER_LETTER_PROMPT_VERSION,
             role_id=role_id,
             questions=None,
@@ -613,12 +618,14 @@ class ApplicationMaterialsService:
 
         prompt = self._build_qa_prompt(fit_rationale, profile_text, cleaned_questions, role)
         output = ""
+        fallback_used = False
         try:
             output = self._clean_output(run_async_task(self.llm_service.complete(prompt)))
         except LLMError:
             output = ""
         if not output:
             output = self._fallback_question_answers(cleaned_questions, role, fit_rationale)
+            fallback_used = True
 
         traceability = [
             {
@@ -631,6 +638,7 @@ class ApplicationMaterialsService:
         return self._persist_material(
             artifact_type=ApplicationArtifactType.APPLICATION_QA,
             content=output,
+            fallback_used=fallback_used,
             prompt_version=QA_PROMPT_VERSION,
             role_id=role_id,
             questions=cleaned_questions,
@@ -656,6 +664,7 @@ class ApplicationMaterialsService:
         )
 
         sections: dict[str, list[str]] | None = None
+        fallback_used = False
         try:
             output = self._clean_output(run_async_task(self.llm_service.complete(prompt)))
             sections = self._parse_interview_prep_sections(output)
@@ -669,6 +678,7 @@ class ApplicationMaterialsService:
                 preferred_skills,
                 role,
             )
+            fallback_used = True
 
         section_traceability, unsupported_claims = self._build_section_traceability(
             sections,
@@ -678,6 +688,7 @@ class ApplicationMaterialsService:
         return self._persist_material(
             artifact_type=ApplicationArtifactType.INTERVIEW_PREP_PACK,
             content=self._render_interview_prep_markdown(sections),
+            fallback_used=fallback_used,
             prompt_version=INTERVIEW_PREP_PROMPT_VERSION,
             role_id=role_id,
             questions=None,
@@ -778,6 +789,7 @@ class ApplicationMaterialsService:
         )
 
         regenerated_items: list[str] | None = None
+        fallback_used = False
         try:
             output = self._clean_output(run_async_task(self.llm_service.complete(prompt)))
             regenerated_items = self._parse_interview_prep_items(output)
@@ -792,6 +804,7 @@ class ApplicationMaterialsService:
                 role,
             )
             regenerated_items = fallback[section.value]
+            fallback_used = True
 
         next_sections = dict(existing_sections)
         next_sections[section.value] = regenerated_items
@@ -803,6 +816,7 @@ class ApplicationMaterialsService:
         return self._persist_material(
             artifact_type=ApplicationArtifactType.INTERVIEW_PREP_PACK,
             content=self._render_interview_prep_markdown(next_sections),
+            fallback_used=fallback_used,
             prompt_version=INTERVIEW_PREP_PROMPT_VERSION,
             role_id=role_id,
             questions=None,
@@ -851,6 +865,7 @@ class ApplicationMaterialsService:
         )
 
         sections: dict[str, list[str]] | None = None
+        fallback_used = False
         try:
             output = self._clean_output(run_async_task(self.llm_service.complete(prompt)))
             sections = self._parse_resume_tuning_sections(output)
@@ -863,6 +878,7 @@ class ApplicationMaterialsService:
                 preferred_skills,
                 required_skills,
             )
+            fallback_used = True
 
         section_traceability, unsupported_claims = self._build_section_traceability(
             sections,
@@ -872,6 +888,7 @@ class ApplicationMaterialsService:
         return self._persist_material(
             artifact_type=ApplicationArtifactType.RESUME_TUNING,
             content=self._render_resume_tuning_markdown(sections),
+            fallback_used=fallback_used,
             prompt_version=RESUME_TUNING_PROMPT_VERSION,
             role_id=role_id,
             questions=None,

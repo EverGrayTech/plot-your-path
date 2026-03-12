@@ -241,6 +241,7 @@ class InterviewPrepPack(BaseModel):
     prompt_version: str
     section_traceability: list[SectionTraceability] = Field(default_factory=list)
     unsupported_claims: list[str] = Field(default_factory=list)
+    fallback_used: bool = False
     created_at: datetime
 
 
@@ -307,6 +308,7 @@ class ResumeTuningSuggestion(BaseModel):
     prompt_version: str
     section_traceability: list[SectionTraceability] = Field(default_factory=list)
     unsupported_claims: list[str] = Field(default_factory=list)
+    fallback_used: bool = False
     created_at: datetime
 
 
@@ -318,12 +320,16 @@ class FitAnalysis(BaseModel):
     fit_score: int
     recommendation: FitRecommendation
     covered_required_skills: list[str]
+    adjacent_required_skills: list[str] = Field(default_factory=list)
     missing_required_skills: list[str]
     covered_preferred_skills: list[str]
+    adjacent_preferred_skills: list[str] = Field(default_factory=list)
     missing_preferred_skills: list[str]
     rationale: str
     rationale_citations: list[OutputCitation] = Field(default_factory=list)
     unsupported_claims: list[str] = Field(default_factory=list)
+    fallback_used: bool = False
+    confidence_label: str = "high"
     provider: str
     model: str
     version: str
@@ -347,6 +353,7 @@ class ApplicationMaterial(BaseModel):
     questions: list[str] | None
     section_traceability: list[SectionTraceability] = Field(default_factory=list)
     unsupported_claims: list[str] = Field(default_factory=list)
+    fallback_used: bool = False
     provider: str
     model: str
     prompt_version: str

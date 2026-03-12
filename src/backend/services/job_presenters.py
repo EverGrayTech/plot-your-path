@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import cast
 
 from backend.models.application_material import ApplicationMaterial as ApplicationMaterialModel
 from backend.models.application_ops import ApplicationOps as ApplicationOpsModel
@@ -30,6 +31,7 @@ from backend.schemas.job import (
     RoleStatusChange,
 )
 from backend.utils.file_storage import file_exists, load_file
+from backend.utils.time import utc_now_naive
 
 
 def application_ops_attention(
@@ -85,6 +87,7 @@ def to_application_material_schema(material: ApplicationMaterialModel) -> Applic
         questions=list(material.questions or []) or None,
         section_traceability=list(getattr(material, "section_traceability", []) or []),
         unsupported_claims=list(getattr(material, "unsupported_claims", []) or []),
+        fallback_used=bool(getattr(material, "fallback_used", False)),
         provider=material.provider,
         model=material.model,
         prompt_version=material.prompt_version,
@@ -117,12 +120,18 @@ def to_application_ops_schema(
 
 def to_desirability_score_schema(score: DesirabilityScoreResult) -> DesirabilityScore:
     """Convert ORM desirability row to response schema."""
+    cache_expires_at = cast(datetime, getattr(score, "cache_expires_at", score.created_at))
+    is_stale = cache_expires_at <= utc_now_naive()
     return DesirabilityScore(
         id=score.id,
         company_id=score.company_id,
         role_id=score.role_id,
         total_score=score.total_score,
         factor_breakdown=list(score.factor_breakdown or []),
+        score_scope=getattr(score, "score_scope", "company"),
+        fallback_used=bool(getattr(score, "fallback_used", False)),
+        cache_expires_at=cache_expires_at,
+        is_stale=is_stale,
         provider=score.provider,
         model=score.model,
         version=score.version,
@@ -138,12 +147,16 @@ def to_fit_analysis_schema(analysis: RoleFitAnalysis) -> FitAnalysis:
         fit_score=analysis.fit_score,
         recommendation=analysis.recommendation,
         covered_required_skills=list(analysis.covered_required_skills or []),
+        adjacent_required_skills=list(getattr(analysis, "adjacent_required_skills", []) or []),
         missing_required_skills=list(analysis.missing_required_skills or []),
         covered_preferred_skills=list(analysis.covered_preferred_skills or []),
+        adjacent_preferred_skills=list(getattr(analysis, "adjacent_preferred_skills", []) or []),
         missing_preferred_skills=list(analysis.missing_preferred_skills or []),
         rationale=analysis.rationale,
         rationale_citations=list(analysis.rationale_citations or []),
         unsupported_claims=list(analysis.unsupported_claims or []),
+        fallback_used=bool(getattr(analysis, "fallback_used", False)),
+        confidence_label=str(getattr(analysis, "confidence_label", "high")),
         provider=analysis.provider,
         model=analysis.model,
         version=analysis.version,
@@ -169,6 +182,7 @@ def to_interview_prep_pack_schema(material: ApplicationMaterialModel) -> Intervi
         prompt_version=material.prompt_version,
         section_traceability=list(getattr(material, "section_traceability", []) or []),
         unsupported_claims=list(getattr(material, "unsupported_claims", []) or []),
+        fallback_used=bool(getattr(material, "fallback_used", False)),
         created_at=material.created_at,
     )
 
@@ -230,6 +244,7 @@ def to_resume_tuning_schema(material: ApplicationMaterialModel) -> ResumeTuningS
         model=material.model,
         prompt_version=material.prompt_version,
         section_traceability=list(getattr(material, "section_traceability", []) or []),
+        fallback_used=bool(getattr(material, "fallback_used", False)),
         unsupported_claims=list(getattr(material, "unsupported_claims", []) or []),
         created_at=material.created_at,
     )

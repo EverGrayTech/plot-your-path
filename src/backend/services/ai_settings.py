@@ -43,6 +43,14 @@ DEFAULTS_BY_FAMILY: dict[OperationFamily, dict[str, object]] = {
         "temperature": llm_config.temperature,
         "max_tokens": llm_config.max_tokens,
     },
+    OperationFamily.FIT_ANALYSIS: {
+        "provider": llm_config.provider,
+        "model": llm_config.model,
+        "api_key_env": llm_config.api_key_env,
+        "base_url": llm_config.base_url,
+        "temperature": llm_config.temperature,
+        "max_tokens": llm_config.max_tokens,
+    },
 }
 
 _RUNTIME_TOKENS: dict[OperationFamily, str] = {}
