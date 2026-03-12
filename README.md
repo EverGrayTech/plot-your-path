@@ -1,172 +1,109 @@
 # Plot Your Path
 
-Turn job goals into a clear direction by mapping skill gaps, readiness, and next steps.
+Plot Your Path is a local-first career intelligence workspace for people who want to approach job searching and career growth more deliberately.
 
-Plot Your Path is a **career intelligence system** that helps professionals evaluate opportunities, prepare stronger applications, and understand how to grow their careers strategically.
+It helps turn scattered job postings, application work, interview prep, and career reflections into a structured system that supports better decisions over time.
 
-Instead of treating job searches as a stressful scramble, Plot Your Path turns them into a **structured, data-driven process**.
+## What it is
 
----
+Plot Your Path is designed to help a user:
 
-# Why This Exists
+- evaluate whether a role is worth pursuing
+- prepare stronger, more grounded applications
+- organize interview preparation around real experience
+- capture career evidence before it is forgotten
+- identify skill gaps that meaningfully change future options
 
-Job searching is surprisingly chaotic.
+The product is not meant to automate a career search end to end. It is meant to help a person think more clearly, prepare more effectively, and build better long-term career memory.
 
-People often struggle to:
+## Why it exists
 
-- remember the details of jobs they applied for
-- determine whether a role is actually a good fit
-- prepare thoughtful application materials quickly
-- reconstruct years of experience during interviews
-- understand which skills would unlock better opportunities
+Job searching is often handled as a series of disconnected tasks:
 
-Plot Your Path helps solve these problems by organizing career data and turning it into actionable insights.
+- saving links in too many places
+- re-reading the same job descriptions
+- rewriting the same stories from memory
+- guessing which roles are realistic
+- guessing which skills matter most next
 
----
+That makes the process noisy, repetitive, and hard to learn from.
 
-# What Plot Your Path Does
+Plot Your Path reframes job search activity as a feedback loop:
 
-Plot Your Path helps you:
+1. collect opportunities
+2. analyze them consistently
+3. pursue the right ones intentionally
+4. prepare using real evidence
+5. learn from outcomes
+6. use those patterns to guide future growth
 
-### Evaluate Job Opportunities
+## Core value
 
-Paste a job posting and instantly see how well it aligns with your experience.
+Plot Your Path creates value at two time horizons.
 
-The system analyzes:
+### Immediate value
 
-- role requirements
-- skill alignment
-- company desirability
+In the short term, it helps with active job search work:
 
-This helps you focus on opportunities that are worth pursuing.
+- role evaluation
+- application support
+- interview preparation
+- application tracking
 
----
+### Long-term value
 
-### Prepare Better Applications
+Over time, it becomes a structured record of:
 
-When you decide to apply, Plot Your Path can help generate or refine:
+- career evidence
+- recurring strengths
+- missing capabilities
+- opportunity patterns
+- lessons from past searches
 
-- cover letters
-- responses to application questions
-- positioning statements
+That longer view is what turns a job search tool into a career intelligence system.
 
-These suggestions are informed by your career history and skills.
+## Product direction
 
----
+The project aims to be:
 
-### Prepare for Interviews
+- **local-first** so sensitive career data stays under the user's control
+- **assistive** rather than autonomous
+- **progressive** so it gives value early and grows with deeper use
+- **practical** in scope, favoring clear decisions over exhaustive analysis
 
-When a company responds, the system becomes your interview preparation workspace.
+## Documentation map
 
-It can help you review:
+The documentation is intentionally split by purpose:
 
-- the role you applied for
-- your relevant experiences
-- likely interview questions
-- structured answers based on your background
+- [`docs/PRODUCT_OVERVIEW.md`](docs/PRODUCT_OVERVIEW.md) — product goals, design principles, user journey, and scope
+- [`docs/CONCEPT_MODEL.md`](docs/CONCEPT_MODEL.md) — shared conceptual language and core entities
+- [`docs/SYSTEM_SPEC.md`](docs/SYSTEM_SPEC.md) — system-level boundaries, architectural direction, and product guardrails
+- [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) — local development and testing workflows
 
-Preparation materials evolve as you progress through interview rounds.
+If you are new to the project, read them in that order.
 
----
+## Current emphasis
 
-### Capture Career Experiences
+The current documentation centers the product around five core capability areas:
 
-Plot Your Path also helps you record meaningful experiences from your work.
+1. opportunity capture
+2. role fit evaluation
+3. application and interview support
+4. career evidence capture
+5. skill-gap and pattern discovery
 
-Over time this builds a rich knowledge base of:
+That is a deliberate scope boundary. The vision is broader than a tracker, but narrower than a full life-planning system.
 
-- achievements
-- projects
-- technical work
-- leadership experiences
+## Contributing
 
-These experiences can later be used to generate resume content, interview stories, and application narratives.
+Before proposing major product or architecture changes, review:
 
----
+1. [`docs/PRODUCT_OVERVIEW.md`](docs/PRODUCT_OVERVIEW.md)
+2. [`docs/CONCEPT_MODEL.md`](docs/CONCEPT_MODEL.md)
+3. [`docs/SYSTEM_SPEC.md`](docs/SYSTEM_SPEC.md)
 
-### Discover Skill Gaps
+These documents are intended to guide future phases of the project.
 
-As you analyze more roles, Plot Your Path begins to detect patterns.
+## Vision
 
-It can highlight skills that frequently appear in desirable roles but are missing from your profile.
-
-This helps you understand **what to learn next** to unlock better career opportunities.
-
----
-
-# How It Works
-
-Plot Your Path connects three types of information:
-
-- Job Market Data
-- Your Career History
-- AI Analysis
-
-This combination allows the system to transform unstructured job postings and personal experience into structured career intelligence.
-
----
-
-# Typical Workflow
-
-A typical workflow looks like this:
-
-1. Upload your resume  
-2. Paste job posting URLs  
-3. Review role analysis and fit  
-4. Apply to promising opportunities  
-5. Prepare for interviews  
-6. Capture experiences from your work  
-7. Identify skill gaps and growth opportunities  
-
-Over time the system becomes an increasingly valuable career companion.
-
----
-
-# Privacy First
-
-Career data is highly personal.
-
-Plot Your Path is designed to run **locally**, allowing you to retain full control over your data.
-
-No external service is required.
-
----
-
-# Project Status
-
-Plot Your Path is an open-source project under active development.
-
-Current priorities include:
-
-- job role ingestion
-- skill extraction
-- company desirability scoring
-- role fit analysis
-- interview preparation support
-
-Future capabilities may include:
-
-- company recommendations
-- skill roadmap planning
-- resume optimization
-- portfolio project suggestions
-
----
-
-# Contributing
-
-Contributions are welcome.
-
-Before implementing major features, please review:
-
-- `docs/SYSTEM_SPEC.md`
-- `docs/PRODUCT_OVERVIEW.md`
-- `docs/CONCEPT_MODEL.md`
-
-These documents describe the architectural and conceptual foundations of the system.
-
----
-
-# Vision
-
-Plot Your Path aims to become a long-term **career intelligence companion** that helps professionals make thoughtful, strategic decisions about their work and growth.
+Plot Your Path should grow into a durable career companion: a system that helps someone understand where they are, what opportunities make sense, what evidence supports their story, and what development steps are most worth taking next.

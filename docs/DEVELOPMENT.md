@@ -1,66 +1,71 @@
 # Plot Your Path — Development Workflows
 
-## Run the web app locally
+See also: [README](../README.md), [Product Overview](./PRODUCT_OVERVIEW.md#in-scope), [System Specification](./SYSTEM_SPEC.md#roadmap-framing)
 
-These steps are optimized for running the app from **WSL** while viewing it in your browser.
+## Purpose
+
+This document covers the practical workflows for running and testing the project locally.
+
+For product intent and architectural direction, start with [Product Overview → In scope](./PRODUCT_OVERVIEW.md#in-scope) and [System Specification → Roadmap framing](./SYSTEM_SPEC.md#roadmap-framing).
+
+## Run the app locally
+
+These steps assume development from the repository root.
 
 ### 1. Install dependencies
 
 ```bash
-# Python/backend deps
+# Python / backend
 uv sync
 
-# Node/frontend deps
+# Node / frontend
 pnpm install
 ```
 
-### 2. Configure environment
+### 2. Configure the environment
 
 ```bash
 cp .env.example .env
 ```
 
-Defaults already work for local development:
+The default local URLs are:
 
-- Backend API: `http://localhost:8000`
-- Frontend app: `http://localhost:3000`
+- backend API: `http://localhost:8000`
+- frontend app: `http://localhost:3000`
 
-### 3. Start backend (terminal 1)
+### 3. Start the backend
 
 ```bash
 uv run uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-### 4. Start frontend (terminal 2)
+### 4. Start the frontend
 
 ```bash
 pnpm dev src/frontend --hostname 0.0.0.0 --port 3000
 ```
 
-Why this command: the Next.js app lives in `src/frontend`, so it must be passed
-as the Next.js app directory when running from the repository root.
+The frontend lives in `src/frontend`, so the app directory must be passed when running from the repository root.
 
 ### 5. Open the app
 
-From Windows or WSL browser, open:
+Open:
 
 - `http://localhost:3000`
 
-If localhost forwarding is unavailable in your setup, use your WSL IP instead:
+If localhost forwarding is unavailable in your environment, determine the machine IP and open the app with that address instead.
 
 ```bash
 hostname -I
 ```
 
-Then open `http://<wsl-ip>:3000`.
+## Run tests
 
-## Running tests
+This project includes backend and frontend tests.
 
-This project has both backend (Python) and frontend (TypeScript) tests.
+### Backend tests
 
-### Backend tests (pytest)
-
-Make sure dev dependencies are installed:
+Install dev dependencies if needed:
 
 ```bash
 uv sync --extra dev
@@ -72,13 +77,13 @@ Run all backend tests:
 uv run pytest tests/backend
 ```
 
-Run backend tests with coverage output (terminal + htmlcov/):
+Run backend tests with coverage:
 
 ```bash
 uv run pytest --cov=src/backend --cov-report=term-missing --cov-report=html tests/backend
 ```
 
-### Frontend tests (vitest)
+### Frontend tests
 
 Run all frontend tests:
 
@@ -92,8 +97,18 @@ Run frontend tests with coverage:
 pnpm test:coverage
 ```
 
-Run a single frontend test file (example):
+Run a single frontend test file:
 
 ```bash
 pnpm vitest run tests/frontend/app/jobs.page.test.tsx
 ```
+
+## Documentation use during development
+
+When making non-trivial changes:
+
+1. use the [Product Overview](./PRODUCT_OVERVIEW.md) to check product intent and scope
+2. use the [Concept Model](./CONCEPT_MODEL.md) to keep terminology consistent
+3. use the [System Specification](./SYSTEM_SPEC.md) to preserve architectural guardrails
+
+If implementation direction starts to drift from these docs, resolve it deliberately rather than letting the project evolve by accident.
