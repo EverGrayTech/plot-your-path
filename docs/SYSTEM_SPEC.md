@@ -1,116 +1,157 @@
-# System Specification: Plot Your Path
+# Plot Your Path — System Specification
 
-## 1. Core Vision
-- **Mission**: To holistically understand one's career history and goals, so that you're confident in each step of their journey.
-- **User Stories**: 
-  - As a job seeker, I want evaluate my fit for a role so that my search is both short and fruitful.
-  - As a job applier, I want to present myself in the best possible manner to raise my chances.
-  - As a ladder climber, I want to evaluate directions I could take my career so that I understand the pros, cons, and steps to get there.
-  - As a life-long learner, I want to define interesting personal projects so that I grow and benefit from the fruits of my efforts.
+See also: [README](../README.md), [Product Overview](./PRODUCT_OVERVIEW.md#product-principles), [Concept Model](./CONCEPT_MODEL.md#core-concepts), [Development Workflows](./DEVELOPMENT.md#documentation-use-during-development)
 
-## 2. Standards & Protocols
-> **Rule of Truth**: This project follows the modular standards defined in the `.rules/` directory.
-- **Workflow**: Follow the plan-first workflow protocol in `.rules/00-global.md`.
-- **Linting/Formatting**: See `.rules/10-frontend.md` and `20-backend.md`.
-- **Quality**: See `.rules/30-testing.md`
+## Purpose
 
-## 3. Technology Stack
+This document describes the system-level direction for Plot Your Path.
 
-### Frontend
-- **Framework**: Next.js 15+ (Server Components by default)
-- **Package Manager**: pnpm
-- **Linting/Formatting**: Biome
+It is not a step-by-step build plan and not a detailed schema reference. Its role is to preserve the architectural and product guardrails that should shape future phases.
 
-### Backend
-- **Framework**: FastAPI
-- **Package Manager**: uv
-- **Linting/Formatting**: Ruff
-- **Database**: SQLite (file-based, single-user)
-- **Vector Store**: ChromaDB (for STAR stories and application history)
-- **ORM**: SQLAlchemy
+For product intent and scope boundaries, see [Product Overview → Product principles](./PRODUCT_OVERVIEW.md#product-principles) and [Product Overview → In scope](./PRODUCT_OVERVIEW.md#in-scope). For shared terminology, see [Concept Model → Core concepts](./CONCEPT_MODEL.md#core-concepts).
 
-### AI/LLM Integration
-- **Provider Strategy**: Configurable multi-provider support
-- **Supported Providers**: OpenAI (GPT-4/GPT-4o), Anthropic Claude (Sonnet/Opus), Local models via Ollama
+## System objective
 
-### Data Storage Strategy
-- **Job Descriptions**: Store both raw HTML and cleaned Markdown on disk
-- **Database**: Metadata, relationships, and structured data only
-- **File Organization**: 
-  - `/data/jobs/raw/{company_slug}/{role_id}.html` - Original scraped HTML
-  - `/data/jobs/cleaned/{company_slug}/{role_id}.md` - LLM-cleaned Markdown
-  - `/data/resumes/` - User's uploaded resume/LinkedIn exports
-  - `/data/applications/{role_id}/` - Generated application materials
+The system should help a user turn fragmented career activity into a usable decision system.
 
-### Caching Strategy
-- **Stable Data** (90+ day cache): Patents, R&D history, company founding info, historical D&I reports
-- **Volatile Data** (7-day cache): Stock prices, Glassdoor ratings, recent news
-- **User-Controlled**: Manual refresh option for any cached data
-- **Rate Limiting**: Implement exponential backoff for external API calls
+At a minimum, that means supporting a loop like this:
 
-## 4. Architectural Overview
+1. capture opportunities
+2. structure and evaluate them
+3. support applications and interviews
+4. preserve reusable evidence
+5. learn from patterns and outcomes
 
-### Data Flow
-- **Ingestion & Refinement**: The flow begins with a raw URL. The `Job Search Agent` scrapes the content, but crucially uses an LLM to "de-noise" the HTML, producing a clean, standardized Markdown version of the Job Description (JD) for the local archive.
-- **Structured Mapping**: The cleaned JD is passed through an extraction prompt that populates the `Roles` and `Role_Skills` tables. This transforms unstructured text into a queryable relational format, linking the role to the broader `Skills` dictionary.
-- **Dynamic Enrichment (The Scoring Engine)**: If the company is new, the agent triggers the `Scoring Engine`. It retrieves the data_source_query instructions from the `Scoring_Config` table for the Desirability Factors. It then performs external research to assign 1-10 scores, which are then weighted by your personal preferences to produce an overall_desirability score.
-- **Actionable Synthesis**: Finally, the system intersects the `Role_Skills` with your Learnings table. This calculates a "Skill Match" percentage and identifies "Gaps," providing a "Go/No-Go" recommendation.
+## Product guardrails
 
-### The Role of AI Agents
+### Local-first by default
 
-In this architecture, the AI Agents act as Middleware and Reasoning Engines rather than simple scripts:
+Sensitive career information should be treated as private by default. The system should prefer local control, local storage, and transparent data handling.
 
-- **The Job Search Agent**: Acts as the primary orchestrator of the data flow, responsible for scraping, SQL insertion logic, and external research/scoring.
-- **The Long-Term Context Agent**: Acts as the "Executive Assistant." It holds the vector memory (ChromaDB) of your STAR stories and past applications. When a role is flagged as a "GO," this agent synthesizes the company's "desirability" context with your personal "Learnings" to generate highly tailored application materials.
-- **The Scoring Analyst (Sub-Agent)**: Specializes in interpreting messy, qualitative web data (like Glassdoor reviews or D&I reports) and quantifying them into the 1-10 integers required for the SQL core.
+### Assistive, not autonomous
 
-By separating the Instructions (stored in SQL) from the Execution (the Agents), the system remains "future-proof"—you can change how a factor is calculated simply by updating a row in the database without rewriting a single line of code.
+The system may analyze and suggest, but it should not obscure authorship or create pressure toward blind automation.
 
-## 5. Database Schema Overview
+### Structured where it matters
 
-### Core Tables
-- **Companies**: Master list of potential employers with desirability scores
-- **Roles**: Specific job openings linked to companies
-- **Skills**: Global dictionary of technical and soft skills
-- **Role_Skills**: Junction table linking roles to required/preferred skills
+The system should convert messy inputs into structured representations when that structure leads to better decisions, comparison, retrieval, or reuse.
 
-### Scoring Architecture
-- **Scoring_Config**: Stores user weights and AI instructions for 8 desirability factors:
-  1. Culture (Glassdoor ratings)
-  2. Notoriety (Market cap/influence)
-  3. Progressiveness (D&I reports, parental leave)
-  4. Inventiveness (Patents, R&D, innovation)
-  5. Social Impact (UN SDG alignment)
-  6. Wow-Factor (Cutting-edge tech, "coolness")
-  7. Reputation (Ethics, trust scores)
-  8. Comp/Growth (Salary, career development)
+### Flexible at the edges
 
-### Personal Progress
-- **Learnings**: Personal skill tracker with status, ease/demand/passion scores, and dependencies
-- **Star_Stories**: STAR format experiences stored in ChromaDB for application materials
+Career activity is messy. The system should allow imperfect input and partial data rather than demanding complete, pristine records before it can be useful.
 
-### Key Relationships
-- **Company → Roles**: One-to-many
-- **Role ↔ Skills**: Many-to-many (via Role_Skills)
-- **Skills → Learnings**: Links market demand to personal supply
+### Opinionated about signal, not exhaustive coverage
 
-## 6. Development Phases
-Detailed roadmap execution lives in `.plans/`.
-- Use `.plans/*.md` for implementation-ready scope, sequencing, and acceptance criteria.
-  - `XX` plans are currently unscheduled/unprioritized.
-- Keep `SYSTEM_SPEC.md` focused on vision and architecture; avoid duplicating checklist-level execution detail here.
+The goal is not to model every possible career variable. The goal is to preserve enough signal to support good choices.
 
-### Cross-Phase Product Considerations
-- **Authentication & Security**: Single-user first; keep secrets in env vars; keep sensitive career data local
-- **Data Portability**: Support backup/restore and export to standard formats
-- **Performance**: Use pagination, lazy loading, and async/background processing for long-running LLM work
-- **Reliability**: Implement retries, graceful degradation when providers fail, and user-readable errors
-- **Extensibility**: Keep architecture open to new data sources, scoring factors, and future integrations
+## Major capability areas
 
-## 7. User Experience Principles
-- **Single User Focus**: One profile per installation (no multi-user complexity)
-- **Privacy First**: All data stored locally (SQLite + file system)
-- **Iterative Enhancement**: Start simple, add sophistication in phases
-- **AI Transparency**: Show reasoning behind recommendations
-- **User Control**: Allow customization of AI instructions and weights
-- **Data Ownership**: Easy export of all data in standard formats
+### 1. Opportunity ingestion
+
+The system should accept opportunities from practical sources such as links, pasted descriptions, or manually entered notes.
+
+Its job is to normalize raw opportunity input into a durable internal representation.
+
+### 2. Opportunity evaluation
+
+The system should help the user judge both:
+
+- role fit
+- company attractiveness or desirability
+
+These evaluations should be explainable and should support comparison rather than pretend to be absolute truth.
+
+### 3. Application support
+
+The system should support application work by connecting opportunities with relevant evidence and providing structured drafting help.
+
+### 4. Interview support
+
+The system should support interview preparation by gathering the relevant context, stories, and materials for a specific role and stage.
+
+### 5. Career evidence capture
+
+The system should preserve useful evidence from ongoing work so that future search activity is less dependent on memory reconstruction.
+
+### 6. Pattern detection and growth guidance
+
+As usage accumulates, the system should surface high-value patterns, especially around recurring strengths, missing skills, and outcomes.
+
+## Architectural direction
+
+### Core data domains
+
+The system should maintain clear boundaries between:
+
+- market-facing opportunity data
+- user-owned career evidence
+- derived analyses and generated artifacts
+- operational workflow records such as applications and outcomes
+
+Keeping those domains distinct helps the system stay understandable and easier to evolve.
+
+### Derived outputs should remain traceable
+
+When the system produces fit analyses, recommendations, or drafted materials, it should remain possible to understand what source information informed them.
+
+Traceability matters for trust, editing, and later refinement.
+
+### AI should be a layer, not the foundation
+
+AI-assisted features are important, but the core product should not be designed as an opaque prompt wrapper.
+
+The durable value of the system comes from:
+
+- structured information
+- reusable evidence
+- explicit workflows
+- comparison across time
+
+AI should strengthen those things, not replace them.
+
+### Persistence should preserve reuse
+
+The system should store information in ways that support later retrieval and recombination.
+
+That is especially important for:
+
+- opportunities
+- evidence units
+- generated materials
+- outcomes
+- historical changes over time
+
+## User experience expectations
+
+The system should feel:
+
+- calm rather than cluttered
+- analytical without being overbearing
+- structured without being rigid
+- helpful without pretending certainty it does not have
+
+Where uncertainty exists, the product should acknowledge it clearly.
+
+## Scope discipline
+
+To protect coherence, future phases should favor depth in the core loop over breadth into loosely related features.
+
+Good expansions are ones that strengthen one of these:
+
+- opportunity selection
+- evidence reuse
+- interview readiness
+- outcome learning
+- skill-gap prioritization
+
+Weak expansions are ones that turn the system into a generic productivity app or a broad social platform.
+
+## Roadmap framing
+
+Near- and mid-term planning should be evaluated against three questions:
+
+1. Does this make the core loop more useful?
+2. Does this improve trust, reuse, or decision quality?
+3. Does this keep the product boundary clear?
+
+If a planned feature does not answer at least one of those strongly, it likely belongs later or elsewhere.

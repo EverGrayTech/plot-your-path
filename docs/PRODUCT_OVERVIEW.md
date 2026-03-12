@@ -1,269 +1,188 @@
-# Plot Your Path — Product Overview & User Journey
+# Plot Your Path — Product Overview
 
-## Mission
+See also: [README](../README.md), [Concept Model](./CONCEPT_MODEL.md#core-concepts), [System Specification](./SYSTEM_SPEC.md#product-guardrails)
 
-To help professionals holistically understand their career history, market opportunities, and future growth so that every career decision is made with clarity and confidence.
+## Purpose
 
-Plot Your Path acts as a **career intelligence system** that transforms fragmented job search activities into a structured, data-informed process.
+This document defines the product intent of Plot Your Path: what problem it solves, who it is for, how it should feel to use, and where the product boundary should stay for now.
 
-The system is designed to deliver **immediate value during job searches**, while quietly building long-term career intelligence over time.
+For the shared domain language behind the product, see [Concept Model → Core concepts](./CONCEPT_MODEL.md#core-concepts). For system-level direction and constraints, see [System Specification → Product guardrails](./SYSTEM_SPEC.md#product-guardrails).
 
----
+## Product statement
 
-# Product Philosophy
+Plot Your Path is a career intelligence workspace that helps people make better career decisions by connecting job opportunities, personal experience, application work, interview preparation, and skill development.
 
-## Immediate Value, Zero Setup
+Its value comes from two things happening together:
 
-The system must provide meaningful insight with minimal user effort.
+- it helps with immediate job search tasks
+- it accumulates structured knowledge that improves future decisions
 
-A user should be able to:
+## Problem
 
-1. Upload a resume  
-2. Paste a job posting URL  
-3. Receive actionable analysis  
+Most job search activity is fragmented.
 
-within minutes of starting the application.
+People often have to:
 
-The system should never require extensive setup before providing value.
+- compare roles manually and inconsistently
+- recreate career stories from memory
+- prepare applications under time pressure
+- track interview progress across too many tools
+- guess which skills would materially improve future options
 
----
+The result is effort without much retained learning.
 
-## Progressive Depth
+## Desired outcome
 
-While the system can operate with minimal input, its intelligence improves as users provide more information.
+Plot Your Path should help a user:
 
-Users should be able to engage with the system at increasing levels of depth:
+- decide which roles deserve attention
+- prepare grounded, credible applications
+- walk into interviews with better recall and structure
+- preserve useful career evidence as it happens
+- see patterns across roles, outcomes, and skill gaps
 
-### Level 1 — Job Evaluation
-Evaluate roles against an existing resume.
+The product should make the user more intentional, not more dependent.
 
-### Level 2 — Application Assistance
-Track applications and receive help answering application questions.
+## Product principles
 
-### Level 3 — Interview Preparation
-Generate structured preparation for interviews.
+### 1. Immediate value first
 
-### Level 4 — Career Memory
-Log experiences and achievements to build a richer career profile.
+The product should be useful early.
 
-### Level 5 — Career Intelligence
-Analyze patterns across roles to identify skill gaps and career opportunities.
+A user should be able to bring in a role, compare it against their background, and get something actionable without a long setup process.
 
-Users should never feel forced into deeper engagement, but should naturally discover the value of doing so.
+### 2. Progressive depth
 
----
+The system should become more valuable as the user adds more information, but deeper engagement should always feel optional rather than required.
 
-## Assistive, Not Autonomous
+Typical progression:
 
-The system supports decision-making rather than replacing it.
+1. evaluate a role
+2. manage an application
+3. prepare for interviews
+4. capture career evidence
+5. identify patterns and strategic next steps
 
-It provides:
+### 3. Assistive, not autonomous
 
-- analysis
-- suggestions
-- synthesis
+The system can analyze, summarize, and suggest. It should not pretend to replace judgment, authorship, or authenticity.
 
-But the user remains responsible for final decisions, messaging, and applications.
+The user remains responsible for decisions, messaging, and final materials.
 
-This maintains user trust and ensures authenticity in applications.
+### 4. Evidence over performance
 
----
+Whenever possible, the product should ground outputs in real experience, concrete achievements, and traceable career evidence.
 
-## Long-Term Career Memory
+This matters especially for applications, interview prep, and future learning recommendations.
 
-One of the biggest challenges professionals face is reconstructing their career narrative during a job search.
+### 5. Local-first trust
 
-Plot Your Path addresses this by acting as a **long-term memory system** for career experiences.
+Career data is sensitive. The product should be shaped around privacy, ownership, and the assumption that users want strong control over their information.
 
-Over time, the system accumulates:
+### 6. Clear scope
 
-- work experiences
-- achievements
-- skill development
-- interview insights
+The project should be ambitious about usefulness, but disciplined about sprawl.
 
-This growing knowledge base enables increasingly strong applications and interview preparation.
+It is not trying to become a general life coach, an auto-apply bot, or an exhaustive labor-market simulator.
 
----
+## Core user journey
 
-# Core User Journey
+The product supports a repeating cycle.
 
-The system supports a natural career cycle that repeats throughout a professional’s life.
+### Phase 1: Capture opportunities
 
----
+The user brings opportunities into the system from job boards, company sites, recruiter messages, or pasted text.
 
-# Phase 1 — Opportunity Discovery
+The goal of this phase is simple: turn a messy opportunity into something structured enough to reason about.
 
-A user discovers potential job opportunities while browsing company career pages or job boards.
+### Phase 2: Evaluate fit
 
-Rather than evaluating each role manually, they collect potential roles and bring them into the system.
+The system compares the role with the user's current skills and experience.
 
-By submitting a job posting URL or pasting job text, the system analyzes the role and extracts structured information including:
+This phase should answer questions like:
 
-- required skills
-- company context
-- job expectations
+- Is this role plausible?
+- Where am I strong?
+- What are the meaningful gaps?
+- Is this worth time and energy right now?
 
-The system also evaluates the broader company environment, producing a **company desirability assessment** based on factors such as reputation, innovation, and workplace culture.
+### Phase 3: Prepare the application
 
-This transforms an unstructured job description into actionable intelligence.
+If the role is worth pursuing, the system helps the user prepare materials and position their experience more clearly.
 
----
-
-# Phase 2 — Role Fit Evaluation
-
-Once roles are analyzed, the system compares them against the user’s current experience and skills.
-
-The system identifies:
-
-- alignment with the role
-- missing skills
-- areas of strength
-
-Each role is evaluated in context, allowing users to compare multiple roles and determine which opportunities are worth pursuing.
-
-This stage helps the user avoid spending time applying to roles that are unlikely to succeed while highlighting the most promising opportunities.
-
----
-
-# Phase 3 — Application Preparation
-
-When the user chooses to pursue a role, the system assists with the application process.
-
-The system can help generate or refine:
+This includes support for:
 
 - cover letters
-- application responses
-- positioning statements
+- application question responses
+- resume tailoring prompts or suggestions
+- role-specific positioning
 
-These outputs are informed by the user’s experience history, skills, and previously recorded stories.
+### Phase 4: Prepare for interviews
 
-The goal is not to automate the application, but to help the user present their experience clearly and effectively.
+Once a process is underway, the system becomes an interview workspace.
 
-Once the application is submitted, the user records the submission in the system so it can track progress.
+It should help the user reconnect the role, company context, relevant evidence, and prepared stories in one place.
 
----
+### Phase 5: Capture career evidence
 
-# Phase 4 — Interview Preparation
+Outside an active search, the system should still be useful.
 
-When a company responds to an application, the system becomes a preparation workspace.
+Users should be able to capture meaningful work, outcomes, challenges, and growth while they are fresh. This reduces later reconstruction work and improves future applications.
 
-Users can review:
+### Phase 6: Find patterns and guide growth
 
-- the role they applied for
-- the resume they used
-- company intelligence
-- relevant skills and experiences
+As more roles and evidence accumulate, the system should help the user notice:
 
-The system synthesizes this information to help prepare for interviews.
+- recurring strengths
+- recurring missing skills
+- opportunity clusters
+- outcome patterns
+- development moves with high leverage
 
-Preparation materials may include:
+This is where the product becomes a career intelligence system rather than only a job search assistant.
 
-- common interview questions
-- suggested answers based on prior experience
-- relevant STAR stories
-- contextual information about the company
+## Primary user
 
-As interviews progress through multiple stages, the preparation material evolves and accumulates notes and refinements.
+Plot Your Path is most valuable for people taking an intentional, strategic approach to their careers.
 
----
-
-# Phase 5 — Career Intelligence
-
-After analyzing many roles, the system begins to detect patterns.
-
-It can identify skills that frequently appear in desirable roles but are currently missing from the user’s profile.
-
-This allows the system to highlight **high-value skill gaps**.
-
-Instead of guessing what to learn next, users gain data-driven insight into which skills would unlock better opportunities.
-
-This turns job searching into a strategic feedback loop.
-
----
-
-# Phase 6 — Career Experience Logging
-
-Between job searches, the system continues to provide value through experience logging.
-
-Users can record notable experiences from their work, including:
-
-- projects completed
-- challenges solved
-- technologies used
-- measurable outcomes
-
-These experiences are structured and stored as part of the user’s career memory.
-
-Over time this produces a rich library of experiences that can be used to generate:
-
-- resume bullet points
-- STAR stories
-- interview answers
-- application narratives
-
-Capturing experiences in real time avoids the common problem of trying to reconstruct years of work during a job search.
-
----
-
-# Long-Term Value Loop
-
-Together, these phases create a reinforcing cycle:
-
-discover roles  
-→ analyze opportunities  
-→ apply strategically  
-→ prepare effectively  
-→ identify skill gaps  
-→ grow professionally  
-
-Over time, the system becomes an increasingly powerful partner in career growth.
-
----
-
-# Intended Users
-
-Plot Your Path is designed for professionals who are actively shaping their careers rather than passively navigating them.
-
-While it can benefit anyone searching for a job, it is particularly valuable for:
+That likely includes:
 
 - mid-career professionals
-- senior technical contributors
-- individuals seeking strategic career advancement
+- senior individual contributors
+- people navigating complex or high-stakes career decisions
+- people who want stronger continuity between one search and the next
 
-These users often face complex opportunities and benefit most from structured career intelligence.
+It may still help earlier-career users, but it should not be designed around high-volume mass application behavior.
 
----
+## In scope
 
-# Design Constraints
+The current product vision should stay focused on:
 
-The system is designed with several intentional constraints.
+- role capture and structuring
+- fit and desirability evaluation
+- application support
+- interview preparation
+- career evidence capture
+- skill-gap discovery
+- outcome-informed reflection
 
-## Local-First Architecture
+## Not in scope for now
 
-Career data is highly personal. The system is designed to run locally so users maintain ownership and privacy of their information.
+To keep the vision manageable, the product should avoid expanding too quickly into:
 
-## Low Friction
+- automated job application submission
+- social networking features
+- multi-user collaboration
+- exhaustive career-path simulation
+- broad personal productivity tooling unrelated to career decisions
 
-Every interaction should justify the effort required from the user.
+## Long-term shape
 
-If an action feels like administrative overhead, it should either be automated or optional.
+Over time, Plot Your Path may reasonably grow into adjacent areas such as:
 
-## Human-Centered Outcomes
+- opportunity recommendations
+- learning roadmap suggestions
+- portfolio or project planning
+- stronger outcome feedback loops
 
-Applications, interviews, and career decisions remain human activities.
-
-The system’s role is to help the user think more clearly, not to replace them.
-
----
-
-# Future Evolution
-
-While the initial focus is job search intelligence, the system may eventually expand into broader career planning features such as:
-
-- company recommendations
-- skill development roadmaps
-- portfolio and project planning
-- resume optimization
-
-These capabilities will build on the intelligence accumulated through everyday use.
+Those additions should reinforce the core loop rather than distract from it.
