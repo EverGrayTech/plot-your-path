@@ -10,16 +10,12 @@ This plan follows the streamlined UX you requested:
 - UI reveals/enables a text area and resubmits with pasted job description text
 - User sees minimal, staged progress feedback and a clear success confirmation
 
----
-
 ## Product/UX Decisions (Confirmed)
 
 1. **Page scope**: Single focused capture page only (fastest)
 2. **Primary input path**: URL-first
 3. **Fallback path**: Triggered by backend structured error code (`FALLBACK_TEXT_REQUIRED`)
 4. **Progress UX**: Simple staged frontend loading states now; design to evolve to server-reported progress later
-
----
 
 ## Technical Design
 
@@ -89,8 +85,6 @@ Error handling branches:
    - Show success message with returned metadata
    - Offer “Capture another job” reset action
 
----
-
 ## Implementation Steps
 
 ### 1. Scaffold minimal frontend app shell**
@@ -123,8 +117,6 @@ Error handling branches:
   - [x] Run Biome lint/format and frontend tests.
   - [x] Run backend tests impacted by API contract update.
 
----
-
 ## Affected Files (Planned)
 
 - Frontend
@@ -140,8 +132,6 @@ Error handling branches:
   - `src/backend/routers/jobs.py` (structured fallback error + alternate capture path)
   - `tests/backend/test_jobs_api.py` (new fallback contract assertions)
 
----
-
 ## Success Criteria
 
 - User can submit URL from a single page.
@@ -149,8 +139,6 @@ Error handling branches:
 - Resubmission with pasted text completes successfully through backend pipeline.
 - User sees lightweight progress messaging during processing.
 - User sees explicit success confirmation when complete.
-
----
 
 ## Future Evolution (post-MVP)
 

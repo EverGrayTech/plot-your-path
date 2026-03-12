@@ -6,8 +6,6 @@ Address backend risks that currently threaten correctness, operability, and futu
 
 This should be completed **before** larger API or frontend refactors because it establishes the behavioral guarantees those refactors need to rely on.
 
----
-
 ## Why This Comes First
 
 - Several LLM-backed workflows call async code from sync contexts using `asyncio.run(...)`, which is fragile and can break under alternate hosting/runtime conditions.
@@ -16,8 +14,6 @@ This should be completed **before** larger API or frontend refactors because it 
 - Automatic `create_all()` on startup hides schema drift and makes production behavior less predictable.
 - Broad `except Exception` fallbacks reduce observability and make real defects look like recoverable degradations.
 
----
-
 ## Goals
 
 1. Establish one consistent async/sync boundary model for backend workflows.
@@ -25,8 +21,6 @@ This should be completed **before** larger API or frontend refactors because it 
 3. Standardize datetime storage/comparison semantics across the backend.
 4. Replace implicit schema mutation on app startup with explicit initialization/migration expectations.
 5. Tighten exception taxonomy so callers can distinguish expected degradation from defects.
-
----
 
 ## Technical Design
 
@@ -87,8 +81,6 @@ Refactor direction:
 - Separate “provider unavailable / fallback allowed” from “invalid data / bug / persistence failure.”
 - Make API responses and logs map cleanly to those categories.
 
----
-
 ## Implementation Steps
 
 ### 1. Execution model definition
@@ -119,8 +111,6 @@ Refactor direction:
 - [x] Add tests for timezone-sensitive comparisons and serialized responses.
 - [x] Add tests for startup/init behavior without implicit table creation.
 
----
-
 ## Affected Areas
 
 - `src/backend/main.py`
@@ -131,8 +121,6 @@ Refactor direction:
 - `src/backend/services/desirability_scorer.py`
 - `src/backend/utils/file_storage.py`
 - related routers, schemas, and tests
-
----
 
 ## Success Criteria
 
