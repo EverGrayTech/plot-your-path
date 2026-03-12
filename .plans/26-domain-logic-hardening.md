@@ -6,15 +6,11 @@ Harden the product logic behind fit analysis, desirability scoring, and related 
 
 This plan should follow the infrastructure and modularization work so business rules can be improved without being entangled with transport and orchestration concerns.
 
----
-
 ## Why This Is Fourth
 
 - The earlier plans reduce architectural friction first.
 - Once the system is structurally safer, this plan improves trustworthiness of the product’s actual recommendations and explanations.
 - These changes are more likely to affect user-facing behavior and therefore benefit from a cleaner implementation surface.
-
----
 
 ## Goals
 
@@ -23,8 +19,6 @@ This plan should follow the infrastructure and modularization work so business r
 3. Align AI operation-family usage with actual domain responsibilities.
 4. Tighten domain invariants around result meaning, provenance, and recomputation.
 5. Expand tests beyond happy-path coverage into decision-quality edge cases.
-
----
 
 ## Technical Design
 
@@ -75,8 +69,6 @@ Refactor direction:
 - Add tests for ambiguous skill matches, overlapping evidence, no-evidence cases, company-vs-role score reuse, and degraded/fallback outputs.
 - Focus on behavioral integrity rather than only code coverage percentage.
 
----
-
 ## Implementation Steps
 
 ### 1. Fit logic review
@@ -100,8 +92,6 @@ Refactor direction:
 - [x] Add regression tests for matching edge cases and scoring semantics.
 - [x] Add tests for fallback provenance and stale-score behavior.
 
----
-
 ## Affected Areas
 
 - `src/backend/services/fit_analyzer.py`
@@ -109,8 +99,6 @@ Refactor direction:
 - `src/backend/services/application_materials.py`
 - related AI settings/config wiring, schemas, and tests
 - selected frontend displays that describe confidence, provenance, and score meaning
-
----
 
 ## Success Criteria
 

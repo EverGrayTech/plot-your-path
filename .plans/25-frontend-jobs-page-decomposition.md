@@ -6,15 +6,11 @@ Decompose the current jobs client experience into smaller hooks, components, and
 
 This plan should follow backend stabilization and API modularization so the frontend can be refactored against a cleaner and more stable interface surface.
 
----
-
 ## Why This Is Third
 
 - The current client component is acting as a feature shell, controller, and full UI implementation all at once.
 - Many concerns are interleaved: jobs list, detail modal, application ops, fit analysis, desirability, outcomes, application materials, interview prep, resume tuning, AI settings, factor settings, skill detail, and pipeline views.
 - Smaller frontend modules will reduce cognitive load and make future feature work safer.
-
----
 
 ## Goals
 
@@ -23,8 +19,6 @@ This plan should follow backend stabilization and API modularization so the fron
 3. Reduce duplicated async/error/loading state handling patterns.
 4. Keep current UI behavior and endpoint contracts intact during the refactor.
 5. Improve testability at the feature-section level.
-
----
 
 ## Technical Design
 
@@ -75,8 +69,6 @@ Refactor direction:
 - Preserve Next.js server-component defaults where possible, while keeping interactive sections client-side.
 - Avoid introducing manual memoization patterns prohibited by project rules.
 
----
-
 ## Implementation Steps
 
 ### 1. Establish component boundaries
@@ -100,15 +92,11 @@ Refactor direction:
 - [x] Add or update feature-level tests for extracted sections/hooks.
 - [x] Preserve page-level integration coverage for core flows.
 
----
-
 ## Affected Areas
 
 - `src/frontend/components/JobsPageClient.tsx`
 - new component/hook files under `src/frontend/components/` and `src/frontend/lib/`
 - related frontend tests under `tests/frontend/`
-
----
 
 ## Success Criteria
 

@@ -16,8 +16,6 @@ de-noise → extract → persist pipeline.
 
 The URL is still recorded as-is (deduplication, source reference) but the scraper is bypassed.
 
----
-
 ## Goals
 
 | # | Goal | Outcome |
@@ -27,8 +25,6 @@ The URL is still recorded as-is (deduplication, source reference) but the scrape
 | 3 | LinkedIn URLs allowed in clip mode | UNSUPPORTED_DOMAINS check bypassed for `--clip` |
 | 4 | Validate clipboard is non-empty | Clear error if clipboard is empty or unreadable |
 | 5 | No new required dependency for common platforms | `pyperclip` added as optional extra; graceful fallback to `xclip`/`pbpaste` if missing |
-
----
 
 ## Technical Design
 
@@ -76,8 +72,6 @@ The LLM de-noise step still runs on clipboard text — LinkedIn page copy is mes
 The `raw_html_path` column is set to `"clipboard"` (a sentinel string) instead of a file path.
 No raw file is written since there is no HTML.  The cleaned Markdown is still saved as normal.
 
----
-
 ### Affected Files
 
 | File | Change Type | Change |
@@ -87,8 +81,6 @@ No raw file is written since there is no HTML.  The cleaned Markdown is still sa
 | `.env.example` | No change | — |
 
 > No backend source files change — this is purely a CLI UX concern.
-
----
 
 ## Implementation Steps
 
@@ -141,15 +133,11 @@ on the clipboard text; the URL is recorded for deduplication as normal.
 - pyproject.toml: pyperclip added as optional [clipboard] extra
 ```
 
----
-
 ## Out of Scope
 
 - Automatic browser clipboard interception
 - Any changes to the FastAPI router or backend services
 - Tests (clipboard is a system I/O boundary; manual smoke test is sufficient for MVP)
-
----
 
 ## Success Criteria
 

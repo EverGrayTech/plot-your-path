@@ -6,16 +6,12 @@ Break apart the oversized jobs API surface into maintainable modules and removes
 
 This plan should follow backend correctness/reliability work so the modularization is built on stable execution and persistence rules.
 
----
-
 ## Why This Is Second
 
 - The current router has grown into a high-churn integration surface with mixed responsibilities.
 - Query composition is repeated inline and includes likely N+1-style access patterns for list and pipeline views.
 - Response mapping logic is embedded directly in routing code, making behavior hard to reuse or test in isolation.
 - A modular API shape will make later frontend simplification much easier because interfaces and ownership become clearer.
-
----
 
 ## Goals
 
@@ -24,8 +20,6 @@ This plan should follow backend correctness/reliability work so the modularizati
 3. Reduce repeated per-row queries in high-read endpoints.
 4. Standardize exception-to-HTTP mapping across feature areas.
 5. Make endpoint behavior easier to test independently of router wiring.
-
----
 
 ## Technical Design
 
@@ -72,8 +66,6 @@ Refactor direction:
 - Reduce repetitive HTTP mapping code through focused helpers or shared adapters.
 - Preserve explicitness while removing copy/paste repetition.
 
----
-
 ## Implementation Steps
 
 ### 1. Decompose routing surface
@@ -96,15 +88,11 @@ Refactor direction:
 - [x] Preserve current response contracts unless an intentional API change is separately approved.
 - [x] Update and extend tests to confirm parity.
 
----
-
 ## Affected Areas
 
 - `src/backend/routers/jobs.py`
 - new router/query/presentation modules under `src/backend/routers/` and/or `src/backend/services/`
 - related schemas and tests for jobs, outcomes, materials, and pipeline views
-
----
 
 ## Success Criteria
 
