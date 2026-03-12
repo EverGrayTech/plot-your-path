@@ -1,12 +1,12 @@
 # Plot Your Path — Product Overview
 
-See also: [README](../README.md), [Concept Model](./CONCEPT_MODEL.md#core-concepts), [System Specification](./SYSTEM_SPEC.md#product-guardrails)
+See also: [README](../README.md), [Concept Model](./concept-model.md#core-concepts), [System Specification](./system-spec.md#product-guardrails)
 
 ## Purpose
 
 This document defines the product intent of Plot Your Path: what problem it solves, who it is for, how it should feel to use, and where the product boundary should stay for now.
 
-For the shared domain language behind the product, see [Concept Model → Core concepts](./CONCEPT_MODEL.md#core-concepts). For system-level direction and constraints, see [System Specification → Product guardrails](./SYSTEM_SPEC.md#product-guardrails).
+For the shared domain language behind the product, see [Concept Model → Core concepts](./concept-model.md#core-concepts). For system-level direction and constraints, see [System Specification → Product guardrails](./system-spec.md#product-guardrails).
 
 ## Product statement
 
