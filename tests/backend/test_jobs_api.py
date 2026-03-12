@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -358,10 +358,14 @@ class TestGetJob:
                 fit_score=55,
                 recommendation="maybe",
                 covered_required_skills=["Python"],
+                adjacent_required_skills=["PySpark"],
                 missing_required_skills=[],
                 covered_preferred_skills=[],
+                adjacent_preferred_skills=["JavaScript"],
                 missing_preferred_skills=["TypeScript"],
                 rationale="Potential fit with minor gaps.",
+                fallback_used=True,
+                confidence_label="medium",
                 provider="openai",
                 model="gpt-4o",
                 version="fit-v1",
@@ -375,6 +379,10 @@ class TestGetJob:
         assert analysis is not None
         assert analysis["fit_score"] == 55
         assert analysis["recommendation"] == "maybe"
+        assert analysis["adjacent_required_skills"] == ["PySpark"]
+        assert analysis["adjacent_preferred_skills"] == ["JavaScript"]
+        assert analysis["fallback_used"] is True
+        assert analysis["confidence_label"] == "medium"
 
     def test_get_job_includes_latest_desirability(self, client, db, sample_role, sample_skills):
         db.add(
@@ -389,6 +397,7 @@ class TestGetJob:
                         "weight": 0.5,
                         "score": 7,
                         "reasoning": "Positive culture evidence.",
+                        "fallback_used": False,
                     },
                     {
                         "factor_id": 2,
@@ -396,8 +405,12 @@ class TestGetJob:
                         "weight": 0.5,
                         "score": 6,
                         "reasoning": "Solid but mixed external brand signals.",
+                        "fallback_used": True,
                     },
                 ],
+                score_scope="company",
+                fallback_used=True,
+                cache_expires_at=datetime.now(UTC).replace(tzinfo=None) + timedelta(days=7),
                 provider="openai",
                 model="gpt-4o",
                 version="desirability-v1",
@@ -411,6 +424,10 @@ class TestGetJob:
         assert payload is not None
         assert payload["total_score"] == pytest.approx(6.9)
         assert len(payload["factor_breakdown"]) == 2
+        assert payload["score_scope"] == "company"
+        assert payload["fallback_used"] is True
+        assert payload["is_stale"] is False
+        assert payload["factor_breakdown"][1]["fallback_used"] is True
 
     def test_get_job_includes_status_history(self, client, db, sample_role):
         db.add(
@@ -904,8 +921,10 @@ class TestFitAnalysis:
             fit_score=81,
             recommendation="go",
             covered_required_skills=["Python"],
+            adjacent_required_skills=["PySpark"],
             missing_required_skills=[],
             covered_preferred_skills=["FastAPI"],
+            adjacent_preferred_skills=["TypeScript"],
             missing_preferred_skills=[],
             rationale="Strong fit.",
             rationale_citations=[
@@ -919,6 +938,8 @@ class TestFitAnalysis:
                 }
             ],
             unsupported_claims=["No direct Kubernetes ownership evidence"],
+            fallback_used=True,
+            confidence_label="medium",
             provider="openai",
             model="gpt-4o",
             version="fit-v1",
@@ -935,6 +956,10 @@ class TestFitAnalysis:
         assert len(data["rationale_citations"]) == 1
         assert data["rationale_citations"][0]["source_record_id"] == "resume.md"
         assert data["unsupported_claims"] == ["No direct Kubernetes ownership evidence"]
+        assert data["adjacent_required_skills"] == ["PySpark"]
+        assert data["adjacent_preferred_skills"] == ["TypeScript"]
+        assert data["fallback_used"] is True
+        assert data["confidence_label"] == "medium"
 
     def test_fit_analysis_malformed_model_output_returns_422(
         self, client, sample_role, sample_skills
@@ -966,7 +991,7 @@ class TestDesirabilityScoring:
 
         with patch(
             "backend.services.desirability_scorer.DesirabilityScoringService._score_factor_async",
-            new=AsyncMock(return_value=(8, "Great culture signal.")),
+            new=AsyncMock(return_value=(8, "Great culture signal.", False)),
         ):
             response = client.post(f"/api/jobs/{sample_role.id}/desirability-score")
 
@@ -975,6 +1000,9 @@ class TestDesirabilityScoring:
         assert data["role_id"] == sample_role.id
         assert data["total_score"] == pytest.approx(8.0)
         assert data["version"] == "desirability-v1"
+        assert data["score_scope"] == "company"
+        assert data["fallback_used"] is False
+        assert data["is_stale"] is False
 
     def test_refresh_desirability_recomputes(self, client, db, sample_role):
         db.add(
@@ -1009,7 +1037,7 @@ class TestDesirabilityScoring:
 
         with patch(
             "backend.services.desirability_scorer.DesirabilityScoringService._score_factor_async",
-            new=AsyncMock(return_value=(9, "Refreshed score.")),
+            new=AsyncMock(return_value=(9, "Refreshed score.", False)),
         ):
             response = client.post(f"/api/jobs/{sample_role.id}/desirability-score/refresh")
 
@@ -1044,7 +1072,7 @@ class TestDesirabilityScoring:
 
         with patch(
             "backend.services.desirability_scorer.DesirabilityScoringService._score_factor_async",
-            new=AsyncMock(return_value=(7, "Shared company signal.")),
+            new=AsyncMock(return_value=(7, "Shared company signal.", False)),
         ):
             first = client.post(f"/api/jobs/{sample_role.id}/desirability-score")
         assert first.status_code == 200
@@ -1075,6 +1103,7 @@ class TestApplicationMaterials:
 
     def test_generate_cover_letter_success(self, client, sample_role):
         fake_material = self._material_result(sample_role.id, artifact_type="cover_letter")
+        fake_material.fallback_used = True
 
         with (
             patch(
@@ -1092,6 +1121,7 @@ class TestApplicationMaterials:
         data = response.json()
         assert data["artifact_type"] == "cover_letter"
         assert data["content"] == "Dear hiring manager..."
+        assert data["fallback_used"] is True
 
     def test_generate_cover_letter_includes_traceability_fields(self, client, sample_role):
         fake_material = self._material_result(sample_role.id, artifact_type="cover_letter")
@@ -1112,6 +1142,7 @@ class TestApplicationMaterials:
             }
         ]
         fake_material.unsupported_claims = ["Leadership scope not fully evidenced"]
+        fake_material.fallback_used = False
 
         with (
             patch(
@@ -1129,6 +1160,7 @@ class TestApplicationMaterials:
         data = response.json()
         assert data["section_traceability"][0]["section_key"] == "intro"
         assert data["unsupported_claims"] == ["Leadership scope not fully evidenced"]
+        assert data["fallback_used"] is False
 
     def test_generate_cover_letter_validation_failure(self, client, sample_role):
         with patch(
@@ -1224,6 +1256,7 @@ class TestApplicationMaterials:
             provider="openai",
             model="gpt-4o",
             prompt_version="interview-prep-pack-v1",
+            fallback_used=True,
             created_at=datetime.now(UTC),
         )
 
@@ -1237,6 +1270,7 @@ class TestApplicationMaterials:
         payload = response.json()
         assert payload["artifact_type"] == "interview_prep_pack"
         assert payload["sections"]["likely_questions"] == ["Why this role?"]
+        assert payload["fallback_used"] is True
 
     def test_list_interview_prep_pack_versions(self, client, sample_role):
         v2 = SimpleNamespace(
@@ -1382,6 +1416,7 @@ class TestApplicationMaterials:
             provider="openai",
             model="gpt-4o",
             prompt_version="resume-tuning-v1",
+            fallback_used=True,
             created_at=datetime.now(UTC),
         )
 
@@ -1395,6 +1430,7 @@ class TestApplicationMaterials:
         payload = response.json()
         assert payload["artifact_type"] == "resume_tuning"
         assert payload["sections"]["missing_keywords"] == ["fastapi", "observability"]
+        assert payload["fallback_used"] is True
 
     def test_list_resume_tuning_versions(self, client, sample_role):
         v2 = SimpleNamespace(

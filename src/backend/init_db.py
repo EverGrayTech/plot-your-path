@@ -17,6 +17,8 @@ def _add_missing_columns(
 ) -> list[str]:
     """Add the provided columns to a table when they are missing."""
     inspector = inspect(bind)
+    if not inspector.has_table(table_name):
+        return []
     existing_columns = {column["name"] for column in inspector.get_columns(table_name)}
     added_columns: list[str] = []
 
@@ -41,8 +43,12 @@ def _migrate_prototype_schema(bind: Engine) -> list[str]:
             bind,
             "role_fit_analyses",
             (
+                "adjacent_required_skills JSON NOT NULL DEFAULT '[]'",
+                "adjacent_preferred_skills JSON NOT NULL DEFAULT '[]'",
                 "rationale_citations JSON NOT NULL DEFAULT '[]'",
                 "unsupported_claims JSON NOT NULL DEFAULT '[]'",
+                "fallback_used BOOLEAN NOT NULL DEFAULT 0",
+                "confidence_label VARCHAR NOT NULL DEFAULT 'high'",
             ),
         )
     )
@@ -55,9 +61,35 @@ def _migrate_prototype_schema(bind: Engine) -> list[str]:
                 "sections JSON",
                 "section_traceability JSON NOT NULL DEFAULT '[]'",
                 "unsupported_claims JSON NOT NULL DEFAULT '[]'",
+                "fallback_used BOOLEAN NOT NULL DEFAULT 0",
             ),
         )
     )
+    migrated_columns.extend(
+        f"desirability_score_results.{column_name}"
+        for column_name in _add_missing_columns(
+            bind,
+            "desirability_score_results",
+            (
+                "score_scope VARCHAR NOT NULL DEFAULT 'company'",
+                "fallback_used BOOLEAN NOT NULL DEFAULT 0",
+                "cache_expires_at DATETIME",
+            ),
+        )
+    )
+
+    inspector = inspect(bind)
+    if inspector.has_table("desirability_score_results"):
+        with bind.begin() as connection:
+            connection.execute(
+                text(
+                    """
+                    UPDATE desirability_score_results
+                    SET cache_expires_at = COALESCE(cache_expires_at, created_at)
+                    WHERE cache_expires_at IS NULL
+                    """
+                )
+            )
 
     return migrated_columns
 

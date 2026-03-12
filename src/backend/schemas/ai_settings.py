@@ -12,6 +12,7 @@ class OperationFamily(StrEnum):
     JOB_PARSING = "job_parsing"
     DESIRABILITY_SCORING = "desirability_scoring"
     APPLICATION_GENERATION = "application_generation"
+    FIT_ANALYSIS = "fit_analysis"
 
 
 class AISetting(BaseModel):

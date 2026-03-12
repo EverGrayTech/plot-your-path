@@ -80,25 +80,25 @@ Refactor direction:
 ## Implementation Steps
 
 ### 1. Fit logic review
-- [ ] Define the target matching semantics for required and preferred skills.
-- [ ] Replace substring-only heuristics with more structured evidence matching rules.
-- [ ] Revisit recommendation thresholds if improved matching changes score distribution.
+- [x] Define the target matching semantics for required and preferred skills.
+- [x] Replace substring-only heuristics with more structured evidence matching rules.
+- [x] Revisit recommendation thresholds if improved matching changes score distribution.
 
 ### 2. Desirability semantics review
-- [ ] Decide the canonical scope of desirability scores.
-- [ ] Align persistence, retrieval, refresh, and UI labeling with that scope.
+- [x] Decide the canonical scope of desirability scores.
+- [x] Align persistence, retrieval, refresh, and UI labeling with that scope.
 
 ### 3. AI operation-family alignment
-- [ ] Review all AI-backed workflows against current operation-family usage.
-- [ ] Introduce clearer configuration boundaries only where justified.
+- [x] Review all AI-backed workflows against current operation-family usage.
+- [x] Introduce clearer configuration boundaries only where justified.
 
 ### 4. Fallback transparency
-- [ ] Define which workflows allow silent fallback and which require explicit degraded-state visibility.
-- [ ] Surface provenance and confidence appropriately in persisted results and APIs.
+- [x] Define which workflows allow silent fallback and which require explicit degraded-state visibility.
+- [x] Surface provenance and confidence appropriately in persisted results and APIs.
 
 ### 5. Domain-focused testing
-- [ ] Add regression tests for matching edge cases and scoring semantics.
-- [ ] Add tests for fallback provenance and stale-score behavior.
+- [x] Add regression tests for matching edge cases and scoring semantics.
+- [x] Add tests for fallback provenance and stale-score behavior.
 
 ---
 
@@ -114,8 +114,8 @@ Refactor direction:
 
 ## Success Criteria
 
-- [ ] Fit analysis is based on stronger evidence semantics than raw substring matching alone.
-- [ ] Desirability score meaning and cache scope are explicit and consistent.
-- [ ] AI configuration families align with actual workflow responsibilities.
-- [ ] Fallback-generated outputs are handled with clearer provenance rules.
-- [ ] Tests validate decision-quality edge cases, not just happy-path persistence.
+- [x] Fit analysis is based on stronger evidence semantics than raw substring matching alone.
+- [x] Desirability score meaning and cache scope are explicit and consistent.
+- [x] AI configuration families align with actual workflow responsibilities.
+- [x] Fallback-generated outputs are handled with clearer provenance rules.
+- [x] Tests validate decision-quality edge cases, not just happy-path persistence.

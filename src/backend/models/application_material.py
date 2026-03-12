@@ -1,6 +1,6 @@
 """Application material persistence model."""
 
-from sqlalchemy import JSON, Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy import JSON, Boolean, Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.sql import func
 
 from backend.database import Base
@@ -20,6 +20,7 @@ class ApplicationMaterial(Base):
     sections = Column(JSON, nullable=True)
     section_traceability = Column(JSON, nullable=False, default=list)
     unsupported_claims = Column(JSON, nullable=False, default=list)
+    fallback_used = Column(Boolean, nullable=False, default=False)
     provider = Column(String, nullable=False)
     model = Column(String, nullable=False)
     prompt_version = Column(String, nullable=False)

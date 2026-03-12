@@ -117,10 +117,13 @@ class JobQueryService:
         return self._first_by_key(rows, lambda row: row.company_id)
 
     def _latest_desirability_for_role(self, role_id: int) -> DesirabilityScoreResult | None:
-        """Load the latest desirability score for one role."""
+        """Load the latest company-scoped desirability score for one role."""
+        role = self.db.query(Role).filter(Role.id == role_id).first()
+        if role is None:
+            return None
         return (
             self.db.query(DesirabilityScoreResult)
-            .filter(DesirabilityScoreResult.role_id == role_id)
+            .filter(DesirabilityScoreResult.company_id == role.company_id)
             .order_by(
                 DesirabilityScoreResult.created_at.desc(),
                 DesirabilityScoreResult.id.desc(),

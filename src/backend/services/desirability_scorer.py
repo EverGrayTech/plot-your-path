@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from datetime import timedelta
 from typing import Any, cast
 
 from sqlalchemy.orm import Session
@@ -16,8 +17,11 @@ from backend.schemas.ai_settings import OperationFamily
 from backend.services.ai_settings import AISettingsService
 from backend.services.llm_service import LLMError, LLMService
 from backend.utils.async_utils import run_async_task
+from backend.utils.time import utc_now_naive
 
 DESIRABILITY_VERSION = "desirability-v1"
+DESIRABILITY_CACHE_TTL_DAYS = 30
+DESIRABILITY_SCORE_SCOPE = "company"
 
 DEFAULT_FACTORS: list[dict[str, object]] = [
     {
@@ -114,7 +118,7 @@ class DesirabilityScoringService:
         self,
         company: Company,
         factor: DesirabilityFactorConfig,
-    ) -> tuple[int, str]:
+    ) -> tuple[int, str, bool]:
         fallback_score = self._build_fallback_factor_score(company, factor)
         fallback_reasoning = (
             f"Fallback heuristic score for {factor.name} due to unavailable model response."
@@ -133,9 +137,21 @@ class DesirabilityScoringService:
             reasoning = self._clean_reasoning(str(payload.get("reasoning", "")))
             if not reasoning:
                 reasoning = fallback_reasoning
-            return score, reasoning
+            return score, reasoning, False
         except (json.JSONDecodeError, KeyError, LLMError, TypeError, ValueError):
-            return fallback_score, fallback_reasoning
+            return fallback_score, fallback_reasoning, True
+
+    @staticmethod
+    def _cache_expires_at(created_at) -> Any:
+        """Compute cache expiry from a score creation timestamp."""
+        return created_at + timedelta(days=DESIRABILITY_CACHE_TTL_DAYS)
+
+    def _is_stale(self, result: DesirabilityScoreResult) -> bool:
+        """Determine whether a cached desirability score is stale."""
+        cache_expires_at = cast(Any, result.cache_expires_at)
+        if cache_expires_at is None:
+            return True
+        return cache_expires_at <= utc_now_naive()
 
     def create_factor(
         self,
@@ -204,7 +220,7 @@ class DesirabilityScoringService:
 
         if not force_refresh:
             latest = self.get_latest_for_company(int(cast(Any, role.company_id)))
-            if latest is not None:
+            if latest is not None and not self._is_stale(latest):
                 return latest
 
         company = (
@@ -228,10 +244,17 @@ class DesirabilityScoringService:
 
         breakdown: list[dict[str, object]] = []
         weighted_total = 0.0
+        fallback_used = False
         for index, factor in enumerate(factors):
-            factor_score, reasoning = scores[index]
+            raw_score = scores[index]
+            if len(raw_score) == 2:
+                factor_score, reasoning = raw_score
+                factor_fallback_used = False
+            else:
+                factor_score, reasoning, factor_fallback_used = raw_score
             normalized_weight = normalized_weights[index]
             weighted_total += factor_score * normalized_weight
+            fallback_used = fallback_used or factor_fallback_used
             breakdown.append(
                 {
                     "factor_id": factor.id,
@@ -239,14 +262,20 @@ class DesirabilityScoringService:
                     "weight": round(normalized_weight, 6),
                     "score": factor_score,
                     "reasoning": reasoning,
+                    "fallback_used": factor_fallback_used,
                 }
             )
+
+        cache_expires_at = utc_now_naive() + timedelta(days=DESIRABILITY_CACHE_TTL_DAYS)
 
         result = DesirabilityScoreResult(
             company_id=company.id,
             role_id=role_id,
             total_score=round(weighted_total, 2),
             factor_breakdown=breakdown,
+            score_scope=DESIRABILITY_SCORE_SCOPE,
+            fallback_used=fallback_used,
+            cache_expires_at=cache_expires_at,
             provider=self.llm_service.config.provider,
             model=self.llm_service.config.model,
             version=DESIRABILITY_VERSION,

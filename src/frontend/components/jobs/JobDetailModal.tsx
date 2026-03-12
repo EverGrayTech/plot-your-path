@@ -123,6 +123,10 @@ function materialLabel(material: ApplicationMaterial): string {
   return material.artifact_type;
 }
 
+function fallbackLabel(fallbackUsed: boolean | undefined): string {
+  return fallbackUsed ? "Fallback output" : "Model output";
+}
+
 export function JobDetailModal({
   analyzingFit,
   applicationMaterials,
@@ -222,6 +226,12 @@ export function JobDetailModal({
     interviewPrepPacks.find((item) => item.id === selectedInterviewPrepId) ?? null;
   const selectedResumeTuning =
     resumeTuningSuggestions.find((item) => item.id === selectedResumeTuningId) ?? null;
+  const adjacentFitEvidence = job?.latest_fit_analysis
+    ? [
+        ...(job.latest_fit_analysis.adjacent_required_skills ?? []),
+        ...(job.latest_fit_analysis.adjacent_preferred_skills ?? []),
+      ]
+    : [];
 
   return (
     <Modal onClose={onClose} title="Job Detail">
@@ -390,6 +400,9 @@ export function JobDetailModal({
                   <strong>Fit score:</strong> {job.latest_fit_analysis.fit_score}%
                 </p>
                 <p>
+                  <strong>Confidence:</strong> {job.latest_fit_analysis.confidence_label ?? "high"}
+                </p>
+                <p>
                   <strong>Strengths:</strong>{" "}
                   {job.latest_fit_analysis.covered_required_skills.concat(
                     job.latest_fit_analysis.covered_preferred_skills,
@@ -399,6 +412,11 @@ export function JobDetailModal({
                         .join(", ")
                     : "None identified"}
                 </p>
+                {adjacentFitEvidence.length ? (
+                  <p>
+                    <strong>Adjacent evidence:</strong> {adjacentFitEvidence.join(", ")}
+                  </p>
+                ) : null}
                 <p>
                   <strong>Gaps:</strong>{" "}
                   {job.latest_fit_analysis.missing_required_skills.concat(
@@ -435,7 +453,8 @@ export function JobDetailModal({
                 <p>
                   <small>
                     Generated {new Date(job.latest_fit_analysis.created_at).toLocaleString()} with{" "}
-                    {job.latest_fit_analysis.provider}/{job.latest_fit_analysis.model}
+                    {job.latest_fit_analysis.provider}/{job.latest_fit_analysis.model} ·{" "}
+                    {fallbackLabel(job.latest_fit_analysis.fallback_used)}
                   </small>
                 </p>
               </div>
@@ -468,11 +487,24 @@ export function JobDetailModal({
                   <strong>Total:</strong> {job.latest_desirability_score.total_score.toFixed(2)} /
                   10
                 </p>
+                <p>
+                  <strong>Scope:</strong> {job.latest_desirability_score.score_scope} ·{" "}
+                  <strong>Status:</strong>{" "}
+                  {job.latest_desirability_score.is_stale ? "Stale" : "Fresh"}
+                </p>
+                <p>
+                  <strong>Cached until:</strong>{" "}
+                  {new Date(job.latest_desirability_score.cache_expires_at).toLocaleString()}
+                  {job.latest_desirability_score.fallback_used
+                    ? " · Includes fallback factors"
+                    : ""}
+                </p>
                 <ul>
                   {job.latest_desirability_score.factor_breakdown.map((factor) => (
                     <li key={factor.factor_id}>
                       <strong>{factor.factor_name}</strong> — score {factor.score}/10, weight{" "}
                       {(factor.weight * 100).toFixed(1)}% — {factor.reasoning}
+                      {factor.fallback_used ? " (fallback)" : ""}
                     </li>
                   ))}
                 </ul>
@@ -593,7 +625,7 @@ export function JobDetailModal({
                     </p>
                     <p>
                       <strong>Generated with:</strong> {selectedMaterial.provider}/
-                      {selectedMaterial.model}
+                      {selectedMaterial.model} · {fallbackLabel(selectedMaterial.fallback_used)}
                     </p>
                     <pre
                       style={{
@@ -654,7 +686,8 @@ export function JobDetailModal({
                   >
                     <p>
                       <strong>Generated with:</strong> {selectedInterviewPrepPack.provider}/
-                      {selectedInterviewPrepPack.model}
+                      {selectedInterviewPrepPack.model} ·{" "}
+                      {fallbackLabel(selectedInterviewPrepPack.fallback_used)}
                     </p>
                     <div style={{ display: "grid", gap: "0.5rem" }}>
                       <label style={{ display: "grid", gap: "0.25rem" }}>
@@ -794,7 +827,8 @@ export function JobDetailModal({
                   >
                     <p>
                       <strong>Generated with:</strong> {selectedResumeTuning.provider}/
-                      {selectedResumeTuning.model}
+                      {selectedResumeTuning.model} ·{" "}
+                      {fallbackLabel(selectedResumeTuning.fallback_used)}
                     </p>
                     {[
                       ["Keep Bullets", selectedResumeTuning.sections.keep_bullets],
