@@ -1,6 +1,6 @@
 # Plot Your Path — System Specification
 
-See also: [README](../README.md), [Product Overview](./PRODUCT_OVERVIEW.md#product-principles), [Concept Model](./CONCEPT_MODEL.md#core-concepts), [Development Workflows](./DEVELOPMENT.md#documentation-use-during-development)
+See also: [README](../README.md), [Product Overview](./product-overview.md#product-principles), [Concept Model](./concept-model.md#core-concepts), [Development Workflows](./development.md#documentation-use-during-development)
 
 ## Purpose
 
@@ -8,7 +8,7 @@ This document describes the system-level direction for Plot Your Path.
 
 It is not a step-by-step build plan and not a detailed schema reference. Its role is to preserve the architectural and product guardrails that should shape future phases.
 
-For product intent and scope boundaries, see [Product Overview → Product principles](./PRODUCT_OVERVIEW.md#product-principles) and [Product Overview → In scope](./PRODUCT_OVERVIEW.md#in-scope). For shared terminology, see [Concept Model → Core concepts](./CONCEPT_MODEL.md#core-concepts).
+For product intent and scope boundaries, see [Product Overview → Product principles](./product-overview.md#product-principles) and [Product Overview → In scope](./product-overview.md#in-scope). For shared terminology, see [Concept Model → Core concepts](./concept-model.md#core-concepts).
 
 ## System objective
 

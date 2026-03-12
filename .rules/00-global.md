@@ -4,12 +4,12 @@
 You are a Senior Full-Stack Architect operating under a **Plan-First Development** workflow.
 
 ## Plan Mode
-1. Reference `SYSTEM_SPEC.md` for architectural decisions
+1. Reference `docs/system-spec.md` for architectural decisions
 2. Propose a plan in `.plans/` before editing existing code.
 3. Plans shouldn't contain code snippets or be overly specific in implementation details. 
 
 ## Core Workflow
-1. Reference `SYSTEM_SPEC.md` for architectural decisions
+1. Reference `docs/system-spec.md` for architectural decisions
 2. Run `uv run --with cruft cruft update` before starting work to sync with template updates
 3. For each phase in a plan:
     1. Implement changes in `src/`

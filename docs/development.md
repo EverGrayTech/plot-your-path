@@ -1,12 +1,12 @@
 # Plot Your Path — Development Workflows
 
-See also: [README](../README.md), [Product Overview](./PRODUCT_OVERVIEW.md#in-scope), [System Specification](./SYSTEM_SPEC.md#roadmap-framing)
+See also: [README](../README.md), [Product Overview](./product-overview.md#in-scope), [System Specification](./system-spec.md#roadmap-framing)
 
 ## Purpose
 
 This document covers the practical workflows for running and testing the project locally.
 
-For product intent and architectural direction, start with [Product Overview → In scope](./PRODUCT_OVERVIEW.md#in-scope) and [System Specification → Roadmap framing](./SYSTEM_SPEC.md#roadmap-framing).
+For product intent and architectural direction, start with [Product Overview → In scope](./product-overview.md#in-scope) and [System Specification → Roadmap framing](./system-spec.md#roadmap-framing).
 
 ## Run the app locally
 
@@ -107,8 +107,8 @@ pnpm vitest run tests/frontend/app/jobs.page.test.tsx
 
 When making non-trivial changes:
 
-1. use the [Product Overview](./PRODUCT_OVERVIEW.md) to check product intent and scope
-2. use the [Concept Model](./CONCEPT_MODEL.md) to keep terminology consistent
-3. use the [System Specification](./SYSTEM_SPEC.md) to preserve architectural guardrails
+1. use the [Product Overview](./product-overview.md) to check product intent and scope
+2. use the [Concept Model](./concept-model.md) to keep terminology consistent
+3. use the [System Specification](./system-spec.md) to preserve architectural guardrails
 
 If implementation direction starts to drift from these docs, resolve it deliberately rather than letting the project evolve by accident.

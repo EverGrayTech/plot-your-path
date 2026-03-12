@@ -2,7 +2,7 @@
 
 ## Overview
 
-A code review against `SYSTEM_SPEC.md`, the existing implementation plans, and current backend code found several **high-impact debt items** that should be addressed before continuing toward later phases (frontend build-out, scoring engine, and agent orchestration).
+A code review against `docs/system-spec.md`, the existing implementation plans, and current backend code found several **high-impact debt items** that should be addressed before continuing toward later phases (frontend build-out, scoring engine, and agent orchestration).
 
 The objective is to reduce divergence risk, enforce backend async/IO standards, and stabilize persistence behavior.
 

@@ -75,10 +75,10 @@ The project aims to be:
 
 The documentation is intentionally split by purpose:
 
-- [`docs/PRODUCT_OVERVIEW.md`](docs/PRODUCT_OVERVIEW.md) — product goals, design principles, user journey, and scope
-- [`docs/CONCEPT_MODEL.md`](docs/CONCEPT_MODEL.md) — shared conceptual language and core entities
-- [`docs/SYSTEM_SPEC.md`](docs/SYSTEM_SPEC.md) — system-level boundaries, architectural direction, and product guardrails
-- [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) — local development and testing workflows
+- [Product Overview](docs/product-overview.md) — product goals, design principles, user journey, and scope
+- [Concept Model](docs/concept-model.md) — shared conceptual language and core entities
+- [System Spec](docs/system-spec.md) — system-level boundaries, architectural direction, and product guardrails
+- [Development](docs/development.md) — local development and testing workflows
 
 If you are new to the project, read them in that order.
 
@@ -98,9 +98,9 @@ That is a deliberate scope boundary. The vision is broader than a tracker, but n
 
 Before proposing major product or architecture changes, review:
 
-1. [`docs/PRODUCT_OVERVIEW.md`](docs/PRODUCT_OVERVIEW.md)
-2. [`docs/CONCEPT_MODEL.md`](docs/CONCEPT_MODEL.md)
-3. [`docs/SYSTEM_SPEC.md`](docs/SYSTEM_SPEC.md)
+1. [Product Overview](docs/product-overview.md)
+2. [Concept Model](docs/concept-model.md)
+3. [System Spec](docs/system-spec.md)
 
 These documents are intended to guide future phases of the project.
 

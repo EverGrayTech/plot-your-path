@@ -1,6 +1,6 @@
 # Plot Your Path — Concept Model
 
-See also: [README](../README.md), [Product Overview](./PRODUCT_OVERVIEW.md#core-user-journey), [System Specification](./SYSTEM_SPEC.md#major-capability-areas)
+See also: [README](../README.md), [Product Overview](./product-overview.md#core-user-journey), [System Specification](./system-spec.md#major-capability-areas)
 
 ## Purpose
 
@@ -8,7 +8,7 @@ This document defines the shared conceptual language of Plot Your Path.
 
 It is intentionally product-level rather than implementation-level. The goal is to give contributors a stable mental model for discussing features, workflows, and future phases without tying the language too tightly to a specific schema or UI.
 
-For how these concepts show up in the user experience, see [Product Overview → Core user journey](./PRODUCT_OVERVIEW.md#core-user-journey). For how they should shape the system, see [System Specification → Major capability areas](./SYSTEM_SPEC.md#major-capability-areas).
+For how these concepts show up in the user experience, see [Product Overview → Core user journey](./product-overview.md#core-user-journey). For how they should shape the system, see [System Specification → Major capability areas](./system-spec.md#major-capability-areas).
 
 ## System view
 
