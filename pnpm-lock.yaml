@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@evergraytech/design-system':
+        specifier: ^0.1.0
+        version: 0.1.0
       next:
         specifier: ^15.0.0
         version: 15.5.12(@babel/core@7.29.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -396,6 +399,9 @@ packages:
     engines: {node: '>=12'}
     cpu: [x64]
     os: [win32]
+
+  '@evergraytech/design-system@0.1.0':
+    resolution: {integrity: sha512-pMEmLtKDUS7HznrQAsGF0rrMTnYXevR323tyTWbssGQyYR4N/H8SRQgCS1rdcMb2SmHH83IRvjnPus1Qb0cZ/w==, tarball: https://npm.pkg.github.com/download/@evergraytech/design-system/0.1.0/821b4e96381595d36bb35b7fc0fe419437af6d09}
 
   '@exodus/bytes@1.15.0':
     resolution: {integrity: sha512-UY0nlA+feH81UGSHv92sLEPLCeZFjXOuHhrIo0HQydScuQc8s0A7kL/UdgwgDq8g8ilksmuoF35YVTNphV2aBQ==}
@@ -1819,6 +1825,8 @@ snapshots:
 
   '@esbuild/win32-x64@0.21.5':
     optional: true
+
+  '@evergraytech/design-system@0.1.0': {}
 
   '@exodus/bytes@1.15.0': {}
 
