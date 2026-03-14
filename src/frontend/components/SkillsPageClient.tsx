@@ -156,10 +156,27 @@ export function SkillsPageClient() {
         </label>
       </div>
 
-      {loadingSkills ? <p>Loading skills...</p> : null}
-      {skillsError ? <p role="alert">{skillsError}</p> : null}
+      {loadingSkills ? (
+        <div className="spinner-center" aria-label="Loading skills">
+          <span className="spinner" />
+        </div>
+      ) : null}
+      {skillsError ? (
+        <div className="alert alert-error" role="alert">
+          {skillsError}
+        </div>
+      ) : null}
 
-      {!loadingSkills && !skillsError ? (
+      {!loadingSkills && !skillsError && sortedSkills.length === 0 ? (
+        <div className="empty-state">
+          <p className="empty-state-title">No skills captured yet</p>
+          <p className="empty-state-description">
+            Skills are extracted automatically when jobs are captured.
+          </p>
+        </div>
+      ) : null}
+
+      {!loadingSkills && !skillsError && sortedSkills.length > 0 ? (
         <ul className="list-unstyled">
           {sortedSkills.map((skill) => (
             <li key={skill.id}>

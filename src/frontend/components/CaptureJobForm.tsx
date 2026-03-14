@@ -7,10 +7,10 @@ import { ApiError, type JobScrapeResponse, scrapeJob } from "../lib/api";
 type Phase = "idle" | "submitting" | "success" | "error";
 
 const progressSteps = [
-  "Validating URL...",
-  "Scraping job posting...",
-  "Parsing job details...",
-  "Saving role and skills...",
+  "Validating URL",
+  "Scraping job posting",
+  "Parsing job details",
+  "Saving role and skills",
 ];
 
 interface CaptureJobFormProps {
@@ -89,8 +89,8 @@ export function CaptureJobForm({ onCaptured }: CaptureJobFormProps) {
     <section>
       {phase !== "success" ? (
         <form className="form-grid" onSubmit={handleSubmit}>
-          <label className="form-label" htmlFor="job-url">
-            Job URL
+          <div className="form-label">
+            <label htmlFor="job-url">Job URL</label>
             <input
               className="form-input"
               id="job-url"
@@ -101,11 +101,14 @@ export function CaptureJobForm({ onCaptured }: CaptureJobFormProps) {
               type="url"
               value={url}
             />
-          </label>
+            <span className="form-helper">
+              Paste the full URL of the job posting you want to capture.
+            </span>
+          </div>
 
           {needsFallbackText ? (
-            <label className="form-label" htmlFor="fallback-text">
-              Pasted job description text
+            <div className="form-label">
+              <label htmlFor="fallback-text">Pasted job description text</label>
               <textarea
                 className="form-textarea"
                 id="fallback-text"
@@ -115,32 +118,53 @@ export function CaptureJobForm({ onCaptured }: CaptureJobFormProps) {
                 rows={8}
                 value={jobText}
               />
-            </label>
+              <span className="form-helper">
+                The URL could not be scraped automatically. Paste the full job description text so
+                it can be parsed directly.
+              </span>
+            </div>
           ) : null}
 
           <div>
-            <button className="btn btn-primary" disabled={submitDisabled} type="submit">
-              {needsFallbackText ? "Submit with pasted text" : "Capture job"}
+            <button
+              className={`btn btn-primary${phase === "submitting" ? " btn-loading" : ""}`}
+              disabled={submitDisabled}
+              type="submit"
+            >
+              {phase === "submitting"
+                ? "Capturing"
+                : needsFallbackText
+                  ? "Submit with pasted text"
+                  : "Capture job"}
             </button>
           </div>
         </form>
       ) : null}
 
-      {phase === "submitting" ? <p aria-live="polite">{progressSteps[progressIndex]}</p> : null}
+      {phase === "submitting" ? (
+        <p className="page-description mt-md" aria-live="polite">
+          {progressSteps[progressIndex]}…
+        </p>
+      ) : null}
 
       {errorMessage ? (
-        <p role="alert" aria-live="assertive">
-          {errorMessage}
-        </p>
+        <div className="alert alert-error mt-md" role="alert" aria-live="assertive">
+          <strong>Capture failed</strong>
+          <p>{errorMessage}</p>
+          {!needsFallbackText ? (
+            <p className="form-helper">Check that the URL is correct and try again.</p>
+          ) : null}
+        </div>
       ) : null}
 
       {phase === "success" && result ? (
         <output aria-live="polite">
-          <p>
-            Captured <strong>{result.title}</strong> at <strong>{result.company}</strong>.
-          </p>
-          <p>Role ID: {result.role_id}</p>
-          <button className="btn btn-secondary" onClick={resetForm} type="button">
+          <div className="alert alert-success mt-md">
+            <p>
+              Role captured: <strong>{result.title}</strong> at <strong>{result.company}</strong>.
+            </p>
+          </div>
+          <button className="btn btn-secondary mt-md" onClick={resetForm} type="button">
             Capture another job
           </button>
         </output>
