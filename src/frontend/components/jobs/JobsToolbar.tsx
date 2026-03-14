@@ -37,45 +37,35 @@ export function JobsToolbar({
 }: JobsToolbarProps) {
   return (
     <>
-      <header
-        style={{
-          alignItems: "center",
-          display: "flex",
-          justifyContent: "space-between",
-          marginBottom: "1rem",
-        }}
-      >
-        <h1 style={{ margin: 0 }}>Jobs</h1>
-        <button onClick={onOpenCapture} type="button">
-          Add Job
-        </button>
-        <button onClick={onOpenPipeline} type="button">
-          Pipeline
-        </button>
-        <button onClick={onOpenOutcomeInsights} type="button">
-          Outcome Insights
-        </button>
-        <button onClick={onOpenFactorSettings} type="button">
-          Factor Settings
-        </button>
-        <button onClick={onOpenAISettings} type="button">
-          AI Settings
-        </button>
+      <header className="toolbar-header">
+        <h1>Jobs</h1>
+        <div className="toolbar-actions">
+          <button className="btn btn-primary" onClick={onOpenCapture} type="button">
+            Add Job
+          </button>
+          <button className="btn btn-secondary" onClick={onOpenPipeline} type="button">
+            Pipeline
+          </button>
+          <button className="btn btn-secondary" onClick={onOpenOutcomeInsights} type="button">
+            Outcome Insights
+          </button>
+          <button className="btn btn-secondary" onClick={onOpenFactorSettings} type="button">
+            Factor Settings
+          </button>
+          <button className="btn btn-secondary" onClick={onOpenAISettings} type="button">
+            AI Settings
+          </button>
+        </div>
       </header>
 
       <p>Capture and review roles from your job search.</p>
       <p>{smartSortDescription}</p>
 
-      <div
-        style={{
-          display: "grid",
-          gap: "0.75rem",
-          gridTemplateColumns: "2fr 1fr 1fr 1fr",
-        }}
-      >
-        <label style={{ display: "grid", gap: "0.25rem" }}>
+      <div className="form-grid-4col">
+        <label className="form-label">
           Search jobs
           <input
+            className="form-input"
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Search by company or title"
             type="search"
@@ -83,9 +73,10 @@ export function JobsToolbar({
           />
         </label>
 
-        <label style={{ display: "grid", gap: "0.25rem" }}>
+        <label className="form-label">
           Sort jobs
           <select
+            className="form-select"
             onChange={(event) => setSortMode(event.target.value as SortMode)}
             value={sortMode}
           >
@@ -97,9 +88,10 @@ export function JobsToolbar({
           </select>
         </label>
 
-        <label style={{ display: "grid", gap: "0.25rem" }}>
+        <label className="form-label">
           Recommendation
           <select
+            className="form-select"
             onChange={(event) =>
               setRecommendationFilter(event.target.value as RecommendationFilter)
             }
@@ -113,9 +105,10 @@ export function JobsToolbar({
           </select>
         </label>
 
-        <label style={{ display: "grid", gap: "0.25rem" }}>
+        <label className="form-label">
           Desirability
           <select
+            className="form-select"
             onChange={(event) => setDesirabilityFilter(event.target.value as DesirabilityFilter)}
             value={desirabilityFilter}
           >

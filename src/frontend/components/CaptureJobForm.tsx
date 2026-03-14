@@ -88,36 +88,41 @@ export function CaptureJobForm({ onCaptured }: CaptureJobFormProps) {
   return (
     <section>
       {phase !== "success" ? (
-        <form onSubmit={handleSubmit}>
-          <label htmlFor="job-url">Job URL</label>
-          <input
-            id="job-url"
-            name="job-url"
-            type="url"
-            required
-            value={url}
-            onChange={(event) => setUrl(event.target.value)}
-            placeholder="https://..."
-          />
+        <form className="form-grid" onSubmit={handleSubmit}>
+          <label className="form-label" htmlFor="job-url">
+            Job URL
+            <input
+              className="form-input"
+              id="job-url"
+              name="job-url"
+              onChange={(event) => setUrl(event.target.value)}
+              placeholder="https://..."
+              required
+              type="url"
+              value={url}
+            />
+          </label>
 
           {needsFallbackText ? (
-            <>
-              <label htmlFor="fallback-text">Pasted job description text</label>
+            <label className="form-label" htmlFor="fallback-text">
+              Pasted job description text
               <textarea
+                className="form-textarea"
                 id="fallback-text"
                 name="fallback-text"
-                rows={8}
-                value={jobText}
                 onChange={(event) => setJobText(event.target.value)}
                 placeholder="Paste the full job description text here"
-                style={{ width: "100%", boxSizing: "border-box" }}
+                rows={8}
+                value={jobText}
               />
-            </>
+            </label>
           ) : null}
 
-          <button type="submit" disabled={submitDisabled}>
-            {needsFallbackText ? "Submit with pasted text" : "Capture job"}
-          </button>
+          <div>
+            <button className="btn btn-primary" disabled={submitDisabled} type="submit">
+              {needsFallbackText ? "Submit with pasted text" : "Capture job"}
+            </button>
+          </div>
         </form>
       ) : null}
 
@@ -135,7 +140,7 @@ export function CaptureJobForm({ onCaptured }: CaptureJobFormProps) {
             Captured <strong>{result.title}</strong> at <strong>{result.company}</strong>.
           </p>
           <p>Role ID: {result.role_id}</p>
-          <button type="button" onClick={resetForm}>
+          <button className="btn btn-secondary" onClick={resetForm} type="button">
             Capture another job
           </button>
         </output>

@@ -16,8 +16,8 @@ export function TraceabilityBlock({ traceability, unsupportedClaims }: Traceabil
   }
 
   return (
-    <div style={{ marginTop: "0.5rem" }}>
-      <h5 style={{ marginBottom: "0.25rem" }}>Evidence Traceability</h5>
+    <div className="mt-md">
+      <h5 className="mb-sm">Evidence Traceability</h5>
       {traces.length ? (
         <ul>
           {traces.map((trace) => (

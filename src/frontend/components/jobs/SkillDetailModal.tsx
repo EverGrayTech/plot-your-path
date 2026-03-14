@@ -33,11 +33,7 @@ export function SkillDetailModal({
           <ul>
             {skill.jobs.map((job) => (
               <li key={job.id}>
-                <button
-                  onClick={() => onOpenJob(job.id)}
-                  style={{ textAlign: "left" }}
-                  type="button"
-                >
+                <button className="link-btn" onClick={() => onOpenJob(job.id)} type="button">
                   {job.title} — {job.company}
                 </button>
               </li>

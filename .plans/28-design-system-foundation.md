@@ -98,28 +98,28 @@ Refactor direction:
 ## Implementation Steps
 
 ### 1. Connect the design system
-- [ ] Install `@evergraytech/design-system` via pnpm.
-- [ ] Import `dist/variables.css` in the Next.js root layout.
+- [x] Install `@evergraytech/design-system` via pnpm.
+- [x] Import `dist/variables.css` in the Next.js root layout.
 
 ### 2. Establish app-wide styling
-- [ ] Create `globals.css` using CSS variables for canvas, typography, spacing, and text defaults.
-- [ ] Replace root inline layout styling with the token-driven global styles.
-- [ ] Define default surface, navigation chrome, and workspace container rules per the app shell guidance.
+- [x] Create `globals.css` using CSS variables for canvas, typography, spacing, and text defaults.
+- [x] Replace root inline layout styling with the token-driven global styles.
+- [x] Define default surface, navigation chrome, and workspace container rules per the app shell guidance.
 
 ### 3. Create shared UI building blocks
-- [ ] Implement button variants (primary, secondary, tertiary, destructive) following the forms-and-action-controls guidance.
-- [ ] Implement input/textarea/select styling and state treatments per the forms guidance.
-- [ ] Implement card/panel and modal surface patterns per the data-dense and overlays guidance.
-- [ ] Implement label, helper text, and validation message patterns per the forms guidance.
-- [ ] Apply the shared styling approach to the highest-traffic existing components first.
+- [x] Implement button variants (primary, secondary, tertiary, destructive) following the forms-and-action-controls guidance.
+- [x] Implement input/textarea/select styling and state treatments per the forms guidance.
+- [x] Implement card/panel and modal surface patterns per the data-dense and overlays guidance.
+- [x] Implement label, helper text, and validation message patterns per the forms guidance.
+- [x] Apply the shared styling approach to the highest-traffic existing components first.
 
 ### 4. Audit and clean up duplicated values
-- [ ] Remove or reduce hardcoded foundational visual values across the frontend.
-- [ ] Document any temporary local overrides with `/* TODO: upstream to design system */` comments.
+- [x] Remove or reduce hardcoded foundational visual values across the frontend.
+- [x] Document any temporary local overrides with `/* TODO: upstream to design system */` comments.
 
 ### 5. Verify and document
-- [ ] Add or update tests where styling structure affects rendered semantics.
-- [ ] Add a design system consumption reference to `docs/development.md` pointing to the upstream consumption guide.
+- [x] Add or update tests where styling structure affects rendered semantics.
+- [x] Add a design system consumption reference to `docs/development.md` pointing to the upstream consumption guide.
 
 ## Affected Areas
 
@@ -132,9 +132,9 @@ Refactor direction:
 
 ## Success Criteria
 
-- [ ] The frontend imports and uses the `@evergraytech/design-system` package outputs via `dist/variables.css` and `dist/tokens.json`.
-- [ ] The application no longer depends on inline root styling for its visual baseline.
-- [ ] Foundational colors, spacing, radii, typography, and motion values come from design tokens.
-- [ ] Forms, modal surfaces, and primary actions share a cohesive visual language consistent with the upstream guidance docs.
-- [ ] Future UX work can reuse this foundation without another visual reset.
-- [ ] Temporary local overrides are documented and tracked for upstream resolution.
+- [x] The frontend imports and uses the `@evergraytech/design-system` package outputs via `dist/variables.css` and `dist/tokens.json`.
+- [x] The application no longer depends on inline root styling for its visual baseline.
+- [x] Foundational colors, spacing, radii, typography, and motion values come from design tokens.
+- [x] Forms, modal surfaces, and primary actions share a cohesive visual language consistent with the upstream guidance docs.
+- [x] Future UX work can reuse this foundation without another visual reset.
+- [x] Temporary local overrides are documented and tracked for upstream resolution.

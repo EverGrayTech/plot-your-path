@@ -45,34 +45,35 @@ export function PipelineModal({
         <strong>Needs follow-up:</strong> {counters.needs_follow_up} • <strong>Overdue:</strong>{" "}
         {counters.overdue_actions} • <strong>Deadlines (7d):</strong> {counters.upcoming_deadlines}
       </p>
-      <div style={{ display: "flex", gap: "0.75rem", marginBottom: "0.75rem" }}>
-        <label>
+      <div className="flex-row-lg mb-md">
+        <label className="form-checkbox-label">
           <input
             checked={pipelineOverdueOnly}
             onChange={(event) => setPipelineOverdueOnly(event.target.checked)}
             type="checkbox"
-          />{" "}
+          />
           Overdue actions
         </label>
-        <label>
+        <label className="form-checkbox-label">
           <input
             checked={pipelineWeekDeadlines}
             onChange={(event) => setPipelineWeekDeadlines(event.target.checked)}
             type="checkbox"
-          />{" "}
+          />
           This-week deadlines
         </label>
-        <label>
+        <label className="form-checkbox-label">
           <input
             checked={pipelineRecentlyUpdated}
             onChange={(event) => setPipelineRecentlyUpdated(event.target.checked)}
             type="checkbox"
-          />{" "}
+          />
           Recently updated
         </label>
-        <label>
+        <label className="form-label">
           Stage
           <select
+            className="form-select"
             onChange={(event) => setPipelineStageFilter(event.target.value as StageFilter)}
             value={pipelineStageFilter}
           >
@@ -90,20 +91,17 @@ export function PipelineModal({
       {loading ? <p>Loading pipeline...</p> : null}
       {error ? <p role="alert">{error}</p> : null}
       {!loading && !error ? (
-        <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
+        <ul className="list-unstyled">
           {items
             .filter(
               (item) =>
                 pipelineStageFilter === "all" || item.interview_stage === pipelineStageFilter,
             )
             .map((item) => (
-              <li
-                key={item.role_id}
-                style={{ border: "1px solid #ddd", marginBottom: "0.5rem", padding: "0.5rem" }}
-              >
+              <li key={item.role_id}>
                 <button
+                  className="list-item-btn"
                   onClick={() => onOpenJob(item.role_id)}
-                  style={{ textAlign: "left", width: "100%" }}
                   type="button"
                 >
                   <strong>{item.title}</strong> — {item.company}

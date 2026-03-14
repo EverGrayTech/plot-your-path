@@ -56,7 +56,7 @@ describe("CaptureJobForm", () => {
 
     expect(await screen.findByRole("alert")).toHaveTextContent("Unable to scrape this URL");
     expect(screen.getByLabelText("Pasted job description text")).toBeInTheDocument();
-    expect(screen.getByLabelText("Pasted job description text")).toHaveStyle({ width: "100%" });
+    expect(screen.getByLabelText("Pasted job description text")).toHaveClass("form-textarea");
     expect(screen.getByRole("button", { name: "Submit with pasted text" })).toBeInTheDocument();
   });
 

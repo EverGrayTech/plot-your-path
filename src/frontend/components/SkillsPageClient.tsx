@@ -122,16 +122,17 @@ export function SkillsPageClient() {
 
   return (
     <section>
-      <header style={{ marginBottom: "1rem" }}>
-        <h1 style={{ margin: 0 }}>Skills</h1>
+      <header className="toolbar-header">
+        <h1>Skills</h1>
       </header>
 
       <p>Browse captured skills and see how often they appear across roles.</p>
 
-      <div style={{ display: "grid", gap: "0.75rem", gridTemplateColumns: "2fr 1fr" }}>
-        <label style={{ display: "grid", gap: "0.25rem" }}>
+      <div className="form-grid-2-1">
+        <label className="form-label">
           Search skills
           <input
+            className="form-input"
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Search by skill name"
             type="search"
@@ -139,9 +140,10 @@ export function SkillsPageClient() {
           />
         </label>
 
-        <label style={{ display: "grid", gap: "0.25rem" }}>
+        <label className="form-label">
           Sort skills
           <select
+            className="form-select"
             onChange={(event) => setSortMode(event.target.value as SkillSortMode)}
             value={sortMode}
           >
@@ -156,12 +158,12 @@ export function SkillsPageClient() {
       {skillsError ? <p role="alert">{skillsError}</p> : null}
 
       {!loadingSkills && !skillsError ? (
-        <ul style={{ listStyle: "none", margin: "1rem 0 0", padding: 0 }}>
+        <ul className="list-unstyled">
           {sortedSkills.map((skill) => (
-            <li key={skill.id} style={{ marginBottom: "0.5rem" }}>
+            <li key={skill.id}>
               <button
+                className="list-item-btn"
                 onClick={() => setSelectedSkillId(skill.id)}
-                style={{ textAlign: "left", width: "100%" }}
                 type="button"
               >
                 <strong>{skill.name}</strong>
@@ -199,11 +201,11 @@ export function SkillsPageClient() {
                 {selectedSkill.jobs.map((job) => (
                   <li key={job.id}>
                     <button
+                      className="link-btn"
                       onClick={() => {
                         setSelectedSkillId(null);
                         setSelectedRoleId(job.id);
                       }}
-                      style={{ textAlign: "left" }}
                       type="button"
                     >
                       {job.title} — {job.company}
@@ -241,11 +243,11 @@ export function SkillsPageClient() {
                 {selectedJob.skills.required.map((skill) => (
                   <li key={`required-${skill.id}`}>
                     <button
+                      className="link-btn"
                       onClick={() => {
                         setSelectedRoleId(null);
                         setSelectedSkillId(skill.id);
                       }}
-                      style={{ textAlign: "left" }}
                       type="button"
                     >
                       {skill.name}
@@ -259,11 +261,11 @@ export function SkillsPageClient() {
                 {selectedJob.skills.preferred.map((skill) => (
                   <li key={`preferred-${skill.id}`}>
                     <button
+                      className="link-btn"
                       onClick={() => {
                         setSelectedRoleId(null);
                         setSelectedSkillId(skill.id);
                       }}
-                      style={{ textAlign: "left" }}
                       type="button"
                     >
                       {skill.name}
