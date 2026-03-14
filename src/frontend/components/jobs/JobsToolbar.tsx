@@ -37,9 +37,9 @@ export function JobsToolbar({
 }: JobsToolbarProps) {
   return (
     <>
-      <header className="toolbar-header">
+      <header className="page-header">
         <h1>Jobs</h1>
-        <div className="toolbar-actions">
+        <div className="page-header-actions">
           <button className="btn btn-primary" onClick={onOpenCapture} type="button">
             Add Job
           </button>
@@ -49,17 +49,21 @@ export function JobsToolbar({
           <button className="btn btn-secondary" onClick={onOpenOutcomeInsights} type="button">
             Outcome Insights
           </button>
-          <button className="btn btn-secondary" onClick={onOpenFactorSettings} type="button">
+          <button
+            className="btn btn-tertiary btn-compact"
+            onClick={onOpenFactorSettings}
+            type="button"
+          >
             Factor Settings
           </button>
-          <button className="btn btn-secondary" onClick={onOpenAISettings} type="button">
+          <button className="btn btn-tertiary btn-compact" onClick={onOpenAISettings} type="button">
             AI Settings
           </button>
         </div>
       </header>
 
-      <p>Capture and review roles from your job search.</p>
-      <p>{smartSortDescription}</p>
+      <p className="page-description">Capture and review roles from your job search.</p>
+      <p className="page-description">{smartSortDescription}</p>
 
       <div className="form-grid-4col">
         <label className="form-label">
