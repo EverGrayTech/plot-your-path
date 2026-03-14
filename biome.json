@@ -33,6 +33,8 @@
       ".next",
       "out",
       "src/frontend/out",
+      "src-tauri/gen",
+      "src-tauri/target",
       "dist",
       "dist-desktop",
       "build",

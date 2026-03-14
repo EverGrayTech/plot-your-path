@@ -112,6 +112,16 @@ Refactor direction:
 
 These items are intentionally not blocking the core desktop runtime foundation commit. They capture additional validation and hardening work that should happen as follow-up investigation rather than forcing re-evaluation of the completed implementation from scratch.
 
-- [ ] Run the full repository formatting, linting, and automated test suite after the desktop foundation commit and record any follow-up fixes separately.
-- [ ] Validate desktop development and release packaging workflows on each supported platform and document platform-specific prerequisites or release blockers.
-- [ ] Review the new desktop status surfaces for usability and determine whether richer startup diagnostics or onboarding guidance should be added in a follow-on plan.
+- [x] Run the full repository formatting, linting, and automated test suite after the desktop foundation commit and record any follow-up fixes separately.
+  - Follow-up fixes recorded: Biome formatting commands now use `--write` instead of the deprecated `--apply` flag.
+  - Validation outcome: backend tests passed (`223 passed`), frontend tests passed (`10` files / `37` tests), backend coverage remains `81%`, and fit-analysis API tests emitted SQLite `ResourceWarning` notices for later cleanup.
+- [x] Validate desktop development and release packaging workflows on each supported platform and document platform-specific prerequisites or release blockers.
+  - Linux validation completed: `pnpm desktop:prepare` succeeded and produced the packaged backend binary plus exported frontend assets.
+  - Linux packaging follow-up fix recorded: desktop workflows now resolve the Tauri CLI entrypoint directly via Node instead of relying on an executable `pnpm exec tauri` shim.
+  - Linux packaging follow-up fixes recorded: the Tauri setup callback now returns the expected Rust result type, desktop icon assets were added for bundling, and generated `src-tauri/gen` / `src-tauri/target` files are excluded from repository Biome checks.
+  - Linux validation outcome: `pnpm desktop:build` now compiles the release desktop binary and produces `.deb` and `.rpm` bundles successfully.
+  - Linux release packaging blocker recorded: the AppImage stage still fails in this environment because Tauri reports `failed to run linuxdeploy`.
+  - Remaining cross-platform packaging validation ownership is now migrated into `.plans/32-data-portability-release-readiness.md`, which tracks the native macOS / Windows validation work, Linux AppImage follow-up, and the release smoke-test matrix.
+- [x] Review the new desktop status surfaces for usability and determine whether richer startup diagnostics or onboarding guidance should be added in a follow-on plan.
+  - Current finding: the desktop status card is adequate as a foundation-level informational surface, but it does not yet provide actionable startup troubleshooting or first-run guidance.
+  - Follow-on decision: keep richer startup diagnostics, recovery messaging, and onboarding guidance in Plan 32 rather than expanding Plan 31 retroactively.

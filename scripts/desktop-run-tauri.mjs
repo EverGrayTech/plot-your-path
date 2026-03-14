@@ -1,8 +1,10 @@
 import { spawn } from "node:child_process";
+import { createRequire } from "node:module";
 import process from "node:process";
 
 const rootDir = process.cwd();
 const mode = process.argv[2];
+const require = createRequire(import.meta.url);
 
 if (mode !== "dev" && mode !== "build") {
   throw new Error("Usage: node scripts/desktop-run-tauri.mjs <dev|build>");
@@ -39,6 +41,16 @@ async function ensureCommandAvailable(command, installHint) {
   }
 }
 
+function resolveTauriCliEntrypoint() {
+  try {
+    return require.resolve("@tauri-apps/cli/tauri.js");
+  } catch {
+    throw new Error(
+      "@tauri-apps/cli is required for desktop workflows. Run 'pnpm install' to restore the Tauri CLI package.",
+    );
+  }
+}
+
 await ensureCommandAvailable(
   "cargo",
   "Install the Rust toolchain before running desktop workflows.",
@@ -49,6 +61,10 @@ if (mode === "build" && process.platform === "linux") {
     "objdump",
     "Install the 'binutils' package before running 'pnpm desktop:build'.",
   );
+  await ensureCommandAvailable(
+    "cc",
+    "Install a system C toolchain (for example 'gcc' or the 'build-essential' package) before running 'pnpm desktop:build'.",
+  );
 }
 
-await runCommand("pnpm", ["exec", "tauri", mode]);
+await runCommand(process.execPath, [resolveTauriCliEntrypoint(), mode]);

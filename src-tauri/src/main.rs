@@ -77,7 +77,7 @@ fn main() {
     tauri::Builder::default()
         .setup(|app| {
             app.manage(BackendProcess(Mutex::new(None)));
-            spawn_backend(app.handle())
+            Ok(spawn_backend(app.handle())?)
         })
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
