@@ -11,6 +11,15 @@ The emphasis is not feature expansion. It is workflow clarity, hierarchy, copy, 
 - `.plans/28-design-system-foundation.md`
 - `.plans/29-app-shell-and-navigation-refresh.md`
 
+## Upstream Design System References
+
+The following design system docs should be treated as the authoritative source for workflow surface, interaction, and feedback decisions:
+
+- **Data-Dense Workspace Patterns** (`docs/data-dense-workspace-patterns.md`) — table layout, stacked row summaries, grouped metadata blocks, scan hierarchy (content priority tiers), density posture, embedded interaction states (hover, selection, keyboard focus, inline actions, expand/collapse), and empty state patterns.
+- **Forms and Action Controls** (`docs/forms-and-action-controls.md`) — control patterns, action hierarchy (primary/secondary/tertiary/destructive), form support text (labels, helper, validation, success), density/spacing, and inline/page/section action placement.
+- **Status, Priority, and Decision Signals** (`docs/status-priority-and-decision-signals.md`) — text badges, pills/tags, dot indicators, counter badges, row-level priority markers, color vs. non-color signaling, priority palette, and comparative signal guidance.
+- **Overlays and Feedback States** (`docs/overlays-and-feedback-states.md`) — modal dialog, popover, and toast patterns; feedback states (empty, loading, progress, success, warning, error); prominence spectrum; structured message anatomy; and tone rules.
+
 ## Goals
 
 1. Streamline the jobs experience around the core decisions users need to make.
@@ -34,6 +43,8 @@ Refactor direction:
   - inspect one role deeply
   - take the next meaningful action
 - Use progressive disclosure for advanced analysis and configuration-heavy features.
+- Apply the upstream action hierarchy rules: page-level primary action (capture) uses accent treatment in the page header (right-aligned). Section-level actions (filter, sort) use ghost/icon buttons. Advanced configuration (AI settings, factor settings) moves to Tier 3 utility positions or behind overflow menus — per forms guidance Section 2.3 and app shell guidance Section 3.2.
+- Inline actions within the jobs list should use icon-only buttons (tertiary/quiet), not text-label buttons, per data-dense guidance Section 4.4.
 
 ### 2. Simplify Capture and Early Evaluation
 
@@ -42,16 +53,30 @@ Observed issues:
 - Fallback and progress states are useful, but they can feel mechanical rather than reassuring.
 
 Refactor direction:
-- Improve the capture interaction hierarchy, instructions, and completion feedback.
-- Make error and fallback states feel intentional and recoverable.
+- Improve the capture interaction using upstream form patterns:
+  - Labels above controls (`--typography-size-sm`, `--typography-weight-medium`) with helper text below (`--typography-size-xs`, `--color-text-tertiary`) per forms guidance Section 3.
+  - Focus states with `--color-border-focus` ring per forms guidance Section 1.3.
+  - Validation messages replace helper text on error per forms guidance Section 3.3.
+  - The primary submit action uses the `primary` button variant (`--color-accent-solid`). Cancel/secondary actions use `secondary` or `tertiary` variants.
+- Improve loading feedback during capture: use a spinner in the primary button (text replaced by animated dots, button non-interactive, width unchanged) per forms guidance Section 2.1.
+- Make error and fallback states feel intentional and recoverable using the upstream structured message anatomy: title + description + recovery guidance + action — per overlays guidance Section 4.
+- Use toast notifications for successful capture confirmations ("Role captured") that auto-dismiss after 4–5 seconds — per overlays guidance Section 1.1 (toast pattern).
 - Keep the capture path fast for users who just want to add a role and move on.
 
 ### 3. Improve List Scannability and Prioritization
 
 Refactor direction:
-- Revisit how roles are summarized in the list and which metadata earns prominence.
-- Make fit, desirability, status, and next-step signals easier to compare at a glance.
-- Ensure sorting and filtering support decision-making rather than visual noise.
+- Apply the upstream scan hierarchy to the jobs list. Adopt the content priority tiers from data-dense guidance Section 2.1:
+  - **Tier 1 — Primary identity**: Role title and company name — `--color-text-primary`, `--typography-weight-medium`.
+  - **Tier 2 — State/status**: Status badges using text badge pattern (e.g., "Captured", "Applied", "Interview", "Offer", "Closed") with semantic colors where appropriate (success for active/positive states, warning for needs-attention, error for blocked/rejected, neutral for draft/inactive) — per status signals guidance Section 1.1.
+  - **Tier 3 — Key metadata**: Fit score, desirability score, date captured — `--color-text-secondary`, `--typography-weight-regular`, `--typography-size-sm`.
+  - **Tier 4 — Action cues**: Quick actions (open detail, edit, archive) as icon-only buttons at `--color-text-secondary`.
+  - **Tier 5 — Secondary analytics**: Skills count, materials count — `--color-text-tertiary`, `--typography-size-xs`.
+- Choose between table layout and stacked row summaries based on data shape per data-dense guidance Section 1.1. Given PYP's variable metadata per role, a stacked row summary pattern may be more appropriate than a strict table.
+- Use desirability/fit information as compact signals: consider dot indicators or subtle text badges rather than full-width analysis displays in the list view — per status signals guidance Section 1.2.
+- Use row-level priority markers (`3px`–`4px` left-edge bar using the priority palette: critical=`--color-semantic-error-foreground`, high=`--color-semantic-warning-foreground`, medium=`--color-text-secondary`, low=`--color-text-tertiary`) for desirability-based visual triage — per status signals guidance Section 1.1 (row-level priority marker).
+- Implement row hover (`--color-neutral-surface` background shift), selection (accent indicator bar + surface background), and keyboard focus (2px `--color-border-focus` ring) per data-dense guidance Section 4.
+- Ensure sorting and filtering support decision-making rather than visual noise. Filter/sort controls go in a compact toolbar (`--spacing-sm` vertical padding, `--spacing-md` horizontal) per forms guidance Section 4.6.
 
 ### 4. Reduce Detail-View Overload
 
@@ -59,33 +84,53 @@ Observed issues:
 - The detail experience currently aggregates many workflows and can feel dense.
 
 Refactor direction:
-- Reorganize the detail experience into clearer sections with stronger hierarchy.
-- Distinguish core decision content from optional AI-assisted or advanced support areas.
-- Make cross-links to skills, materials, interview prep, and outcomes feel intentional rather than crowded.
+- Reorganize the detail experience using grouped metadata blocks from data-dense guidance Section 1.1:
+  - Core role information as a key-value metadata block (keys in `--color-text-secondary`, values in `--color-text-primary`, separated by `--spacing-sm`–`--spacing-md`).
+  - Use section headers (`--typography-weight-semibold`, `--spacing-xl` above, `--spacing-md` below) to create clear vertical landmarks.
+- Distinguish core decision content from optional AI-assisted or advanced support areas:
+  - Core: role details, company info, status, fit summary, next action — always visible.
+  - Secondary: detailed AI analysis, skills breakdown, traceability — available via progressive disclosure (expand/collapse per data-dense guidance Section 4.6, or behind tabs/section toggles).
+  - Tertiary: materials prep, interview stages, outcome tracking — deeper-level sections.
+- Action hierarchy within the detail view: the primary action (e.g., "Update Status", "Record Outcome") uses the `primary` button variant in the page header or section header. Supporting actions use `secondary`/`tertiary`. Destructive actions (archive, delete) go in a separate danger zone section or behind overflow — per forms guidance Section 2.3.
+- Modal usage: apply the design system's inline-vs-modal decision guidance. Use modals only for irreversible confirmations or context-free input collection. Prefer inline expansion and popovers for routine interactions — per overlays guidance Section 1.5.
 
 ### 5. Raise the Quality of Feedback States
 
 Refactor direction:
-- Improve empty states, loading states, confirmations, and recoverable errors across the core workflow.
-- Use consistent tone and interaction patterns so the product feels trustworthy and calm.
+- Implement the upstream feedback state patterns across the core workflow:
+  - **Empty states**: Centered within the surface, factual primary message (`--typography-size-base`, `--typography-weight-medium`), optional supporting message (`--typography-size-sm`, `--color-text-secondary`), optional action button, optional geometric icon (`--color-text-tertiary`). No mascots or playful illustrations — per overlays guidance Section 2.1 and data-dense guidance Section 5.6.
+  - **Loading states**: Spinner (`20px`–`24px`, `--color-text-tertiary` track, `--color-text-secondary` arc) centered in the loading surface. For known-layout surfaces like the jobs list, use skeleton loading (pulsing `--color-neutral-surface` rectangles) — per overlays guidance Section 2.2.
+  - **Success states**: Inline text or toast, transient (2–3 seconds fade), `--color-semantic-success-foreground`. Factual and brief: "Changes saved", "Role captured". No celebratory language — per overlays guidance Section 2.4 and Section 3.3.
+  - **Error states**: Inline field errors (replace helper text, `--color-semantic-error-foreground`), error banners for page-level issues (persistent, `--color-semantic-error-background`), full-surface error for catastrophic failures — per overlays guidance Section 2.6 and forms guidance Section 3.3.
+  - **Warning states**: Inline or banner, `--color-semantic-warning-foreground/background`, for non-blocking issues — per overlays guidance Section 2.5.
+- Match feedback prominence to severity: inline for routine success, toast for background actions, banner for persistent issues, modal only for blocking errors — per overlays guidance Section 3.1.
+- Use consistent matter-of-fact tone across all feedback messages. No exclamation marks for routine feedback, no casual language, no technical jargon in user-facing messages — per overlays guidance Section 4.3.
 
 ## Implementation Steps
 
 ### 1. Reassess the primary jobs workflow
-- [ ] Define the smallest coherent “capture -> evaluate -> act” path the page should optimize for.
-- [ ] Identify controls and views that should become secondary or contextual.
+- [ ] Define the smallest coherent "capture → evaluate → act" path the page should optimize for.
+- [ ] Map controls and views to the upstream action hierarchy tiers (page-level, section-level, background utility).
+- [ ] Identify controls that should become secondary, contextual, or behind overflow menus.
 
 ### 2. Redesign the capture and list experience
-- [ ] Update the capture flow hierarchy and interaction feedback.
-- [ ] Improve list summaries, prioritization cues, and scan patterns.
+- [ ] Update the capture form using upstream form patterns: labeled inputs, focus states, validation, button loading states.
+- [ ] Implement toast notifications for capture success.
+- [ ] Apply the data-dense scan hierarchy to the jobs list (primary identity, state badges, key metadata, action cues, secondary analytics).
+- [ ] Implement row interaction states (hover, selection, keyboard focus) per data-dense guidance.
+- [ ] Add compact status signals to the list using text badges and/or row-level priority markers per status signals guidance.
 
 ### 3. Rework the role-detail experience
-- [ ] Reorganize the detail view around clear sections and action hierarchy.
-- [ ] Reduce the apparent complexity of advanced workflows without removing them.
+- [ ] Reorganize the detail view using grouped metadata blocks and section headers.
+- [ ] Separate core decision content from advanced analysis via progressive disclosure.
+- [ ] Apply the inline-vs-modal decision framework: reduce unnecessary modals in favor of inline and popover patterns.
+- [ ] Implement action hierarchy in the detail view (primary, secondary, destructive placement).
 
 ### 4. Normalize product feedback states
-- [ ] Improve empty, loading, success, and error treatments across the workflow.
-- [ ] Align user-facing copy with the product’s calm, analytical tone.
+- [ ] Implement empty state patterns for jobs list, skills page, and detail sections.
+- [ ] Implement loading states (spinner and skeleton) across the workflow.
+- [ ] Implement success, error, and warning treatments per the upstream guidance.
+- [ ] Align user-facing copy with the product's calm, matter-of-fact analytical tone.
 
 ### 5. Verify usability and regression coverage
 - [ ] Update component and page-level tests for revised workflows.
@@ -103,6 +148,9 @@ Refactor direction:
 
 - [ ] A new user can understand the primary jobs workflow quickly.
 - [ ] Capture, evaluation, and next-action flows feel more guided and less cluttered.
-- [ ] List and detail views communicate priority more clearly.
-- [ ] Advanced capabilities remain available but no longer dominate the default experience.
-- [ ] Feedback states feel deliberate, reassuring, and visually cohesive.
+- [ ] The jobs list uses the upstream scan hierarchy with proper content priority tiers.
+- [ ] Status, fit, and desirability signals use the design system's compact signal patterns.
+- [ ] List and detail views communicate priority more clearly through row markers and badges.
+- [ ] Advanced capabilities remain available via progressive disclosure but no longer dominate the default experience.
+- [ ] Feedback states (empty, loading, success, error, warning) follow the upstream patterns with appropriate prominence.
+- [ ] Feedback copy is calm, matter-of-fact, and consistent across the workflow.
