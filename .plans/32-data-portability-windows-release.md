@@ -1,10 +1,26 @@
-# Plan: Tester Onboarding, Data Portability, and Release Readiness
+# Plan: Data Portability and Windows Release Readiness
 
 ## Overview
 
 Finish the path from "works on a developer machine" to "safe and understandable for non-technical users." This phase adds the surrounding product and operational capabilities that make a packaged local-first app practical to hand off: first-run guidance, data visibility, backup/export, restore/reset behavior, and a repeatable release checklist.
 
-This is the final phase because it depends on both a simplified user experience and a stable desktop runtime foundation.
+This is the final shared-product phase because it depends on both a simplified user experience and a stable desktop runtime foundation.
+
+It now also formally absorbs the remaining release-readiness follow-up from Plan 31, but with a narrower execution boundary. The original cross-platform scope was too broad for one implementation pass because native packaging validation is operationally different on each OS and depends on machine access.
+
+This plan therefore covers:
+
+- shared onboarding, trust, and data-portability work that applies across platforms
+- shared release checklist and smoke-test design
+- native Windows packaging validation and blocker capture, since Windows is the platform available for direct validation right now
+
+This plan does **not** try to fully validate every desktop platform in one pass. Native macOS validation and Linux-specific distribution follow-up move into dedicated follow-on plans so platform blockers can be tracked independently.
+
+Priority framing for the split:
+
+- Windows and macOS matter first for tester handoff
+- Windows goes first because it is the platform currently available for native validation
+- Linux remains important, but is lower priority and already has a known AppImage-specific blocker that should not hold up shared UX and data-portability work
 
 ## Prerequisites
 
@@ -26,7 +42,8 @@ The following design system docs are relevant to onboarding, data control, and f
 2. Give users explicit control over their local data.
 3. Provide safe backup, export, restore, and reset paths.
 4. Improve release readiness with packaging, smoke-test, and handoff checklists.
-5. Reduce support burden by making failure states and recovery paths clearer.
+5. Validate the Windows tester handoff flow on a native machine.
+6. Reduce support burden by making failure states and recovery paths clearer.
 
 ## Technical Design
 
@@ -66,7 +83,29 @@ Refactor direction:
 - Document the user installation and update experience.
 - Capture the minimum troubleshooting information needed when a user reports an issue.
 
-### 5. Quality and Trust Signals
+Observed packaging follow-up from Plan 31:
+- Linux desktop builds now compile and bundle successfully for `.deb` and `.rpm` outputs.
+- Linux AppImage packaging still fails with a `linuxdeploy` blocker and needs explicit follow-up rather than being treated as a generic runtime failure.
+- macOS and Windows packaging flows have not yet been validated on native build machines.
+- Tauri packaging now depends on explicit desktop icon assets, correct shell startup typing, direct Node-based CLI resolution, and generated-file exclusions in repository linting.
+
+Additional release-hardening direction:
+- Treat release readiness as an artifact matrix, not a single pass/fail check. Validate each supported platform and installer format independently.
+- Use this plan to define the shared matrix and complete the Windows row first.
+- Defer native macOS validation to a dedicated follow-up plan because it requires access to a native macOS machine.
+- Defer Linux distribution validation and the AppImage `linuxdeploy` blocker to a dedicated follow-up plan because Linux is lower priority and already has a known packaging-specific issue.
+- Add smoke-test expectations for each packaged artifact, including backend launch, healthcheck availability, local data-root creation, and clean first-run behavior.
+- Record platform-specific prerequisites and blockers explicitly so future release attempts do not repeat known failures.
+
+### 5. Platform sequencing and scope control
+
+Refactor direction:
+- Keep shared product behavior together when the implementation should remain consistent across platforms.
+- Split native packaging validation where OS-specific prerequisites, installer behavior, signing rules, or distribution blockers materially change the work.
+- Avoid making shared UX and data-safety improvements wait on lower-confidence packaging work for platforms that are not currently testable.
+- Capture deferred platforms in dedicated plans rather than leaving them implied inside a single broad checklist.
+
+### 6. Quality and Trust Signals
 
 Refactor direction:
 - Make failure states, offline limitations, and local-environment dependencies easier to understand.
@@ -91,10 +130,18 @@ Refactor direction:
 ### 4. Prepare release workflows
 - [ ] Document packaging, smoke testing, and handoff procedures.
 - [ ] Define the minimum release checklist for future user drops.
+- [ ] Define a platform-by-platform smoke-test matrix covering backend startup, frontend connectivity, healthcheck response, local data-root creation, and first-run clarity.
+- [ ] Record explicit deferred-status notes and prerequisites for macOS and Linux follow-up validation.
 
-### 5. Validate the user experience
-- [ ] Run through the packaged first-run flow from a non-technical perspective.
-- [ ] Close the largest gaps in clarity, recovery, and trust before distribution.
+### 5. Validate Windows packaging and handoff
+- [ ] Validate Windows packaging on a native Windows machine and record installer, runtime, or signing blockers.
+- [ ] Run through the packaged Windows first-run flow from a non-technical perspective.
+- [ ] Close the largest Windows tester-handoff gaps in clarity, recovery, and trust before distribution.
+
+## Follow-on Plans
+
+- **Plan 33 — macOS Dektop Release**: native macOS packaging validation, runtime verification, installer expectations, and signing/notarization blocker tracking.
+- **Plan XX — Linux Release**: `.deb` / `.rpm` distribution validation, AppImage `linuxdeploy` follow-up, and Linux-specific installer/runtime guidance.
 
 ## Affected Areas
 
@@ -102,6 +149,8 @@ Refactor direction:
 - local data handling and export/reset flows
 - release documentation and user handoff materials
 - packaging and smoke-test workflows
+- Windows-specific desktop artifact validation and blocker tracking
+- deferred macOS and Linux release-plan sequencing
 
 ## Success Criteria
 
@@ -111,4 +160,7 @@ Refactor direction:
 - [ ] Destructive data actions use modal confirmation with the upstream destructive-filled pattern.
 - [ ] Feedback states for data operations (success, error, progress) follow the upstream patterns.
 - [ ] Release handoff is supported by a repeatable checklist.
-- [ ] The packaged app feels safe enough to share outside the development context.
+- [ ] The supported packaging matrix is documented by platform and artifact type, including explicit pass/fail/blocker/deferred notes.
+- [ ] Windows packaging has native validation notes sufficient for a tester drop.
+- [ ] macOS and Linux follow-up work is moved into explicit plans with clear prerequisites and blocker framing.
+- [ ] The packaged app feels safe enough to share outside the development context on the validated Windows path.

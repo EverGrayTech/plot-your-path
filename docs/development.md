@@ -116,7 +116,10 @@ pnpm install
 
 You also need a Rust toolchain with `cargo` available on your `PATH` for Tauri development and release builds.
 
-On Linux, desktop backend packaging also requires `objdump`, which is typically provided by the `binutils` package.
+On Linux, desktop backend packaging also requires:
+
+- `objdump`, which is typically provided by the `binutils` package
+- a system C toolchain with `cc` available on `PATH` such as `gcc`, `clang`, or the Debian/Ubuntu `build-essential` package set
 
 ### Run the desktop app in development mode
 
@@ -138,6 +141,10 @@ This builds:
 - a static frontend export for the desktop shell
 
 If this step fails on Linux with an `objdump` error, install `binutils` first.
+
+If this step fails on Linux with a `cc` or linker error, install a system C toolchain first.
+
+If Linux release builds produce `.deb` and `.rpm` bundles but fail during the AppImage stage with a `linuxdeploy` error, treat that as a separate packaging blocker rather than a frontend/backend runtime failure.
 
 ### Build the desktop application
 

@@ -106,6 +106,7 @@ Desktop packaging adds a few contributor requirements beyond the browser-only wo
 - Rust toolchain with `cargo` available on `PATH`
 - platform-specific Tauri system dependencies as required by Tauri 2
 - on Linux, `objdump` available via the `binutils` package for PyInstaller analysis
+- on Linux, a system C toolchain with `cc` available on `PATH` for Rust/Tauri linking
 
 ## Current constraints
 
@@ -128,5 +129,31 @@ If a desktop build fails to start correctly, check these first:
 3. desktop mode is using the expected local data root
 4. Rust and Tauri prerequisites are installed on the build machine
 5. on Linux, the `binutils` package is installed so `objdump` is available
+6. on Linux, a system C toolchain is installed so `cc` is available for Rust linking
 
 When troubleshooting startup failures, prefer explicit shell and backend logs over silent retries.
+
+## Deferred follow-up validation status
+
+The desktop foundation follow-up validation produced these outcomes:
+
+- repository formatting and linting completed successfully
+- backend automated tests passed (`223 passed`)
+- frontend automated tests passed (`10` test files, `37` tests)
+- backend coverage for the current suite is still `81%`, so broader backend coverage improvement remains separate follow-up work
+- backend tests emitted `ResourceWarning` notices about unclosed SQLite connections during fit-analysis API coverage; those warnings should be addressed in a later hardening pass
+
+### Linux validation findings
+
+- `pnpm desktop:prepare` completed successfully on Linux and produced both the packaged backend binary at `src-tauri/resources/plot-your-path-backend` and the static frontend export in `dist-desktop`
+- the desktop runner now resolves the Tauri CLI entrypoint directly through Node so desktop workflows do not depend on a platform-created `node_modules/.bin/tauri` shim being executable
+- Linux release validation also uncovered and resolved two Tauri build issues: the desktop shell now returns the setup callback with the correct Rust result type, and the repository now includes explicit desktop icon assets plus bundle icon configuration
+- `pnpm desktop:build` now completes the backend packaging step, frontend export step, Rust desktop binary compilation step, and Linux `.deb` / `.rpm` bundling step on this machine
+- Linux AppImage bundling still fails in this environment with Tauri reporting `failed to run linuxdeploy`, so AppImage packaging remains an open Linux-specific release blocker even though other Linux bundle artifacts are produced successfully
+- `objdump` remains a Linux prerequisite for packaged desktop builds because PyInstaller analysis depends on the `binutils` package
+
+### Remaining follow-up scope
+
+- diagnose or work around the remaining Linux AppImage `linuxdeploy` bundling failure
+- release packaging still needs validation on macOS and Windows
+- richer startup diagnostics and first-run onboarding guidance remain intentionally deferred to Plan 32

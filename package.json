@@ -12,7 +12,7 @@
     "desktop:web:dev": "node scripts/desktop-dev-web.mjs",
     "dev": "next dev",
     "lint": "biome check .",
-    "lint:fix": "biome check --apply .",
+    "lint:fix": "biome check --write .",
     "start": "next start",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
