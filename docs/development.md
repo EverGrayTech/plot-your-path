@@ -103,6 +103,26 @@ Run a single frontend test file:
 pnpm vitest run tests/frontend/app/jobs.page.test.tsx
 ```
 
+## Design system consumption
+
+The frontend uses the `@evergraytech/design-system` npm package as the source of truth for foundational visual values. The upstream consumption guide defines the full rules; here is a quick reference:
+
+### What must come from the design system
+
+Colors, typography, spacing, radii, motion, semantic states, and accent values. These are consumed via CSS custom properties imported from `@evergraytech/design-system/dist/variables.css` in `src/frontend/app/globals.css`.
+
+### What remains local
+
+Layout composition, component-internal dimensions, app-specific breakpoints, content-driven spacing adjustments, and z-index layering.
+
+### Exception handling
+
+If a value does not exist in the token set: check if an existing token fits, request upstream if not, and document a temporary local override with a `/* TODO: upstream to design system */` comment.
+
+### Update flow
+
+Bump `@evergraytech/design-system` version in `package.json`, review changelog, rebuild.
+
 ## Documentation use during development
 
 When making non-trivial changes:

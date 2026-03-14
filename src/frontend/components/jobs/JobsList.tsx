@@ -25,14 +25,10 @@ export function JobsList({
       {listError ? <p role="alert">{listError}</p> : null}
 
       {!loadingJobs && !listError ? (
-        <ul style={{ listStyle: "none", margin: "1rem 0 0", padding: 0 }}>
+        <ul className="list-unstyled">
           {jobs.map((job) => (
-            <li key={job.id} style={{ marginBottom: "0.5rem" }}>
-              <button
-                onClick={() => onSelectJob(job.id)}
-                style={{ textAlign: "left", width: "100%" }}
-                type="button"
-              >
+            <li key={job.id}>
+              <button className="list-item-btn" onClick={() => onSelectJob(job.id)} type="button">
                 <strong>{job.title}</strong> — {job.company}
                 <br />
                 <small>

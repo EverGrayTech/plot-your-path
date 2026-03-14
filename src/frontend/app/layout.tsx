@@ -1,26 +1,14 @@
 import Link from "next/link";
 import React, { type ReactNode } from "react";
 
+import "./globals.css";
+
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body>
-        <main
-          style={{
-            margin: "0 auto",
-            maxWidth: 760,
-            padding: "2rem 1rem",
-            fontFamily: "sans-serif",
-          }}
-        >
-          <nav
-            aria-label="Primary"
-            style={{
-              display: "flex",
-              gap: "1rem",
-              marginBottom: "1.5rem",
-            }}
-          >
+        <main className="app-shell">
+          <nav aria-label="Primary" className="app-nav">
             <Link href="/jobs">Jobs</Link>
             <Link href="/skills">Skills</Link>
           </nav>
