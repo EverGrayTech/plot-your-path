@@ -185,7 +185,7 @@ describe("JobsPageClient", () => {
     render(<JobsPageClient />);
 
     await screen.findByText("Engineer");
-    fireEvent.click(screen.getByRole("button", { name: /Engineer — Beta Co/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Engineer.*Beta Co/i }));
 
     expect(await screen.findByRole("heading", { name: "Job Detail" })).toBeInTheDocument();
     expect(await screen.findByText("Required skills")).toBeInTheDocument();
@@ -237,13 +237,13 @@ describe("JobsPageClient", () => {
     render(<JobsPageClient />);
 
     await screen.findByText("Engineer");
-    fireEvent.click(screen.getByRole("button", { name: /Engineer — Beta Co/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Engineer.*Beta Co/i }));
     fireEvent.click(await screen.findByRole("button", { name: "Python" }));
 
     const skillHeading = await screen.findByRole("heading", { name: "Skill Detail" });
     const skillModal = skillHeading.closest("dialog") as HTMLElement;
     expect(
-      within(skillModal).getByRole("button", { name: /Engineer — Beta Co/i }),
+      within(skillModal).getByRole("button", { name: /Engineer.*Beta Co/i }),
     ).toBeInTheDocument();
   }, 20000);
 
@@ -284,7 +284,7 @@ describe("JobsPageClient", () => {
     render(<JobsPageClient />);
 
     await screen.findByText("Engineer");
-    fireEvent.click(screen.getByRole("button", { name: /Engineer — Beta Co/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Engineer.*Beta Co/i }));
     fireEvent.click(await screen.findByRole("button", { name: "FastAPI" }));
 
     expect(getSkillSpy).toHaveBeenCalledWith(2);
@@ -365,7 +365,7 @@ describe("JobsPageClient", () => {
     render(<JobsPageClient />);
 
     await screen.findByText("Engineer");
-    fireEvent.click(screen.getByRole("button", { name: /Engineer — Beta Co/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Engineer.*Beta Co/i }));
     fireEvent.change(await screen.findByLabelText("Update status"), {
       target: { value: "submitted" },
     });
@@ -418,7 +418,7 @@ describe("JobsPageClient", () => {
     render(<JobsPageClient />);
 
     await screen.findByText("Engineer");
-    fireEvent.click(screen.getByRole("button", { name: /Engineer — Beta Co/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Engineer.*Beta Co/i }));
     fireEvent.click(await screen.findByRole("button", { name: "Analyze Fit" }));
 
     const fitAnalysisHeading = await screen.findByRole("heading", { name: "Fit analysis" });
@@ -535,7 +535,7 @@ describe("JobsPageClient", () => {
     render(<JobsPageClient />);
 
     await screen.findByText("Engineer");
-    fireEvent.click(screen.getByRole("button", { name: /Engineer — Beta Co/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Engineer.*Beta Co/i }));
     fireEvent.click(await screen.findByRole("button", { name: "Generate Cover Letter" }));
 
     await waitFor(() => {
@@ -655,7 +655,7 @@ describe("JobsPageClient", () => {
     expect(within(pipelineDialog).getByText(/Needs follow-up:/i)).toBeInTheDocument();
     expect(within(pipelineDialog).getByText(/Overdue next action/i)).toBeInTheDocument();
     expect(
-      within(pipelineDialog).getByRole("button", { name: /Engineer — Beta Co/i }),
+      within(pipelineDialog).getByRole("button", { name: /Engineer.*Beta Co/i }),
     ).toBeInTheDocument();
 
     fireEvent.change(within(pipelineDialog).getByLabelText("Stage"), {
@@ -663,7 +663,7 @@ describe("JobsPageClient", () => {
     });
 
     expect(
-      within(pipelineDialog).queryByRole("button", { name: /Engineer — Beta Co/i }),
+      within(pipelineDialog).queryByRole("button", { name: /Engineer.*Beta Co/i }),
     ).not.toBeInTheDocument();
     expect(
       within(pipelineDialog).getByRole("button", { name: /Developer — Acme Corp/i }),
@@ -786,7 +786,7 @@ describe("JobsPageClient", () => {
     render(<JobsPageClient />);
 
     await screen.findByText("Engineer");
-    fireEvent.click(screen.getByRole("button", { name: /Engineer — Beta Co/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Engineer.*Beta Co/i }));
 
     fireEvent.click(await screen.findByRole("button", { name: "Generate Interview Prep Pack" }));
 
@@ -894,7 +894,7 @@ describe("JobsPageClient", () => {
     render(<JobsPageClient />);
 
     await screen.findByText("Engineer");
-    fireEvent.click(screen.getByRole("button", { name: /Engineer — Beta Co/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Engineer.*Beta Co/i }));
 
     fireEvent.click(await screen.findByRole("button", { name: "Sync Resume Profile" }));
     expect(
@@ -1004,7 +1004,7 @@ describe("JobsPageClient", () => {
     render(<JobsPageClient />);
 
     await screen.findByText("Engineer");
-    fireEvent.click(screen.getByRole("button", { name: /Engineer — Beta Co/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Engineer.*Beta Co/i }));
 
     expect(await screen.findByText("Evidence references:")).toBeInTheDocument();
     expect(screen.getByText(/Built and scaled APIs/i)).toBeInTheDocument();
@@ -1132,7 +1132,7 @@ describe("JobsPageClient", () => {
     render(<JobsPageClient />);
 
     await screen.findByText("Engineer");
-    fireEvent.click(screen.getByRole("button", { name: /Engineer — Beta Co/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Engineer.*Beta Co/i }));
 
     fireEvent.change(await screen.findByLabelText("Outcome type"), {
       target: { value: "offer" },

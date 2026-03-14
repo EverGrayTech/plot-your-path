@@ -27,9 +27,8 @@ describe("CaptureJobForm", () => {
     fireEvent.click(screen.getByRole("button", { name: "Capture job" }));
 
     expect(await screen.findByRole("status")).toHaveTextContent(
-      "Captured Backend Engineer at TechCo",
+      /Role captured:.*Backend Engineer.*TechCo/,
     );
-    expect(screen.getByText("Role ID: 101")).toBeInTheDocument();
     expect(screen.queryByLabelText("Job URL")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Capture job" })).not.toBeInTheDocument();
   });

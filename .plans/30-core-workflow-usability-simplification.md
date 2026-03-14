@@ -109,32 +109,32 @@ Refactor direction:
 ## Implementation Steps
 
 ### 1. Reassess the primary jobs workflow
-- [ ] Define the smallest coherent "capture → evaluate → act" path the page should optimize for.
-- [ ] Map controls and views to the upstream action hierarchy tiers (page-level, section-level, background utility).
-- [ ] Identify controls that should become secondary, contextual, or behind overflow menus.
+- [x] Define the smallest coherent "capture → evaluate → act" path the page should optimize for.
+- [x] Map controls and views to the upstream action hierarchy tiers (page-level, section-level, background utility).
+- [x] Identify controls that should become secondary, contextual, or behind overflow menus.
 
 ### 2. Redesign the capture and list experience
-- [ ] Update the capture form using upstream form patterns: labeled inputs, focus states, validation, button loading states.
-- [ ] Implement toast notifications for capture success.
-- [ ] Apply the data-dense scan hierarchy to the jobs list (primary identity, state badges, key metadata, action cues, secondary analytics).
-- [ ] Implement row interaction states (hover, selection, keyboard focus) per data-dense guidance.
-- [ ] Add compact status signals to the list using text badges and/or row-level priority markers per status signals guidance.
+- [x] Update the capture form using upstream form patterns: labeled inputs, focus states, validation, button loading states.
+- [x] Implement toast notifications for capture success.
+- [x] Apply the data-dense scan hierarchy to the jobs list (primary identity, state badges, key metadata, action cues, secondary analytics).
+- [x] Implement row interaction states (hover, selection, keyboard focus) per data-dense guidance.
+- [x] Add compact status signals to the list using text badges and/or row-level priority markers per status signals guidance.
 
 ### 3. Rework the role-detail experience
-- [ ] Reorganize the detail view using grouped metadata blocks and section headers.
-- [ ] Separate core decision content from advanced analysis via progressive disclosure.
-- [ ] Apply the inline-vs-modal decision framework: reduce unnecessary modals in favor of inline and popover patterns.
-- [ ] Implement action hierarchy in the detail view (primary, secondary, destructive placement).
+- [x] Reorganize the detail view using grouped metadata blocks and section headers.
+- [x] Separate core decision content from advanced analysis via progressive disclosure.
+- [x] Apply the inline-vs-modal decision framework: reduce unnecessary modals in favor of inline and popover patterns.
+- [x] Implement action hierarchy in the detail view (primary, secondary, destructive placement).
 
 ### 4. Normalize product feedback states
-- [ ] Implement empty state patterns for jobs list, skills page, and detail sections.
-- [ ] Implement loading states (spinner and skeleton) across the workflow.
-- [ ] Implement success, error, and warning treatments per the upstream guidance.
-- [ ] Align user-facing copy with the product's calm, matter-of-fact analytical tone.
+- [x] Implement empty state patterns for jobs list, skills page, and detail sections.
+- [x] Implement loading states (spinner and skeleton) across the workflow.
+- [x] Implement success, error, and warning treatments per the upstream guidance.
+- [x] Align user-facing copy with the product's calm, matter-of-fact analytical tone.
 
 ### 5. Verify usability and regression coverage
-- [ ] Update component and page-level tests for revised workflows.
-- [ ] Confirm the redesigned flow still preserves the existing product capabilities.
+- [x] Update component and page-level tests for revised workflows.
+- [x] Confirm the redesigned flow still preserves the existing product capabilities.
 
 ## Affected Areas
 
@@ -146,11 +146,11 @@ Refactor direction:
 
 ## Success Criteria
 
-- [ ] A new user can understand the primary jobs workflow quickly.
-- [ ] Capture, evaluation, and next-action flows feel more guided and less cluttered.
-- [ ] The jobs list uses the upstream scan hierarchy with proper content priority tiers.
-- [ ] Status, fit, and desirability signals use the design system's compact signal patterns.
-- [ ] List and detail views communicate priority more clearly through row markers and badges.
-- [ ] Advanced capabilities remain available via progressive disclosure but no longer dominate the default experience.
-- [ ] Feedback states (empty, loading, success, error, warning) follow the upstream patterns with appropriate prominence.
-- [ ] Feedback copy is calm, matter-of-fact, and consistent across the workflow.
+- [x] A new user can understand the primary jobs workflow quickly.
+- [x] Capture, evaluation, and next-action flows feel more guided and less cluttered.
+- [x] The jobs list uses the upstream scan hierarchy with proper content priority tiers.
+- [x] Status, fit, and desirability signals use the design system's compact signal patterns.
+- [x] List and detail views communicate priority more clearly through row markers and badges.
+- [x] Advanced capabilities remain available via progressive disclosure but no longer dominate the default experience.
+- [x] Feedback states (empty, loading, success, error, warning) follow the upstream patterns with appropriate prominence.
+- [x] Feedback copy is calm, matter-of-fact, and consistent across the workflow.

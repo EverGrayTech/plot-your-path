@@ -33,10 +33,11 @@ describe("JobsList", () => {
     );
 
     expect(screen.getByText("Captured New Role at New Co")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Engineer — Beta Co/i })).toBeInTheDocument();
+    expect(screen.getByText("Engineer")).toBeInTheDocument();
+    expect(screen.getByText(/Beta Co/)).toBeInTheDocument();
     expect(screen.getByText(/Needs attention/i)).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: /Engineer — Beta Co/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Engineer/i }));
 
     expect(onSelectJob).toHaveBeenCalledWith(2);
   });
@@ -52,7 +53,7 @@ describe("JobsList", () => {
       />,
     );
 
-    expect(screen.getByText("Loading jobs...")).toBeInTheDocument();
+    expect(screen.getByLabelText("Loading jobs")).toBeInTheDocument();
     expect(screen.queryByRole("list")).not.toBeInTheDocument();
 
     rerender(
