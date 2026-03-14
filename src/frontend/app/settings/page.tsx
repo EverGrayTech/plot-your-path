@@ -1,5 +1,7 @@
 import React from "react";
 
+import { DesktopStatusCard } from "../../components/DesktopStatusCard";
+
 export default function SettingsPage() {
   return (
     <>
@@ -25,6 +27,8 @@ export default function SettingsPage() {
           settings are also accessible from the Jobs page toolbar.
         </p>
       </section>
+
+      <DesktopStatusCard />
     </>
   );
 }

@@ -79,6 +79,7 @@ The documentation is intentionally split by purpose:
 - [Concept Model](docs/concept-model.md) — shared conceptual language and core entities
 - [System Spec](docs/system-spec.md) — system-level boundaries, architectural direction, and product guardrails
 - [Development](docs/development.md) — local development and testing workflows
+- [Desktop Runtime Foundation](docs/desktop-runtime.md) — Tauri packaging model, local runtime behavior, and desktop build workflows
 
 If you are new to the project, read them in that order.
 

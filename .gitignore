@@ -8,8 +8,10 @@ __pycache__/
 .cover
 .coverage
 .coverage.*
+coverage/
 coverage.xml
 .pytest_cache
+.ruff_cache
 *.log
 
 # Distribution & Packaging
@@ -58,8 +60,14 @@ venv/
 node_modules/
 .next/
 out/
+dist-desktop/
 *.tsbuildinfo
 next-env.d.ts
+
+# Desktop runtime
+src-tauri/target/
+src-tauri/gen/
+src-tauri/resources/plot-your-path-backend*
 
 # Environment Variables
 .env

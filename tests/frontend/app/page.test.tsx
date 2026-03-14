@@ -11,5 +11,9 @@ describe("HomePage", () => {
     expect(screen.getByText(/Capture opportunities/)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Jobs/ })).toHaveAttribute("href", "/jobs");
     expect(screen.getByRole("link", { name: /Skills/ })).toHaveAttribute("href", "/skills");
+    expect(
+      screen.getByRole("heading", { name: /Desktop runtime foundation/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Healthcheck:/i)).toBeInTheDocument();
   });
 });

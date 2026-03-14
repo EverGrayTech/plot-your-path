@@ -103,6 +103,50 @@ Run a single frontend test file:
 pnpm vitest run tests/frontend/app/jobs.page.test.tsx
 ```
 
+## Desktop runtime workflows
+
+The desktop runtime packages the existing frontend and backend into a local Tauri shell.
+
+### Prerequisites
+
+```bash
+uv sync --extra dev
+pnpm install
+```
+
+You also need a Rust toolchain with `cargo` available on your `PATH` for Tauri development and release builds.
+
+On Linux, desktop backend packaging also requires `objdump`, which is typically provided by the `binutils` package.
+
+### Run the desktop app in development mode
+
+```bash
+pnpm desktop:dev
+```
+
+This starts the desktop-oriented backend runtime, starts the frontend dev server on `127.0.0.1:3000`, and launches the Tauri shell.
+
+### Prepare packaged desktop assets
+
+```bash
+pnpm desktop:prepare
+```
+
+This builds:
+
+- a packaged backend binary with PyInstaller
+- a static frontend export for the desktop shell
+
+If this step fails on Linux with an `objdump` error, install `binutils` first.
+
+### Build the desktop application
+
+```bash
+pnpm desktop:build
+```
+
+For runtime architecture details, data-root behavior, and packaging constraints, see [Desktop Runtime Foundation](./desktop-runtime.md).
+
 ## Design system consumption
 
 The frontend uses the `@evergraytech/design-system` npm package as the source of truth for foundational visual values. The upstream consumption guide defines the full rules; here is a quick reference:
