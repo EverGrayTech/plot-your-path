@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 
+import backend.config as config_module
 from backend.config import LLMConfig, ScrapingConfig, Settings
 
 
@@ -119,8 +120,9 @@ class TestSettings:
         # Clear any env vars that might bleed in from the local .env file
         monkeypatch.delenv("DATA_ROOT", raising=False)
         monkeypatch.delenv("DATABASE_URL", raising=False)
+        monkeypatch.delenv("PYP_DESKTOP_RUNTIME", raising=False)
 
-        settings = Settings()
+        settings = Settings(_env_file=None)
 
         # data_root should be the expanded absolute equivalent of the default "~/Documents/plot_your_path"
         expected_data_root = str(Path("~/Documents/plot_your_path").expanduser().resolve())
@@ -142,7 +144,7 @@ class TestSettings:
         monkeypatch.setenv("OPENAI_API_KEY", "test-openai-key")
         monkeypatch.setenv("ANTHROPIC_API_KEY", "test-anthropic-key")
 
-        settings = Settings()
+        settings = Settings(_env_file=None)
         assert settings.database_url == "sqlite:///./test.db"
         assert settings.backend_host == "127.0.0.1"
         assert settings.backend_port == 9000
@@ -152,7 +154,64 @@ class TestSettings:
 
     def test_settings_optional_api_keys(self):
         """Test that API keys are optional in settings."""
-        settings = Settings()
+        settings = Settings(_env_file=None)
         # API keys should be None if not set
         assert settings.openai_api_key is None or isinstance(settings.openai_api_key, str)
         assert settings.anthropic_api_key is None or isinstance(settings.anthropic_api_key, str)
+
+    def test_settings_desktop_runtime_defaults(self, monkeypatch):
+        """Desktop mode uses packaged-friendly defaults."""
+        monkeypatch.setenv("PYP_DESKTOP_RUNTIME", "true")
+        monkeypatch.delenv("DATA_ROOT", raising=False)
+        monkeypatch.delenv("BACKEND_HOST", raising=False)
+        monkeypatch.delenv("BACKEND_PORT", raising=False)
+        monkeypatch.delenv("NEXT_PUBLIC_API_URL", raising=False)
+
+        settings = Settings(_env_file=None)
+
+        expected_data_root = str(Path.home() / ".local" / "share" / "plot-your-path")
+        assert settings.data_root == expected_data_root
+        assert settings.database_url == f"sqlite:///{expected_data_root}/plot_your_path.db"
+        assert settings.backend_host == "127.0.0.1"
+        assert settings.backend_port == 8765
+        assert settings.next_public_api_url == "http://127.0.0.1:8765"
+
+
+class TestConfigHelpers:
+    """Tests for desktop configuration helpers."""
+
+    def test_ensure_data_root_exists_creates_directory(self, tmp_path):
+        """ensure_data_root_exists creates nested directories when missing."""
+        target = tmp_path / "desktop" / "data"
+
+        created = config_module.ensure_data_root_exists(str(target))
+
+        assert created == target
+        assert target.exists()
+        assert target.is_dir()
+
+    def test_resolve_resource_path_uses_project_root_for_relative_paths(self):
+        """Relative resource paths resolve from the repository root in source mode."""
+        resolved = config_module.resolve_resource_path("config/llm.json")
+
+        assert resolved.name == "llm.json"
+        assert resolved.exists()
+
+    def test_is_desktop_runtime_enabled_accepts_truthy_values(self, monkeypatch):
+        """Desktop runtime toggle accepts common truthy values."""
+        monkeypatch.setenv("PYP_DESKTOP_RUNTIME", "YES")
+
+        assert config_module.is_desktop_runtime_enabled() is True
+
+    def test_resolve_resource_path_uses_meipass_bundle_root(self, monkeypatch, tmp_path):
+        """Bundled runtimes read config files from the PyInstaller extraction root."""
+        bundled_config = tmp_path / "config"
+        bundled_config.mkdir()
+        bundled_file = bundled_config / "llm.json"
+        bundled_file.write_text("{}", encoding="utf-8")
+        monkeypatch.setattr(config_module.sys, "_MEIPASS", str(tmp_path), raising=False)
+
+        resolved = config_module.resolve_resource_path("config/llm.json")
+
+        assert resolved == bundled_file
+        monkeypatch.delattr(config_module.sys, "_MEIPASS", raising=False)

@@ -2,11 +2,72 @@
 
 import json
 import os
+import sys
 from pathlib import Path
 from typing import Literal
 
 from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+def default_data_root() -> str:
+    """Return the default data root for the current runtime mode."""
+    if is_desktop_runtime_enabled():
+        if os.name == "nt":
+            local_app_data = os.getenv("LOCALAPPDATA")
+            base_path = (
+                Path(local_app_data) if local_app_data else Path.home() / "AppData" / "Local"
+            )
+            return str(base_path / "Plot Your Path")
+
+        if sys.platform == "darwin":
+            return str(Path.home() / "Library" / "Application Support" / "Plot Your Path")
+
+        xdg_data_home = os.getenv("XDG_DATA_HOME")
+        base_path = Path(xdg_data_home) if xdg_data_home else Path.home() / ".local" / "share"
+        return str(base_path / "plot-your-path")
+
+    return str(Path("~/Documents/plot_your_path").expanduser())
+
+
+def default_backend_host() -> str:
+    """Return the backend host for the current runtime mode."""
+    if is_desktop_runtime_enabled():
+        return "127.0.0.1"
+    return "0.0.0.0"
+
+
+def default_backend_port() -> int:
+    """Return the backend port for the current runtime mode."""
+    if is_desktop_runtime_enabled():
+        return 8765
+    return 8000
+
+
+def ensure_data_root_exists(data_root: str | None = None) -> Path:
+    """Create the configured data root when it does not already exist."""
+    target = Path(data_root or settings.data_root)
+    target.mkdir(parents=True, exist_ok=True)
+    return target
+
+
+def is_desktop_runtime_enabled() -> bool:
+    """Return whether the backend is running under the packaged desktop shell."""
+    value = os.getenv("PYP_DESKTOP_RUNTIME", "")
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def resolve_resource_path(filepath: str) -> Path:
+    """Resolve a project resource path for source and bundled runtimes."""
+    path = Path(filepath)
+    if path.is_absolute():
+        return path
+
+    bundle_root = getattr(sys, "_MEIPASS", None)
+    if bundle_root is not None:
+        return Path(bundle_root) / path
+
+    return Path(__file__).resolve().parents[2] / path
 
 
 class LLMConfig(BaseSettings):
@@ -30,7 +91,8 @@ class LLMConfig(BaseSettings):
         Returns:
             LLMConfig instance
         """
-        with open(filepath) as f:
+        resolved_path = resolve_resource_path(filepath)
+        with resolved_path.open(encoding="utf-8") as f:
             data = json.load(f)
         return cls(**data)
 
@@ -72,7 +134,8 @@ class ScrapingConfig(BaseSettings):
         Returns:
             ScrapingConfig instance
         """
-        with open(filepath) as f:
+        resolved_path = resolve_resource_path(filepath)
+        with resolved_path.open(encoding="utf-8") as f:
             data = json.load(f)
         return cls(**data)
 
@@ -83,7 +146,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     # Data root — all job files and the SQLite DB live here (outside the repo)
-    data_root: str = Field(default="~/Documents/plot_your_path")
+    data_root: str = Field(default_factory=default_data_root)
 
     # Database — auto-derived from data_root if not explicitly set
     database_url: str | None = Field(default=None)
@@ -92,11 +155,11 @@ class Settings(BaseSettings):
     candidate_profile_path: str = Field(default="resume.md")
 
     # Backend Server
-    backend_host: str = Field(default="0.0.0.0")
-    backend_port: int = Field(default=8000)
+    backend_host: str = Field(default_factory=default_backend_host)
+    backend_port: int = Field(default_factory=default_backend_port)
 
     # Frontend
-    next_public_api_url: str = Field(default="http://localhost:8000")
+    next_public_api_url: str | None = Field(default=None)
 
     # API Keys (optional, loaded from env)
     openai_api_key: str | None = Field(default=None)
@@ -111,6 +174,11 @@ class Settings(BaseSettings):
         # Derive database_url from data_root when not explicitly configured
         if self.database_url is None:
             self.database_url = f"sqlite:///{self.data_root}/plot_your_path.db"
+        if self.next_public_api_url is None:
+            if is_desktop_runtime_enabled():
+                self.next_public_api_url = f"http://127.0.0.1:{self.backend_port}"
+            else:
+                self.next_public_api_url = f"http://localhost:{self.backend_port}"
         return self
 
 

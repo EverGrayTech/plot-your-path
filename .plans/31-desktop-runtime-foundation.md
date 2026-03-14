@@ -73,24 +73,24 @@ Refactor direction:
 ## Implementation Steps
 
 ### 1. Validate the desktop approach
-- [ ] Confirm Tauri is suitable for packaging the current Next.js and FastAPI architecture.
-- [ ] Document the chosen runtime model and its constraints.
+- [x] Confirm Tauri is suitable for packaging the current Next.js and FastAPI architecture.
+- [x] Document the chosen runtime model and its constraints.
 
 ### 2. Establish packaged runtime behavior
-- [ ] Implement frontend and backend startup orchestration for desktop use.
-- [ ] Ensure local API communication works cleanly in packaged and development desktop flows.
+- [x] Implement frontend and backend startup orchestration for desktop use.
+- [x] Ensure local API communication works cleanly in packaged and development desktop flows.
 
 ### 3. Define local storage behavior
-- [ ] Set and document the packaged app data-root strategy.
-- [ ] Ensure packaged runtime paths behave predictably across supported environments.
+- [x] Set and document the packaged app data-root strategy.
+- [x] Ensure packaged runtime paths behave predictably across supported environments.
 
 ### 4. Add build and packaging workflows
-- [ ] Introduce the required desktop build configuration and scripts.
-- [ ] Verify local developer and release build workflows are repeatable.
+- [x] Introduce the required desktop build configuration and scripts.
+- [x] Verify local developer and release build workflows are repeatable.
 
 ### 5. Test and document the foundation
-- [ ] Add validation for the packaged startup path where practical.
-- [ ] Document how the desktop runtime works for future contributors.
+- [x] Add validation for the packaged startup path where practical.
+- [x] Document how the desktop runtime works for future contributors.
 
 ## Affected Areas
 
@@ -102,8 +102,16 @@ Refactor direction:
 
 ## Success Criteria
 
-- [ ] A non-technical user no longer needs to run separate frontend and backend processes manually.
-- [ ] The packaged app preserves the project’s local-first data model.
-- [ ] Backend startup and frontend connectivity are reliable in desktop mode.
-- [ ] The repository has a documented and repeatable desktop build path.
-- [ ] The packaging foundation is strong enough for user onboarding and release hardening work.
+- [x] A non-technical user no longer needs to run separate frontend and backend processes manually.
+- [x] The packaged app preserves the project’s local-first data model.
+- [x] Backend startup and frontend connectivity are reliable in desktop mode.
+- [x] The repository has a documented and repeatable desktop build path.
+- [x] The packaging foundation is strong enough for user onboarding and release hardening work.
+
+## Deferred Follow-up After Plan 31 Implementation
+
+These items are intentionally not blocking the core desktop runtime foundation commit. They capture additional validation and hardening work that should happen as follow-up investigation rather than forcing re-evaluation of the completed implementation from scratch.
+
+- [ ] Run the full repository formatting, linting, and automated test suite after the desktop foundation commit and record any follow-up fixes separately.
+- [ ] Validate desktop development and release packaging workflows on each supported platform and document platform-specific prerequisites or release blockers.
+- [ ] Review the new desktop status surfaces for usability and determine whether richer startup diagnostics or onboarding guidance should be added in a follow-on plan.

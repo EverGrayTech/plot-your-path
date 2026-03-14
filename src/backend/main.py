@@ -6,7 +6,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.config import settings
+from backend.config import is_desktop_runtime_enabled, settings
 from backend.routers import ai_settings, desirability, jobs, skills
 
 
@@ -27,14 +27,35 @@ app = FastAPI(
 )
 
 
+def _allowed_origin_pattern() -> str:
+    """Return the CORS origin regex for browser and packaged runtimes."""
+    return (
+        r"^(https?://(localhost|127\.0\.0\.1)(:\d+)?|"
+        r"tauri://localhost|https?://tauri\.localhost)$"
+    )
+
+
 # CORS middleware to allow the frontend to call the API
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", settings.next_public_api_url],
+    allow_origins=[],
+    allow_origin_regex=_allowed_origin_pattern(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.get("/api/health")
+def healthcheck() -> dict[str, object]:
+    """Return runtime status for launch orchestration and troubleshooting."""
+    return {
+        "status": "ok",
+        "desktop_runtime": is_desktop_runtime_enabled(),
+        "data_root": settings.data_root,
+        "backend_port": settings.backend_port,
+    }
+
 
 # Mount routers
 app.include_router(jobs.router, prefix="/api")

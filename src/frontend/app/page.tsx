@@ -1,6 +1,8 @@
 import Link from "next/link";
 import React from "react";
 
+import { DesktopStatusCard } from "../components/DesktopStatusCard";
+
 export default function HomePage() {
   return (
     <>
@@ -27,6 +29,8 @@ export default function HomePage() {
             they are referenced.
           </p>
         </Link>
+
+        <DesktopStatusCard />
       </div>
     </>
   );
