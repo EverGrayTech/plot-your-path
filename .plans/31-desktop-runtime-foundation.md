@@ -11,6 +11,15 @@ This phase is about runtime architecture and packaging foundations, not final on
 - `.plans/28-design-system-foundation.md`
 - `.plans/29-app-shell-and-navigation-refresh.md`
 
+## Upstream Design System Context
+
+While the desktop runtime plan is primarily about packaging and process architecture, it benefits from the design system foundation in two ways:
+
+- **Shell stability**: The application shell structure is now defined by the upstream design system guidance (`docs/application-shell-and-navigation.md`), meaning the windowed shell dimensions, chrome regions, and responsive behavior have a predictable structure. The primary workspace shell pattern (top bar + side nav + workspace container) provides a known layout to package.
+- **Lightweight secondary shell**: The design system defines a simpler shell pattern (top bar only, no side nav, centered content) that can support lightweight desktop-specific surfaces like first-run setup or configuration, if needed before Plan 32 is implemented.
+
+No additional design system adoption work is required for this plan beyond what Plans 28 and 29 already establish.
+
 ## Goals
 
 1. Validate and establish the desktop packaging approach for the app.
