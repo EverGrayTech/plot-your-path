@@ -93,31 +93,31 @@ Refactor direction:
 ## Implementation Steps
 
 ### 1. Define the shell structure
-- [ ] Map product sections to the three-tier navigation hierarchy.
-- [ ] Define what the landing route should communicate and enable.
-- [ ] Decide which pages use the primary workspace shell and which (if any) use the lightweight secondary shell.
+- [x] Map product sections to the three-tier navigation hierarchy.
+- [x] Define what the landing route should communicate and enable.
+- [x] Decide which pages use the primary workspace shell and which (if any) use the lightweight secondary shell.
 
 ### 2. Implement the primary workspace shell
-- [ ] Build the top app bar with product identity and utility controls per app shell guidance Section 1.1.
-- [ ] Build the side navigation with full state treatments per app shell guidance Section 1.2 and Section 2.
-- [ ] Build the page header pattern per app shell guidance Section 1.3.
-- [ ] Establish the workspace container as the primary content area per app shell guidance Section 1.5.
+- [x] Build the top app bar with product identity and utility controls per app shell guidance Section 1.1.
+- [x] Build the side navigation with full state treatments per app shell guidance Section 1.2 and Section 2.
+- [x] Build the page header pattern per app shell guidance Section 1.3.
+- [x] Establish the workspace container as the primary content area per app shell guidance Section 1.5.
 
 ### 3. Implement navigation hierarchy and state
-- [ ] Apply the three-tier action hierarchy (primary, supporting, admin/utility) per app shell guidance Section 3.
-- [ ] Implement navigation state behavior (default, hover, focus, selected, disabled) with the specified tokens.
-- [ ] Separate utility navigation at the bottom of the side nav from primary workflow navigation.
+- [x] Apply the three-tier action hierarchy (primary, supporting, admin/utility) per app shell guidance Section 3.
+- [x] Implement navigation state behavior (default, hover, focus, selected, disabled) with the specified tokens.
+- [x] Separate utility navigation at the bottom of the side nav from primary workflow navigation.
 
 ### 4. Add responsive behavior
-- [ ] Implement side navigation collapse (expanded → icon-only → off-canvas) per app shell guidance Section 4.1.
-- [ ] Implement top bar simplification per app shell guidance Section 4.2.
-- [ ] Implement page header adaptation per app shell guidance Section 4.3.
+- [x] Implement side navigation collapse (expanded → icon-only → off-canvas) per app shell guidance Section 4.1.
+- [x] Implement top bar simplification per app shell guidance Section 4.2.
+- [x] Implement page header adaptation per app shell guidance Section 4.3.
 
 ### 5. Update pages and validate
-- [ ] Create the landing/home view replacing the current redirect.
-- [ ] Align the jobs and skills entry points with the new shell structure.
-- [ ] Add or update frontend tests for navigation, entry behavior, and major shell states.
-- [ ] Verify the resulting structure matches product-overview principles.
+- [x] Create the landing/home view replacing the current redirect.
+- [x] Align the jobs and skills entry points with the new shell structure.
+- [x] Add or update frontend tests for navigation, entry behavior, and major shell states.
+- [x] Verify the resulting structure matches product-overview principles.
 
 ## Affected Areas
 
@@ -130,11 +130,11 @@ Refactor direction:
 
 ## Success Criteria
 
-- [ ] The app uses the primary workspace shell pattern with top app bar, side navigation, page header, and workspace container.
-- [ ] The app has a real entry experience instead of a redirect-only root route.
-- [ ] Navigation reflects the core user journey through the three-tier hierarchy.
-- [ ] Navigation states (default, hover, focus, selected, disabled) match the upstream token mappings.
-- [ ] Primary actions and advanced settings are separated across the appropriate hierarchy tiers.
-- [ ] The shell feels calm, deliberate, and reusable across pages.
-- [ ] Responsive behavior follows the upstream collapse and simplification patterns.
-- [ ] The global structure is stable enough to support both workflow redesign and desktop packaging.
+- [x] The app uses the primary workspace shell pattern with top app bar, side navigation, page header, and workspace container.
+- [x] The app has a real entry experience instead of a redirect-only root route.
+- [x] Navigation reflects the core user journey through the three-tier hierarchy.
+- [x] Navigation states (default, hover, focus, selected, disabled) match the upstream token mappings.
+- [x] Primary actions and advanced settings are separated across the appropriate hierarchy tiers.
+- [x] The shell feels calm, deliberate, and reusable across pages.
+- [x] Responsive behavior follows the upstream collapse and simplification patterns.
+- [x] The global structure is stable enough to support both workflow redesign and desktop packaging.

@@ -1,17 +1,15 @@
+import { render, screen } from "@testing-library/react";
 import React from "react";
 
-import { redirect } from "next/navigation";
+import HomePage from "../../../src/frontend/app/page";
 
-import CapturePage from "../../../src/frontend/app/page";
+describe("HomePage", () => {
+  it("renders a landing view with navigation cards", () => {
+    render(<HomePage />);
 
-vi.mock("next/navigation", () => ({
-  redirect: vi.fn(),
-}));
-
-describe("CapturePage", () => {
-  it("redirects root route to /jobs", () => {
-    CapturePage();
-
-    expect(redirect).toHaveBeenCalledWith("/jobs");
+    expect(screen.getByRole("heading", { name: "Home" })).toBeInTheDocument();
+    expect(screen.getByText(/Capture opportunities/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Jobs/ })).toHaveAttribute("href", "/jobs");
+    expect(screen.getByRole("link", { name: /Skills/ })).toHaveAttribute("href", "/skills");
   });
 });

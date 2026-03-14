@@ -122,11 +122,13 @@ export function SkillsPageClient() {
 
   return (
     <section>
-      <header className="toolbar-header">
+      <header className="page-header">
         <h1>Skills</h1>
       </header>
 
-      <p>Browse captured skills and see how often they appear across roles.</p>
+      <p className="page-description">
+        Browse captured skills and see how often they appear across roles.
+      </p>
 
       <div className="form-grid-2-1">
         <label className="form-label">
