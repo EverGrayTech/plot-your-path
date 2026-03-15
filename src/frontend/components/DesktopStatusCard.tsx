@@ -25,6 +25,7 @@ export function DesktopStatusCard() {
         Desktop builds run the frontend inside a Tauri shell and launch the packaged backend
         automatically, so users do not need to manage separate terminals or ports.
       </p>
+      <p>Your workspace data stays in a local application folder unless you export a backup.</p>
       <ul>
         <li>
           API endpoint: <code>{API_BASE_URL}</code>

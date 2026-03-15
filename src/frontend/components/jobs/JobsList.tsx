@@ -8,6 +8,7 @@ interface JobsListProps {
   jobs: JobListItem[];
   listError: string | null;
   loadingJobs: boolean;
+  onOpenCapture?: () => void;
   onSelectJob: (jobId: number) => void;
 }
 
@@ -43,6 +44,7 @@ export function JobsList({
   jobs,
   listError,
   loadingJobs,
+  onOpenCapture,
   onSelectJob,
 }: JobsListProps) {
   return (
@@ -66,11 +68,17 @@ export function JobsList({
       ) : null}
 
       {!loadingJobs && !listError && jobs.length === 0 ? (
-        <div className="empty-state">
+        <div className="empty-state card">
           <p className="empty-state-title">No jobs captured yet</p>
           <p className="empty-state-description">
-            Add your first role to start tracking opportunities.
+            Capture your first role to start tracking opportunities, fit signals, and follow-up work
+            in one place.
           </p>
+          {onOpenCapture ? (
+            <button className="btn btn-primary" onClick={onOpenCapture} type="button">
+              Capture your first role
+            </button>
+          ) : null}
         </div>
       ) : null}
 

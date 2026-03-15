@@ -1,5 +1,6 @@
 import React from "react";
 
+import { DataManagementPanel } from "../../components/DataManagementPanel";
 import { DesktopStatusCard } from "../../components/DesktopStatusCard";
 
 export default function SettingsPage() {
@@ -9,7 +10,8 @@ export default function SettingsPage() {
         <h1>Settings</h1>
       </header>
       <p className="page-description">
-        Configuration and administration for AI models, desirability scoring, and system behavior.
+        Configuration and administration for AI models, desirability scoring, local data safety, and
+        packaged desktop behavior.
       </p>
 
       <section>
@@ -27,6 +29,8 @@ export default function SettingsPage() {
           settings are also accessible from the Jobs page toolbar.
         </p>
       </section>
+
+      <DataManagementPanel />
 
       <DesktopStatusCard />
     </>

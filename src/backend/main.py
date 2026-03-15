@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.config import is_desktop_runtime_enabled, settings
-from backend.routers import ai_settings, desirability, jobs, skills
+from backend.routers import ai_settings, desirability, jobs, skills, system
 
 
 @asynccontextmanager
@@ -62,3 +62,4 @@ app.include_router(jobs.router, prefix="/api")
 app.include_router(skills.router, prefix="/api")
 app.include_router(desirability.router, prefix="/api")
 app.include_router(ai_settings.router, prefix="/api")
+app.include_router(system.router, prefix="/api")

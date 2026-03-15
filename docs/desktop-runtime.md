@@ -1,6 +1,6 @@
 # Plot Your Path — Desktop Runtime Foundation
 
-See also: [Development Workflows](./development.md#desktop-runtime-workflows), [System Specification](./system-spec.md#local-first-by-default), [README](../README.md#documentation-map)
+See also: [Development Workflows](./development.md#desktop-runtime-workflows), [Windows Release Readiness](./windows-release-readiness.md), [System Specification](./system-spec.md#local-first-by-default), [README](../README.md#documentation-map)
 
 ## Purpose
 

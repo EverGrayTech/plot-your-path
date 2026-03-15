@@ -43,12 +43,14 @@ describe("JobsList", () => {
   });
 
   it("renders empty loading and error states without the jobs list", () => {
+    const onOpenCapture = vi.fn();
     const { rerender } = render(
       <JobsList
         captureNotice={null}
         jobs={[]}
         listError={null}
         loadingJobs={true}
+        onOpenCapture={onOpenCapture}
         onSelectJob={vi.fn()}
       />,
     );
@@ -62,11 +64,26 @@ describe("JobsList", () => {
         jobs={[]}
         listError="Failed to load jobs."
         loadingJobs={false}
+        onOpenCapture={onOpenCapture}
         onSelectJob={vi.fn()}
       />,
     );
 
     expect(screen.getByRole("alert")).toHaveTextContent("Failed to load jobs.");
     expect(screen.queryByRole("list")).not.toBeInTheDocument();
+
+    rerender(
+      <JobsList
+        captureNotice={null}
+        jobs={[]}
+        listError={null}
+        loadingJobs={false}
+        onOpenCapture={onOpenCapture}
+        onSelectJob={vi.fn()}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /Capture your first role/i }));
+    expect(onOpenCapture).toHaveBeenCalledTimes(1);
   });
 });

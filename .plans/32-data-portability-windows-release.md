@@ -116,22 +116,22 @@ Refactor direction:
 ## Implementation Steps
 
 ### 1. Improve first-run guidance
-- [ ] Add lightweight onboarding or guided empty-state support for first-time users using the upstream empty state and secondary shell patterns.
-- [ ] Ensure the first meaningful action is obvious.
+- [x] Add lightweight onboarding or guided empty-state support for first-time users using the upstream empty state and secondary shell patterns.
+- [x] Ensure the first meaningful action is obvious.
 
 ### 2. Add data control surfaces
-- [ ] Expose local-data visibility in a user-appropriate way using grouped metadata blocks.
-- [ ] Add backup/export and reset capabilities with appropriate confirmation and feedback patterns.
+- [x] Expose local-data visibility in a user-appropriate way using grouped metadata blocks.
+- [x] Add backup/export and reset capabilities with appropriate confirmation and feedback patterns.
 
 ### 3. Define recovery paths
-- [ ] Add restore or import behavior where it improves user safety with progress and error feedback.
-- [ ] Make destructive or irreversible actions explicit using modal confirmation with destructive-filled button variants.
+- [x] Add restore or import behavior where it improves user safety with progress and error feedback.
+- [x] Make destructive or irreversible actions explicit using modal confirmation with destructive-filled button variants.
 
 ### 4. Prepare release workflows
-- [ ] Document packaging, smoke testing, and handoff procedures.
-- [ ] Define the minimum release checklist for future user drops.
-- [ ] Define a platform-by-platform smoke-test matrix covering backend startup, frontend connectivity, healthcheck response, local data-root creation, and first-run clarity.
-- [ ] Record explicit deferred-status notes and prerequisites for macOS and Linux follow-up validation.
+- [x] Document packaging, smoke testing, and handoff procedures.
+- [x] Define the minimum release checklist for future user drops.
+- [x] Define a platform-by-platform smoke-test matrix covering backend startup, frontend connectivity, healthcheck response, local data-root creation, and first-run clarity.
+- [x] Record explicit deferred-status notes and prerequisites for macOS and Linux follow-up validation.
 
 ### 5. Validate Windows packaging and handoff
 - [ ] Validate Windows packaging on a native Windows machine and record installer, runtime, or signing blockers.
@@ -154,13 +154,13 @@ Refactor direction:
 
 ## Success Criteria
 
-- [ ] A non-technical user can understand how to start using the app.
-- [ ] Local data ownership and storage are communicated clearly.
-- [ ] Backup/export and reset workflows exist and are understandable.
-- [ ] Destructive data actions use modal confirmation with the upstream destructive-filled pattern.
-- [ ] Feedback states for data operations (success, error, progress) follow the upstream patterns.
-- [ ] Release handoff is supported by a repeatable checklist.
-- [ ] The supported packaging matrix is documented by platform and artifact type, including explicit pass/fail/blocker/deferred notes.
+- [x] A non-technical user can understand how to start using the app.
+- [x] Local data ownership and storage are communicated clearly.
+- [x] Backup/export and reset workflows exist and are understandable.
+- [x] Destructive data actions use modal confirmation with the upstream destructive-filled pattern.
+- [x] Feedback states for data operations (success, error, progress) follow the upstream patterns.
+- [x] Release handoff is supported by a repeatable checklist.
+- [x] The supported packaging matrix is documented by platform and artifact type, including explicit pass/fail/blocker/deferred notes.
 - [ ] Windows packaging has native validation notes sufficient for a tester drop.
-- [ ] macOS and Linux follow-up work is moved into explicit plans with clear prerequisites and blocker framing.
+- [x] macOS and Linux follow-up work is moved into explicit plans with clear prerequisites and blocker framing.
 - [ ] The packaged app feels safe enough to share outside the development context on the validated Windows path.
