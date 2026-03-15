@@ -154,6 +154,8 @@ pnpm desktop:build
 
 For runtime architecture details, data-root behavior, and packaging constraints, see [Desktop Runtime Foundation](./desktop-runtime.md).
 
+For the Windows tester-handoff checklist and smoke-test matrix, see [Windows Release Readiness](./windows-release-readiness.md).
+
 ## Design system consumption
 
 The frontend uses the `@evergraytech/design-system` npm package as the source of truth for foundational visual values. The upstream consumption guide defines the full rules; here is a quick reference:

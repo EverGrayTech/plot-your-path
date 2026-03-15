@@ -15,6 +15,14 @@ export default function HomePage() {
 
       <div className="form-grid-2col">
         <Link className="card" href="/jobs">
+          <h3>Start here</h3>
+          <p>
+            Begin with Jobs. Capture one role or paste a description so the app has a concrete
+            opportunity to analyze.
+          </p>
+        </Link>
+
+        <Link className="card" href="/jobs">
           <h3>Jobs</h3>
           <p>
             Capture and review roles from your job search. Analyze fit, score desirability, and

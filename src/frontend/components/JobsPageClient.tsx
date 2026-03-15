@@ -216,6 +216,7 @@ export function JobsPageClient() {
         jobs={sortedJobs}
         listError={listError}
         loadingJobs={loadingJobs}
+        onOpenCapture={() => setShowCaptureModal(true)}
         onSelectJob={openJobDetail}
       />
 
