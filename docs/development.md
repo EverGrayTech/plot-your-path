@@ -8,21 +8,39 @@ This document covers the practical workflows for running and testing the project
 
 For product intent and architectural direction, start with [Product Overview → In scope](./product-overview.md#in-scope) and [System Specification → Roadmap framing](./system-spec.md#roadmap-framing).
 
-## Run the app locally
+## Set up Development Environment
 
 These steps assume development from the repository root.
 
-### 1. Install dependencies
+### 1. Set up the Python virtual environment
+
+Create the project-local virtual environment:
+
+```bash
+uv venv
+```
+
+Activate it before running Python tooling:
+
+```bash
+# macOS / Linux
+source .venv/bin/activate
+
+# PowerShell on Windows
+.venv\Scripts\Activate.ps1
+```
+
+### 2. Install dependencies
 
 ```bash
 # Python / backend
-uv sync
+uv sync --extra dev
 
 # Node / frontend
 pnpm install
 ```
 
-### 2. Configure the environment
+### 3. Configure the environment
 
 ```bash
 cp .env.example .env
@@ -33,13 +51,15 @@ The default local URLs are:
 - backend API: `http://localhost:8000`
 - frontend app: `http://localhost:3000`
 
-### 3. Start the backend
+## Run the app locally
+
+### 1. Start the backend
 
 ```bash
 uv run uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-### 4. Start the frontend
+### 2. Start the frontend
 
 ```bash
 pnpm dev src/frontend --hostname 0.0.0.0 --port 3000
@@ -47,7 +67,7 @@ pnpm dev src/frontend --hostname 0.0.0.0 --port 3000
 
 The frontend lives in `src/frontend`, so the app directory must be passed when running from the repository root.
 
-### 5. Open the app
+### 3. Open the app
 
 Open:
 
@@ -64,12 +84,6 @@ hostname -I
 This project includes backend and frontend tests.
 
 ### Backend tests
-
-Install dev dependencies if needed:
-
-```bash
-uv sync --extra dev
-```
 
 Run all backend tests:
 
@@ -110,6 +124,8 @@ The desktop runtime packages the existing frontend and backend into a local Taur
 ### Prerequisites
 
 ```bash
+uv venv
+source .venv/bin/activate
 uv sync --extra dev
 pnpm install
 ```

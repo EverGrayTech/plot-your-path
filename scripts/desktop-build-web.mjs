@@ -18,6 +18,7 @@ function runCommand(command, args, extraEnv = {}) {
         NEXT_TELEMETRY_DISABLED: "1",
         ...extraEnv,
       },
+      shell: process.platform === "win32",      
       stdio: "inherit",
     });
 
@@ -51,7 +52,7 @@ for (const outputDir of [...outputCandidates, desktopDistDir]) {
   await rm(outputDir, { force: true, recursive: true });
 }
 
-await runCommand("pnpm", ["exec", "next", "build", "src/frontend"]);
+await runCommand(process.platform === "win32" ? "pnpm.cmd" : "pnpm", ["exec", "next", "build", "src/frontend"]);
 
 const outputDir = await resolveOutputDir();
 await cp(outputDir, desktopDistDir, { recursive: true });
