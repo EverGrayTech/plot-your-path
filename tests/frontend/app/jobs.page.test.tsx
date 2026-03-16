@@ -597,6 +597,8 @@ describe("JobsPageClient", () => {
     await screen.findByText("Engineer");
     fireEvent.click(screen.getByRole("button", { name: "AI Settings" }));
 
+    expect(await screen.findByText(/Browser-local AI configuration/i)).toBeInTheDocument();
+    expect(screen.getByText(/API keys are stored locally on this device/i)).toBeInTheDocument();
     expect(await screen.findByText(/Runtime token:\s*••••••••7890/i)).toBeInTheDocument();
 
     fireEvent.change(screen.getByPlaceholderText("Paste token"), {
@@ -607,6 +609,8 @@ describe("JobsPageClient", () => {
     await waitFor(() => {
       expect(updateTokenSpy).toHaveBeenCalledWith("job_parsing", "sk-test-0000");
     });
+
+    expect(await screen.findByText(/Local API key saved for this browser/i)).toBeInTheDocument();
   });
 
   it("shows pipeline rows and filters by stage with attention indicators", async () => {

@@ -192,6 +192,7 @@ export function useJobsFeatureModals() {
     try {
       await updateAISetting(family, payload);
       await loadAISettings();
+      setAISettingsError(null);
     } catch (error) {
       setAISettingsError(error instanceof Error ? error.message : "Failed to update AI setting.");
     }
@@ -211,6 +212,10 @@ export function useJobsFeatureModals() {
         [family]: "",
       }));
       await loadAISettings();
+      setHealthByFamily((previous) => ({
+        ...previous,
+        [family]: "Local API key saved for this browser.",
+      }));
     } catch (error) {
       setAISettingsError(error instanceof Error ? error.message : "Failed to update token.");
     }
@@ -220,6 +225,10 @@ export function useJobsFeatureModals() {
     try {
       await clearAISettingToken(family);
       await loadAISettings();
+      setHealthByFamily((previous) => ({
+        ...previous,
+        [family]: "Local API key removed from this browser.",
+      }));
     } catch (error) {
       setAISettingsError(error instanceof Error ? error.message : "Failed to clear token.");
     }
@@ -230,7 +239,9 @@ export function useJobsFeatureModals() {
       const response = await healthcheckAISetting(family);
       setHealthByFamily((previous) => ({
         ...previous,
-        [family]: response.ok ? "OK" : `Error: ${response.detail}`,
+        [family]: response.ok
+          ? "OK — configuration is ready for browser-based AI workflows."
+          : `Error: ${response.detail}`,
       }));
     } catch (error) {
       setHealthByFamily((previous) => ({

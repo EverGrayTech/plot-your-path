@@ -50,20 +50,20 @@ Refactor direction:
 ## Implementation Steps
 
 ### 1. Add provider settings
-- [ ] Add settings UX for one provider and local API key storage.
-- [ ] Ensure keys are removable/resettable.
+- [x] Add settings UX for one provider and local API key storage.
+- [x] Ensure keys are removable/resettable.
 
 ### 2. Implement evaluation flows
-- [ ] Build the fit/desirability evaluation workflow around the browser-local data model.
-- [ ] Ensure the outputs are shaped for reliable UI rendering.
+- [x] Build the fit/desirability evaluation workflow around the browser-local data model.
+- [x] Ensure the outputs are shaped for reliable UI rendering.
 
 ### 3. Implement application-help flows
-- [ ] Build durable cover letter generation/storage behavior.
-- [ ] Build regenerable assistance flows for form/question help.
+- [x] Build durable cover letter generation/storage behavior.
+- [x] Build regenerable assistance flows for form/question help.
 
 ### 4. Add safeguards and messaging
-- [ ] Add input validation for missing or weak pasted input.
-- [ ] Add user-facing messaging about model variability and responsibility for final output.
+- [x] Add input validation for missing or weak pasted input.
+- [x] Add user-facing messaging about model variability and responsibility for final output.
 
 ## Affected Areas
 
@@ -74,7 +74,7 @@ Refactor direction:
 
 ## Success Criteria
 
-- [ ] Users can configure one provider locally and use it without a server-managed secret flow.
-- [ ] Role evaluation works from pasted inputs in the browser-hosted MVP.
-- [ ] Cover letters are saved durably while other temporary outputs can be regenerated.
-- [ ] The UI frames AI outputs as helpful guidance rather than authority.
+- [x] Users can configure one provider locally and use it without a server-managed secret flow.
+- [x] Role evaluation works from pasted inputs in the browser-hosted MVP.
+- [x] Cover letters are saved durably while other temporary outputs can be regenerated.
+- [x] The UI frames AI outputs as helpful guidance rather than authority.
