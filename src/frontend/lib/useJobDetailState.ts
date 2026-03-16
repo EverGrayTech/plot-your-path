@@ -478,8 +478,11 @@ export function useJobDetailState({ loadJobs }: UseJobDetailStateOptions) {
         desirability_score_id: selectedJob.latest_desirability_score?.id ?? null,
         event_type: newOutcomeType,
         fit_analysis_id: selectedJob.latest_fit_analysis?.id ?? null,
+        model: selectedJob.latest_fit_analysis?.model ?? null,
+        model_family: selectedJob.latest_fit_analysis?.provider ?? null,
         notes: newOutcomeNotes || null,
         occurred_at: new Date(newOutcomeOccurredAt).toISOString(),
+        prompt_version: selectedJob.latest_fit_analysis?.version ?? null,
       });
       setOutcomeEvents(await listOutcomeEvents(selectedJob.id));
       setNewOutcomeNotes("");

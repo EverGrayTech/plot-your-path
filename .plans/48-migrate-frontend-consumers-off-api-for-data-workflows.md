@@ -22,6 +22,7 @@ This phase focuses on consumer cutover for jobs, skills, workflow state, and por
 
 Refactor direction:
 - Migrate hooks to use the new service/repository interfaces.
+- Consumer migration for `useJobDetailState.ts`, `useJobsFeatureModals.ts`, and related UI hooks/components.
 - Keep UI-state logic separate from persistence/transport concerns.
 
 ### 2. Component migration

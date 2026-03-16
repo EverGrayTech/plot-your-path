@@ -79,6 +79,9 @@ export interface OutcomeEventCreate {
   fit_analysis_id?: number | null;
   desirability_score_id?: number | null;
   application_material_id?: number | null;
+  model_family?: string | null;
+  model?: string | null;
+  prompt_version?: string | null;
 }
 
 export interface OutcomeConversionRow {

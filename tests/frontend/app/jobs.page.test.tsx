@@ -4,7 +4,9 @@ import { indexedDB } from "fake-indexeddb";
 
 import { JobsPageClient } from "../../../src/frontend/components/JobsPageClient";
 import * as api from "../../../src/frontend/lib/api";
+import { setFrontendServicesForTests } from "../../../src/frontend/lib/services";
 import { setJobsLoaderForTests } from "../../../src/frontend/lib/useJobsBoard";
+import type { FrontendServices } from "../../../src/frontend/lib/services/types";
 
 describe("JobsPageClient", () => {
   const jobs: api.JobListItem[] = [
@@ -37,9 +39,12 @@ describe("JobsPageClient", () => {
   afterEach(() => {
     vi.restoreAllMocks();
     setJobsLoaderForTests(null);
+    setFrontendServicesForTests(null);
+    delete (globalThis as { fetch?: typeof fetch }).fetch;
   });
 
   beforeEach(() => {
+    localStorage.clear();
     Object.defineProperty(window, "indexedDB", {
       configurable: true,
       value: indexedDB,
@@ -48,6 +53,69 @@ describe("JobsPageClient", () => {
     vi.spyOn(api, "listInterviewPrepPacks").mockResolvedValue([]);
     vi.spyOn(api, "listResumeTuning").mockResolvedValue([]);
     setJobsLoaderForTests(async () => jobs);
+    const services = {
+      jobs: {
+        getJob: api.getJob,
+        listJobs: api.listJobs,
+        scrapeJob: api.scrapeJob,
+        updateJobStatus: api.updateJobStatus,
+      },
+      skills: {
+        getSkill: api.getSkill,
+        listSkills: api.listSkills,
+      },
+      workflows: {
+        createOutcomeEvent: api.createOutcomeEvent,
+        getApplicationOps: api.getApplicationOps,
+        getOutcomeInsights: api.getOutcomeInsights,
+        getOutcomeTuningSuggestions: api.getOutcomeTuningSuggestions,
+        listInterviewStages: api.listInterviewStages,
+        listOutcomeEvents: api.listOutcomeEvents,
+        listPipeline: api.listPipeline,
+        updateInterviewStage: api.updateInterviewStage,
+        updateNextAction: api.updateNextAction,
+        upsertApplicationOps: api.upsertApplicationOps,
+      },
+      aiSettings: {
+        clearAISettingToken: api.clearAISettingToken,
+        healthcheckAISetting: api.healthcheckAISetting,
+        listAISettings: api.listAISettings,
+        updateAISetting: api.updateAISetting,
+        updateAISettingToken: api.updateAISettingToken,
+      },
+      aiGeneration: {
+        analyzeJobFit: api.analyzeJobFit,
+        generateCoverLetter: api.generateCoverLetter,
+        generateInterviewPrepPack: api.generateInterviewPrepPack,
+        generateQuestionAnswers: api.generateQuestionAnswers,
+        generateResumeTuning: api.generateResumeTuning,
+        listApplicationMaterials: api.listApplicationMaterials,
+        listInterviewPrepPacks: api.listInterviewPrepPacks,
+        listResumeTuning: api.listResumeTuning,
+        refreshDesirabilityScore: api.refreshDesirabilityScore,
+        regenerateInterviewPrepSection: api.regenerateInterviewPrepSection,
+        scoreJobDesirability: api.scoreJobDesirability,
+        syncResumeProfile: api.syncResumeProfile,
+        updateInterviewPrepPack: api.updateInterviewPrepPack,
+      },
+      desirabilityFactors: {
+        createDesirabilityFactor: api.createDesirabilityFactor,
+        deleteDesirabilityFactor: api.deleteDesirabilityFactor,
+        listDesirabilityFactors: api.listDesirabilityFactors,
+        reorderDesirabilityFactors: api.reorderDesirabilityFactors,
+        updateDesirabilityFactor: api.updateDesirabilityFactor,
+      },
+      portability: {
+        exportDataArchive: api.exportDataArchive,
+        getDataPortabilitySummary: api.getDataPortabilitySummary,
+        importDataArchive: api.importDataArchive,
+        resetDataWorkspace: api.resetDataWorkspace,
+      },
+    } satisfies FrontendServices;
+    setFrontendServicesForTests(services);
+    global.fetch = vi.fn(async () => {
+      throw new Error("Unexpected fetch in JobsPageClient test");
+    }) as typeof fetch;
   });
 
   it("loads jobs and applies search + sort controls", async () => {
@@ -1161,8 +1229,10 @@ describe("JobsPageClient", () => {
     expect(await screen.findByText(/Offer —/i)).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Outcome Insights" }));
-    expect(await screen.findByRole("heading", { name: "Outcome Insights" })).toBeInTheDocument();
-    expect(await screen.findByText(/Conversion by Fit Band/i)).toBeInTheDocument();
-    expect(await screen.findByText(/Prefer openai for new drafts/i)).toBeInTheDocument();
+    const outcomeInsightsHeading = await screen.findByRole("heading", { name: "Outcome Insights" });
+    const outcomeInsightsDialog = outcomeInsightsHeading.closest("dialog") as HTMLElement;
+    expect(outcomeInsightsHeading).toBeInTheDocument();
+    expect(await within(outcomeInsightsDialog).findByText(/Conversion by Fit Band/i)).toBeInTheDocument();
+    expect(await within(outcomeInsightsDialog).findByText(/Prefer openai for new drafts/i)).toBeInTheDocument();
   }, 20000);
 });

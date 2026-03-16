@@ -12,21 +12,7 @@ import type {
   PipelineCounters,
   PipelineItem,
 } from "./api";
-import {
-  clearAISettingToken,
-  createDesirabilityFactor,
-  deleteDesirabilityFactor,
-  getOutcomeInsights,
-  getOutcomeTuningSuggestions,
-  healthcheckAISetting,
-  listAISettings,
-  listDesirabilityFactors,
-  listPipeline,
-  reorderDesirabilityFactors,
-  updateAISetting,
-  updateAISettingToken,
-  updateDesirabilityFactor,
-} from "./api";
+import { getFrontendServices } from "./services";
 
 export type StageFilter = "all" | InterviewStage;
 
@@ -85,7 +71,7 @@ export function useJobsFeatureModals() {
       setPipelineLoading(true);
       setPipelineError(null);
       try {
-        const response = await listPipeline({
+        const response = await getFrontendServices().workflows.listPipeline({
           overdueOnly: pipelineOverdueOnly,
           recentlyUpdated: pipelineRecentlyUpdated,
           thisWeekDeadlines: pipelineWeekDeadlines,
@@ -106,7 +92,7 @@ export function useJobsFeatureModals() {
     setFactorsLoading(true);
     setFactorsError(null);
     try {
-      setFactors(await listDesirabilityFactors());
+      setFactors(await getFrontendServices().desirabilityFactors.listDesirabilityFactors());
     } catch (error) {
       setFactorsError(error instanceof Error ? error.message : "Failed to load factors.");
     } finally {
@@ -118,7 +104,7 @@ export function useJobsFeatureModals() {
     setAISettingsLoading(true);
     setAISettingsError(null);
     try {
-      setAISettings(await listAISettings());
+      setAISettings(await getFrontendServices().aiSettings.listAISettings());
     } catch (error) {
       setAISettingsError(error instanceof Error ? error.message : "Failed to load AI settings.");
     } finally {
@@ -131,8 +117,8 @@ export function useJobsFeatureModals() {
     setOutcomeInsightsError(null);
     try {
       const [insights, suggestions] = await Promise.all([
-        getOutcomeInsights(),
-        getOutcomeTuningSuggestions(),
+        getFrontendServices().workflows.getOutcomeInsights(),
+        getFrontendServices().workflows.getOutcomeTuningSuggestions(),
       ]);
       setOutcomeInsights(insights);
       setTuningSuggestions(suggestions);
@@ -190,7 +176,7 @@ export function useJobsFeatureModals() {
     payload: { api_key_env?: string; model?: string; provider?: string },
   ) => {
     try {
-      await updateAISetting(family, payload);
+      await getFrontendServices().aiSettings.updateAISetting(family, payload);
       await loadAISettings();
       setAISettingsError(null);
     } catch (error) {
@@ -206,7 +192,7 @@ export function useJobsFeatureModals() {
     }
 
     try {
-      await updateAISettingToken(family, token);
+      await getFrontendServices().aiSettings.updateAISettingToken(family, token);
       setTokenInputs((previous) => ({
         ...previous,
         [family]: "",
@@ -223,7 +209,7 @@ export function useJobsFeatureModals() {
 
   const handleClearToken = async (family: OperationFamily) => {
     try {
-      await clearAISettingToken(family);
+      await getFrontendServices().aiSettings.clearAISettingToken(family);
       await loadAISettings();
       setHealthByFamily((previous) => ({
         ...previous,
@@ -236,7 +222,7 @@ export function useJobsFeatureModals() {
 
   const handleHealthcheck = async (family: OperationFamily) => {
     try {
-      const response = await healthcheckAISetting(family);
+      const response = await getFrontendServices().aiSettings.healthcheckAISetting(family);
       setHealthByFamily((previous) => ({
         ...previous,
         [family]: response.ok
@@ -259,7 +245,7 @@ export function useJobsFeatureModals() {
     }
 
     try {
-      await createDesirabilityFactor({
+      await getFrontendServices().desirabilityFactors.createDesirabilityFactor({
         display_order: factors.length,
         is_active: true,
         name: newFactorName.trim(),
@@ -277,10 +263,10 @@ export function useJobsFeatureModals() {
 
   const handleDeleteFactor = async (factorId: number) => {
     try {
-      await deleteDesirabilityFactor(factorId);
+      await getFrontendServices().desirabilityFactors.deleteDesirabilityFactor(factorId);
       const ordered = factors.filter((factor) => factor.id !== factorId).map((factor) => factor.id);
       if (ordered.length) {
-        await reorderDesirabilityFactors(ordered);
+        await getFrontendServices().desirabilityFactors.reorderDesirabilityFactors(ordered);
       }
       await loadFactors();
     } catch (error) {
@@ -300,7 +286,11 @@ export function useJobsFeatureModals() {
     reordered.splice(nextIndex, 0, item);
 
     try {
-      setFactors(await reorderDesirabilityFactors(reordered.map((factor) => factor.id)));
+      setFactors(
+        await getFrontendServices().desirabilityFactors.reorderDesirabilityFactors(
+          reordered.map((factor) => factor.id),
+        ),
+      );
     } catch (error) {
       setFactorsError(error instanceof Error ? error.message : "Failed to reorder factors.");
     }
@@ -313,13 +303,19 @@ export function useJobsFeatureModals() {
   ) => {
     try {
       if (field === "is_active") {
-        await updateDesirabilityFactor(factorId, { is_active: Boolean(value) });
+        await getFrontendServices().desirabilityFactors.updateDesirabilityFactor(factorId, {
+          is_active: Boolean(value),
+        });
       }
       if (field === "prompt") {
-        await updateDesirabilityFactor(factorId, { prompt: String(value) });
+        await getFrontendServices().desirabilityFactors.updateDesirabilityFactor(factorId, {
+          prompt: String(value),
+        });
       }
       if (field === "weight") {
-        await updateDesirabilityFactor(factorId, { weight: Number(value) });
+        await getFrontendServices().desirabilityFactors.updateDesirabilityFactor(factorId, {
+          weight: Number(value),
+        });
       }
       await loadFactors();
     } catch (error) {

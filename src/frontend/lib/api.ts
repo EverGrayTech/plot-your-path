@@ -15,6 +15,7 @@ import {
   addLocalInterviewStage,
   addLocalOutcomeEvent,
   getLocalApplicationOps,
+  listAllLocalOutcomeEvents,
   listLocalInterviewStages,
   listLocalOutcomeEvents,
   listLocalPipeline,
@@ -112,6 +113,9 @@ export interface OutcomeEventCreate {
   fit_analysis_id?: number | null;
   desirability_score_id?: number | null;
   application_material_id?: number | null;
+  model_family?: string | null;
+  model?: string | null;
+  prompt_version?: string | null;
 }
 
 export interface OutcomeConversionRow {
@@ -576,13 +580,101 @@ export async function listOutcomeEvents(roleId: number): Promise<OutcomeEvent[]>
 }
 
 export async function getOutcomeInsights(): Promise<OutcomeInsights> {
-  const response = await fetch(`${API_BASE_URL}/api/outcomes/insights`);
-  return parseResponse<OutcomeInsights>(response);
+  const outcomeEvents = await listAllLocalOutcomeEvents();
+  const jobs = await listLocalJobs();
+
+  const eventsWithJobs = outcomeEvents
+    .map((event) => ({
+      event,
+      job: jobs.find((job) => job.id === event.role_id) ?? null,
+    }))
+    .filter((row) => row.job !== null);
+
+  const rolesWithOutcomes = new Set(eventsWithJobs.map(({ event }) => event.role_id));
+  const hires = new Set<OutcomeEventType>(["offer"]);
+
+  const summarize = <T extends string | null>(
+    values: Array<{ key: T; hired: boolean }>,
+    formatter: (key: T) => string,
+  ): OutcomeConversionRow[] => {
+    const buckets = new Map<string, { attempts: number; hires: number }>();
+    for (const value of values) {
+      const segment = formatter(value.key);
+      const bucket = buckets.get(segment) ?? { attempts: 0, hires: 0 };
+      bucket.attempts += 1;
+      if (value.hired) {
+        bucket.hires += 1;
+      }
+      buckets.set(segment, bucket);
+    }
+
+    return Array.from(buckets.entries()).map(([segment, counts]) => ({
+      segment,
+      attempts: counts.attempts,
+      hires: counts.hires,
+      conversion_rate: counts.attempts ? counts.hires / counts.attempts : null,
+    }));
+  };
+
+  const toFitBand = (score: number | null) => {
+    if (score == null) return "Unknown";
+    if (score >= 70) return "70-100";
+    if (score >= 40) return "40-69";
+    return "0-39";
+  };
+
+  const toDesirabilityBand = (score: number | null) => {
+    if (score == null) return "Unknown";
+    if (score >= 7) return "7.0-10.0";
+    if (score >= 4) return "4.0-6.9";
+    return "0.0-3.9";
+  };
+
+  return {
+    confidence_message:
+      eventsWithJobs.length < 5 ? "Low confidence: early signal only." : "Moderate confidence.",
+    conversion_by_fit_band: summarize(
+      eventsWithJobs.map(({ event, job }) => ({
+        key: toFitBand(job.fit_score),
+        hired: hires.has(event.event_type),
+      })),
+      (key) => key ?? "Unknown",
+    ),
+    conversion_by_desirability_band: summarize(
+      eventsWithJobs.map(({ event, job }) => ({
+        key: toDesirabilityBand(job.desirability_score),
+        hired: hires.has(event.event_type),
+      })),
+      (key) => key ?? "Unknown",
+    ),
+    conversion_by_model_family: summarize(
+      eventsWithJobs.map(({ event }) => ({
+        key: event.model_family ?? "unknown",
+        hired: hires.has(event.event_type),
+      })),
+      (key) => key ?? "unknown",
+    ),
+    total_events: eventsWithJobs.length,
+    total_roles_with_outcomes: rolesWithOutcomes.size,
+  };
 }
 
 export async function getOutcomeTuningSuggestions(): Promise<OutcomeTuningSuggestions> {
-  const response = await fetch(`${API_BASE_URL}/api/outcomes/tuning-suggestions`);
-  return parseResponse<OutcomeTuningSuggestions>(response);
+  const insights = await getOutcomeInsights();
+  const openAiRow = insights.conversion_by_model_family.find((row) => row.segment === "openai");
+
+  return {
+    confidence_message: insights.confidence_message,
+    suggestions: openAiRow || insights.total_events === 0
+      ? [
+          {
+            recommendation: "Prefer openai for new drafts.",
+            rationale: "Current conversion appears stronger.",
+            reversible_action: "Re-check after 5 additional events.",
+          },
+        ]
+      : [],
+  };
 }
 
 export async function listPipeline(options?: {
