@@ -4,7 +4,7 @@ import type {
   InterviewStage,
   OutcomeEventType,
   ResumeTuningSuggestion,
-} from "./api";
+} from "./dataModels";
 
 export function recommendationLabel(value: FitRecommendation | null): string {
   if (value === "go") {

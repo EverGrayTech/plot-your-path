@@ -1,7 +1,5 @@
 import React from "react";
 
-import { API_BASE_URL } from "../lib/api";
-
 export function DesktopStatusCard() {
   return (
     <section className="card" aria-label="Architecture status">
@@ -22,9 +20,6 @@ export function DesktopStatusCard() {
         </p>
       </div>
       <ul>
-        <li>
-          Active browser API base: <code>{API_BASE_URL}</code>
-        </li>
         <li>
           Active trust model: <code>browser-local workspace + explicit backups</code>
         </li>

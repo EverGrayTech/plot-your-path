@@ -498,64 +498,6 @@ export interface JobScrapeResponse {
   processing_time_seconds: number;
 }
 
-interface StructuredErrorDetail {
-  code?: string;
-  message?: string;
-}
-
-export class ApiError extends Error {
-  status: number;
-  detail: unknown;
-  code?: string;
-
-  constructor(message: string, status: number, detail: unknown, code?: string) {
-    super(message);
-    this.name = "ApiError";
-    this.status = status;
-    this.detail = detail;
-    this.code = code;
-  }
-}
-
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
-
-function parseStructuredDetail(detail: unknown): StructuredErrorDetail {
-  if (typeof detail === "object" && detail !== null) {
-    const maybeDetail = detail as StructuredErrorDetail;
-    return {
-      code: maybeDetail.code,
-      message: maybeDetail.message,
-    };
-  }
-  return {};
-}
-
-async function parseResponse<T>(response: Response): Promise<T> {
-  if (!response.ok) {
-    await throwApiError(response);
-  }
-
-  return (await response.json()) as T;
-}
-
-async function throwApiError(response: Response): Promise<never> {
-  let detail: unknown = "Request failed";
-  try {
-    const payload = await response.json();
-    detail = payload?.detail ?? detail;
-  } catch {
-    // Keep default when backend does not return JSON.
-  }
-
-  const { code, message } = parseStructuredDetail(detail);
-  throw new ApiError(
-    message ?? `Request failed with status ${response.status}`,
-    response.status,
-    detail,
-    code,
-  );
-}
-
 export async function getJob(roleId: number): Promise<JobDetail> {
   return getLocalJob(roleId);
 }
@@ -733,24 +675,13 @@ export async function analyzeJobFit(roleId: number): Promise<FitAnalysis> {
 export async function createDesirabilityFactor(
   payload: DesirabilityFactorCreate,
 ): Promise<DesirabilityFactor> {
-  const response = await fetch(`${API_BASE_URL}/api/desirability/factors`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
-
-  return parseResponse<DesirabilityFactor>(response);
+  void payload;
+  throw new Error("Desirability factor mutation is not available in the browser-local MVP path.");
 }
 
 export async function deleteDesirabilityFactor(factorId: number): Promise<void> {
-  const response = await fetch(`${API_BASE_URL}/api/desirability/factors/${factorId}`, {
-    method: "DELETE",
-  });
-  if (!response.ok) {
-    await parseResponse(response);
-  }
+  void factorId;
+  throw new Error("Desirability factor mutation is not available in the browser-local MVP path.");
 }
 
 export async function generateCoverLetter(roleId: number): Promise<ApplicationMaterial> {
@@ -766,16 +697,6 @@ export async function generateQuestionAnswers(
   questions: string[],
 ): Promise<ApplicationMaterial> {
   return generateLocalQuestionAnswers(roleId, questions);
-}
-
-export async function getApplicationMaterial(
-  roleId: number,
-  materialId: number,
-): Promise<ApplicationMaterial> {
-  const response = await fetch(
-    `${API_BASE_URL}/api/jobs/${roleId}/application-materials/${materialId}`,
-  );
-  return parseResponse<ApplicationMaterial>(response);
 }
 
 export async function listApplicationMaterials(roleId: number): Promise<ApplicationMaterial[]> {
@@ -828,15 +749,8 @@ export async function refreshDesirabilityScore(roleId: number): Promise<Desirabi
 export async function reorderDesirabilityFactors(
   factorIds: number[],
 ): Promise<DesirabilityFactor[]> {
-  const response = await fetch(`${API_BASE_URL}/api/desirability/factors/reorder`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ factor_ids: factorIds }),
-  });
-
-  return parseResponse<DesirabilityFactor[]>(response);
+  void factorIds;
+  throw new Error("Desirability factor reordering is not available in the browser-local MVP path.");
 }
 
 export async function scoreJobDesirability(roleId: number): Promise<DesirabilityScore> {
@@ -847,15 +761,9 @@ export async function updateDesirabilityFactor(
   factorId: number,
   payload: DesirabilityFactorUpdate,
 ): Promise<DesirabilityFactor> {
-  const response = await fetch(`${API_BASE_URL}/api/desirability/factors/${factorId}`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
-
-  return parseResponse<DesirabilityFactor>(response);
+  void factorId;
+  void payload;
+  throw new Error("Desirability factor mutation is not available in the browser-local MVP path.");
 }
 
 export async function listAISettings(): Promise<AISetting[]> {

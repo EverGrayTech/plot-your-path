@@ -2,22 +2,102 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 
 import { CaptureJobForm } from "../../../src/frontend/components/CaptureJobForm";
-import * as api from "../../../src/frontend/lib/api";
+import { setFrontendServicesForTests } from "../../../src/frontend/lib/services";
+import type { FrontendServices } from "../../../src/frontend/lib/services/types";
+
+function createServices(overrides?: Partial<FrontendServices>): FrontendServices {
+  return {
+    jobs: {
+      getJob: vi.fn(),
+      listJobs: vi.fn(),
+      scrapeJob: vi.fn(),
+      updateJobStatus: vi.fn(),
+      ...overrides?.jobs,
+    },
+    skills: {
+      getSkill: vi.fn(),
+      listSkills: vi.fn(),
+      ...overrides?.skills,
+    },
+    workflows: {
+      createOutcomeEvent: vi.fn(),
+      getApplicationOps: vi.fn(),
+      getOutcomeInsights: vi.fn(),
+      getOutcomeTuningSuggestions: vi.fn(),
+      listInterviewStages: vi.fn(),
+      listOutcomeEvents: vi.fn(),
+      listPipeline: vi.fn(),
+      updateInterviewStage: vi.fn(),
+      updateNextAction: vi.fn(),
+      upsertApplicationOps: vi.fn(),
+      ...overrides?.workflows,
+    },
+    aiSettings: {
+      clearAISettingToken: vi.fn(),
+      healthcheckAISetting: vi.fn(),
+      listAISettings: vi.fn(),
+      updateAISetting: vi.fn(),
+      updateAISettingToken: vi.fn(),
+      ...overrides?.aiSettings,
+    },
+    aiGeneration: {
+      analyzeJobFit: vi.fn(),
+      generateCoverLetter: vi.fn(),
+      generateInterviewPrepPack: vi.fn(),
+      generateQuestionAnswers: vi.fn(),
+      generateResumeTuning: vi.fn(),
+      listApplicationMaterials: vi.fn(),
+      listInterviewPrepPacks: vi.fn(),
+      listResumeTuning: vi.fn(),
+      refreshDesirabilityScore: vi.fn(),
+      regenerateInterviewPrepSection: vi.fn(),
+      scoreJobDesirability: vi.fn(),
+      syncResumeProfile: vi.fn(),
+      updateInterviewPrepPack: vi.fn(),
+      ...overrides?.aiGeneration,
+    },
+    desirabilityFactors: {
+      createDesirabilityFactor: vi.fn(),
+      deleteDesirabilityFactor: vi.fn(),
+      listDesirabilityFactors: vi.fn(),
+      reorderDesirabilityFactors: vi.fn(),
+      updateDesirabilityFactor: vi.fn(),
+      ...overrides?.desirabilityFactors,
+    },
+    portability: {
+      exportDataArchive: vi.fn(),
+      getDataPortabilitySummary: vi.fn(),
+      importDataArchive: vi.fn(),
+      resetDataWorkspace: vi.fn(),
+      ...overrides?.portability,
+    },
+  };
+}
 
 describe("CaptureJobForm", () => {
   afterEach(() => {
     vi.restoreAllMocks();
+    setFrontendServicesForTests(null);
   });
 
   it("submits URL first and renders success state", async () => {
-    vi.spyOn(api, "scrapeJob").mockResolvedValue({
-      status: "success",
-      role_id: 101,
-      company: "TechCo",
-      title: "Backend Engineer",
-      skills_extracted: 6,
-      processing_time_seconds: 1.2,
-    });
+    setFrontendServicesForTests(
+      createServices({
+        jobs: {
+          getJob: vi.fn(),
+          listJobs: vi.fn(),
+          scrapeJob: vi.fn().mockResolvedValue({
+            status: "success",
+            role_id: 101,
+            company: "TechCo",
+            title: "Backend Engineer",
+            skills_extracted: 6,
+            processing_time_seconds: 1.2,
+          }),
+          updateJobStatus: vi.fn(),
+        },
+      }),
+    );
 
     render(<CaptureJobForm />);
 
@@ -38,7 +118,7 @@ describe("CaptureJobForm", () => {
   });
 
   it("defaults to pasted job description capture for the browser MVP", async () => {
-    vi.spyOn(api, "scrapeJob").mockResolvedValue({
+    const scrapeJob = vi.fn().mockResolvedValue({
       status: "success",
       role_id: 22,
       company: "Paste Co",
@@ -46,6 +126,17 @@ describe("CaptureJobForm", () => {
       skills_extracted: 3,
       processing_time_seconds: 0.9,
     });
+
+    setFrontendServicesForTests(
+      createServices({
+        jobs: {
+          getJob: vi.fn(),
+          listJobs: vi.fn(),
+          scrapeJob,
+          updateJobStatus: vi.fn(),
+        },
+      }),
+    );
 
     render(<CaptureJobForm />);
 
@@ -58,7 +149,7 @@ describe("CaptureJobForm", () => {
     fireEvent.click(screen.getByRole("button", { name: /Capture from pasted text/i }));
 
     await waitFor(() => {
-      expect(api.scrapeJob).toHaveBeenCalledWith({
+      expect(scrapeJob).toHaveBeenCalledWith({
         fallback_text: "Senior engineer role with TypeScript and systems design.",
         url: "pasted-job-description",
       });
@@ -67,91 +158,18 @@ describe("CaptureJobForm", () => {
     expect(await screen.findByRole("status")).toHaveTextContent(/Role captured:\s*Typed Role\s*at\s*Paste Co/i);
   });
 
-  it("reveals fallback textarea when API requests fallback", async () => {
-    vi.spyOn(api, "scrapeJob").mockRejectedValueOnce(
-      new api.ApiError(
-        "Unable to scrape this URL. Paste the job text and resubmit.",
-        422,
-        {
-          code: "FALLBACK_TEXT_REQUIRED",
-          message: "Unable to scrape this URL. Paste the job text and resubmit.",
+  it("shows returned error message for failed URL capture", async () => {
+    const scrapeJob = vi.fn().mockRejectedValue(new Error("Unable to scrape this URL."));
+
+    setFrontendServicesForTests(
+      createServices({
+        jobs: {
+          getJob: vi.fn(),
+          listJobs: vi.fn(),
+          scrapeJob,
+          updateJobStatus: vi.fn(),
         },
-        "FALLBACK_TEXT_REQUIRED",
-      ),
-    );
-
-    render(<CaptureJobForm />);
-
-    fireEvent.change(screen.getByLabelText("Capture method"), {
-      target: { value: "url" },
-    });
-
-    fireEvent.change(screen.getByLabelText("Job URL"), {
-      target: { value: "https://example.com/jobs/blocked" },
-    });
-    fireEvent.click(screen.getByRole("button", { name: "Capture job" }));
-
-    expect(await screen.findByRole("alert")).toHaveTextContent("Unable to scrape this URL");
-    expect(screen.getByLabelText("Pasted job description text")).toBeInTheDocument();
-    expect(screen.getByLabelText("Pasted job description text")).toHaveClass("form-textarea");
-    expect(screen.getByRole("button", { name: "Submit with pasted text" })).toBeInTheDocument();
-  });
-
-  it("submits fallback text after fallback is requested", async () => {
-    const scrapeSpy = vi
-      .spyOn(api, "scrapeJob")
-      .mockRejectedValueOnce(
-        new api.ApiError(
-          "Unable to scrape this URL. Paste the job text and resubmit.",
-          422,
-          {
-            code: "FALLBACK_TEXT_REQUIRED",
-            message: "Unable to scrape this URL. Paste the job text and resubmit.",
-          },
-          "FALLBACK_TEXT_REQUIRED",
-        ),
-      )
-      .mockResolvedValueOnce({
-        status: "success",
-        role_id: 102,
-        company: "Fallback Inc",
-        title: "Platform Engineer",
-        skills_extracted: 5,
-        processing_time_seconds: 1.5,
-      });
-
-    render(<CaptureJobForm />);
-
-    fireEvent.change(screen.getByLabelText("Capture method"), {
-      target: { value: "url" },
-    });
-
-    fireEvent.change(screen.getByLabelText("Job URL"), {
-      target: { value: "https://example.com/jobs/blocked" },
-    });
-    fireEvent.click(screen.getByRole("button", { name: "Capture job" }));
-
-    await screen.findByLabelText("Pasted job description text");
-
-    fireEvent.change(screen.getByLabelText("Pasted job description text"), {
-      target: { value: "Full pasted JD text" },
-    });
-    fireEvent.click(screen.getByRole("button", { name: "Submit with pasted text" }));
-
-    await screen.findByRole("status");
-
-    expect(scrapeSpy).toHaveBeenNthCalledWith(1, {
-      url: "https://example.com/jobs/blocked",
-    });
-    expect(scrapeSpy).toHaveBeenNthCalledWith(2, {
-      url: "https://example.com/jobs/blocked",
-      fallback_text: "Full pasted JD text",
-    });
-  });
-
-  it("shows generic error for non-fallback API errors", async () => {
-    vi.spyOn(api, "scrapeJob").mockRejectedValue(
-      new api.ApiError("Server error", 500, "Server error"),
+      }),
     );
 
     render(<CaptureJobForm />);
@@ -166,7 +184,7 @@ describe("CaptureJobForm", () => {
     fireEvent.click(screen.getByRole("button", { name: "Capture job" }));
 
     await waitFor(() => {
-      expect(screen.getByRole("alert")).toHaveTextContent("Server error");
+      expect(screen.getByRole("alert")).toHaveTextContent("Unable to scrape this URL.");
     });
   });
 });
