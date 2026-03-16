@@ -2,13 +2,8 @@
 
 import React from "react";
 
-import {
-  type DataPortabilitySummary,
-  exportDataArchive,
-  getDataPortabilitySummary,
-  importDataArchive,
-  resetDataWorkspace,
-} from "../lib/api";
+import type { DataPortabilitySummary } from "../lib/dataModels";
+import { getFrontendServices } from "../lib/services";
 import { Modal } from "./Modal";
 
 function describeTimestamp(value: string | null): string {
@@ -59,6 +54,7 @@ function fileToBase64(file: File): Promise<string> {
 }
 
 export function DataManagementPanel() {
+  const services = getFrontendServices();
   const [summary, setSummary] = React.useState<DataPortabilitySummary | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -76,7 +72,7 @@ export function DataManagementPanel() {
     setError(null);
 
     try {
-      setSummary(await getDataPortabilitySummary());
+      setSummary(await services.portability.getDataPortabilitySummary());
     } catch (fetchError) {
       const message = fetchError instanceof Error ? fetchError.message : "Failed to load data.";
       setError(message);
@@ -91,7 +87,7 @@ export function DataManagementPanel() {
       setError(null);
 
       try {
-        setSummary(await getDataPortabilitySummary());
+        setSummary(await services.portability.getDataPortabilitySummary());
       } catch (fetchError) {
         const message = fetchError instanceof Error ? fetchError.message : "Failed to load data.";
         setError(message);
@@ -101,7 +97,7 @@ export function DataManagementPanel() {
     }
 
     void loadInitialSummary();
-  }, []);
+  }, [services]);
 
   React.useEffect(() => {
     if (!notice && !operationNotice) {
@@ -120,7 +116,7 @@ export function DataManagementPanel() {
     setOperationError(null);
 
     try {
-      const { blob, filename } = await exportDataArchive();
+      const { blob, filename } = await services.portability.exportDataArchive();
       const objectUrl = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = objectUrl;
@@ -152,7 +148,7 @@ export function DataManagementPanel() {
 
     try {
       const payload = await fileToBase64(file);
-      const result = await importDataArchive(payload);
+      const result = await services.portability.importDataArchive(payload);
       setNotice("Backup restored.");
       if (
         typeof result.added_count === "number" ||
@@ -179,7 +175,7 @@ export function DataManagementPanel() {
     setOperationError(null);
 
     try {
-      await resetDataWorkspace();
+      await services.portability.resetDataWorkspace();
       setShowResetConfirmation(false);
       setNotice("Local data reset.");
       await loadSummary();

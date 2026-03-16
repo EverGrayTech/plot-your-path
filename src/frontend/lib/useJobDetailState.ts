@@ -13,42 +13,21 @@ import type {
   ResumeTuningSuggestion,
   RoleStatus,
   SkillDetail,
-} from "./api";
-import {
-  analyzeJobFit,
-  createOutcomeEvent,
-  generateCoverLetter,
-  generateInterviewPrepPack,
-  generateQuestionAnswers,
-  generateResumeTuning,
-  getJob,
-  getSkill,
-  listApplicationMaterials,
-  listInterviewPrepPacks,
-  listOutcomeEvents,
-  listResumeTuning,
-  refreshDesirabilityScore,
-  regenerateInterviewPrepSection,
-  scoreJobDesirability,
-  syncResumeProfile,
-  updateInterviewPrepPack,
-  updateInterviewStage,
-  updateJobStatus,
-  updateNextAction,
-  upsertApplicationOps,
-} from "./api";
+} from "./dataModels";
 import {
   exportMarkdownFile,
   interviewPrepToMarkdown,
   resumeTuningToMarkdown,
   toLocalInputValue,
 } from "./jobsPageUtils";
+import { getFrontendServices } from "./services";
 
 interface UseJobDetailStateOptions {
   loadJobs: () => Promise<void>;
 }
 
 export function useJobDetailState({ loadJobs }: UseJobDetailStateOptions) {
+  const services = getFrontendServices();
   const [selectedRoleId, setSelectedRoleId] = useState<number | null>(null);
   const [selectedJob, setSelectedJob] = useState<JobDetail | null>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
@@ -132,7 +111,7 @@ export function useJobDetailState({ loadJobs }: UseJobDetailStateOptions) {
       setSelectedJob(null);
       setDetailError(null);
       try {
-        setSelectedJob(await getJob(selectedRoleId));
+        setSelectedJob(await services.jobs.getJob(selectedRoleId));
       } catch (error) {
         setDetailError(error instanceof Error ? error.message : "Failed to load job detail.");
       } finally {
@@ -141,7 +120,7 @@ export function useJobDetailState({ loadJobs }: UseJobDetailStateOptions) {
     };
 
     void fetchJobDetail();
-  }, [selectedRoleId]);
+  }, [selectedRoleId, services]);
 
   useEffect(() => {
     if (!selectedJob) {
@@ -171,7 +150,7 @@ export function useJobDetailState({ loadJobs }: UseJobDetailStateOptions) {
       setOutcomesLoading(true);
       setOutcomesError(null);
       try {
-        setOutcomeEvents(await listOutcomeEvents(selectedRoleId));
+        setOutcomeEvents(await services.workflows.listOutcomeEvents(selectedRoleId));
       } catch (error) {
         setOutcomesError(error instanceof Error ? error.message : "Failed to load outcome events.");
       } finally {
@@ -180,7 +159,7 @@ export function useJobDetailState({ loadJobs }: UseJobDetailStateOptions) {
     };
 
     void fetchOutcomes();
-  }, [selectedRoleId]);
+  }, [selectedRoleId, services]);
 
   useEffect(() => {
     if (!selectedSkillId) {
@@ -192,7 +171,7 @@ export function useJobDetailState({ loadJobs }: UseJobDetailStateOptions) {
       setSelectedSkill(null);
       setSkillDetailError(null);
       try {
-        setSelectedSkill(await getSkill(selectedSkillId));
+        setSelectedSkill(await services.skills.getSkill(selectedSkillId));
       } catch (error) {
         setSkillDetailError(
           error instanceof Error ? error.message : "Failed to load skill detail.",
@@ -203,7 +182,7 @@ export function useJobDetailState({ loadJobs }: UseJobDetailStateOptions) {
     };
 
     void fetchSkillDetail();
-  }, [selectedSkillId]);
+  }, [selectedSkillId, services]);
 
   useEffect(() => {
     if (!selectedRoleId) {
@@ -224,7 +203,7 @@ export function useJobDetailState({ loadJobs }: UseJobDetailStateOptions) {
       setLoadingMaterials(true);
       setMaterialsError(null);
       try {
-        const response = await listApplicationMaterials(selectedRoleId);
+        const response = await services.aiGeneration.listApplicationMaterials(selectedRoleId);
         setApplicationMaterials(response);
         setSelectedMaterialId((previous) => {
           if (previous && response.some((item) => item.id === previous)) {
@@ -242,7 +221,7 @@ export function useJobDetailState({ loadJobs }: UseJobDetailStateOptions) {
     };
 
     void fetchMaterials();
-  }, [selectedRoleId]);
+  }, [selectedRoleId, services]);
 
   useEffect(() => {
     if (!selectedRoleId) {
@@ -253,7 +232,7 @@ export function useJobDetailState({ loadJobs }: UseJobDetailStateOptions) {
       setInterviewPrepLoading(true);
       setInterviewPrepError(null);
       try {
-        const response = await listInterviewPrepPacks(selectedRoleId);
+        const response = await services.aiGeneration.listInterviewPrepPacks(selectedRoleId);
         setInterviewPrepPacks(response);
         setSelectedInterviewPrepId((previous) => {
           if (previous && response.some((item) => item.id === previous)) {
@@ -271,7 +250,7 @@ export function useJobDetailState({ loadJobs }: UseJobDetailStateOptions) {
     };
 
     void fetchInterviewPrepPacks();
-  }, [selectedRoleId]);
+  }, [selectedRoleId, services]);
 
   useEffect(() => {
     if (!selectedRoleId) {
@@ -282,7 +261,7 @@ export function useJobDetailState({ loadJobs }: UseJobDetailStateOptions) {
       setResumeTuningLoading(true);
       setResumeTuningError(null);
       try {
-        const response = await listResumeTuning(selectedRoleId);
+        const response = await services.aiGeneration.listResumeTuning(selectedRoleId);
         setResumeTuningSuggestions(response);
         setSelectedResumeTuningId((previous) => {
           if (previous && response.some((item) => item.id === previous)) {
@@ -300,7 +279,7 @@ export function useJobDetailState({ loadJobs }: UseJobDetailStateOptions) {
     };
 
     void fetchResumeTuning();
-  }, [selectedRoleId]);
+  }, [selectedRoleId, services]);
 
   const selectedInterviewPrepPack =
     interviewPrepPacks.find((item) => item.id === selectedInterviewPrepId) ?? null;
@@ -349,7 +328,7 @@ export function useJobDetailState({ loadJobs }: UseJobDetailStateOptions) {
   };
 
   const refreshSelectedJob = async (roleId: number) => {
-    setSelectedJob(await getJob(roleId));
+    setSelectedJob(await services.jobs.getJob(roleId));
   };
 
   const handleStatusChange = async (nextStatus: RoleStatus) => {
@@ -360,7 +339,7 @@ export function useJobDetailState({ loadJobs }: UseJobDetailStateOptions) {
     setUpdatingStatus(true);
     setStatusError(null);
     try {
-      await updateJobStatus(selectedJob.id, nextStatus);
+      await services.jobs.updateJobStatus(selectedJob.id, nextStatus);
       await loadJobs();
       await refreshSelectedJob(selectedJob.id);
     } catch (error) {
@@ -378,7 +357,7 @@ export function useJobDetailState({ loadJobs }: UseJobDetailStateOptions) {
     setAnalyzingFit(true);
     setFitError(null);
     try {
-      const response = await analyzeJobFit(selectedJob.id);
+      const response = await services.aiGeneration.analyzeJobFit(selectedJob.id);
       setSelectedJob((previous) =>
         previous
           ? {
@@ -407,7 +386,7 @@ export function useJobDetailState({ loadJobs }: UseJobDetailStateOptions) {
     setOpsSaving(true);
     setOpsError(null);
     try {
-      await upsertApplicationOps(selectedJob.id, {
+      await services.workflows.upsertApplicationOps(selectedJob.id, {
         applied_at: opsAppliedAt || null,
         deadline_at: opsDeadlineAt || null,
         next_action_at: opsNextActionAt || null,
@@ -432,7 +411,7 @@ export function useJobDetailState({ loadJobs }: UseJobDetailStateOptions) {
     setStageSaving(true);
     setOpsError(null);
     try {
-      await updateInterviewStage(selectedJob.id, {
+      await services.workflows.updateInterviewStage(selectedJob.id, {
         occurred_at: new Date(stageOccurredAt).toISOString(),
         notes: stageNotes || null,
         stage: newStage,
@@ -456,7 +435,7 @@ export function useJobDetailState({ loadJobs }: UseJobDetailStateOptions) {
     next.setDate(next.getDate() + daysFromNow);
 
     try {
-      const updated = await updateNextAction(selectedJob.id, next.toISOString());
+      const updated = await services.workflows.updateNextAction(selectedJob.id, next.toISOString());
       setOpsNextActionAt(toLocalInputValue(updated.next_action_at));
       await refreshSelectedJob(selectedJob.id);
       await loadJobs();
@@ -473,7 +452,7 @@ export function useJobDetailState({ loadJobs }: UseJobDetailStateOptions) {
     setSavingOutcome(true);
     setOutcomesError(null);
     try {
-      await createOutcomeEvent(selectedJob.id, {
+      await services.workflows.createOutcomeEvent(selectedJob.id, {
         application_material_id: selectedMaterialId,
         desirability_score_id: selectedJob.latest_desirability_score?.id ?? null,
         event_type: newOutcomeType,
@@ -484,7 +463,7 @@ export function useJobDetailState({ loadJobs }: UseJobDetailStateOptions) {
         occurred_at: new Date(newOutcomeOccurredAt).toISOString(),
         prompt_version: selectedJob.latest_fit_analysis?.version ?? null,
       });
-      setOutcomeEvents(await listOutcomeEvents(selectedJob.id));
+      setOutcomeEvents(await services.workflows.listOutcomeEvents(selectedJob.id));
       setNewOutcomeNotes("");
     } catch (error) {
       setOutcomesError(error instanceof Error ? error.message : "Failed to log outcome event.");
@@ -501,8 +480,8 @@ export function useJobDetailState({ loadJobs }: UseJobDetailStateOptions) {
     setGeneratingCoverLetter(true);
     setMaterialsError(null);
     try {
-      const created = await generateCoverLetter(selectedJob.id);
-      const refreshed = await listApplicationMaterials(selectedJob.id);
+      const created = await services.aiGeneration.generateCoverLetter(selectedJob.id);
+      const refreshed = await services.aiGeneration.listApplicationMaterials(selectedJob.id);
       setApplicationMaterials(refreshed);
       setSelectedMaterialId(created.id);
     } catch (error) {
@@ -534,8 +513,8 @@ export function useJobDetailState({ loadJobs }: UseJobDetailStateOptions) {
     setGeneratingQA(true);
     setMaterialsError(null);
     try {
-      const created = await generateQuestionAnswers(selectedJob.id, questions);
-      const refreshed = await listApplicationMaterials(selectedJob.id);
+      const created = await services.aiGeneration.generateQuestionAnswers(selectedJob.id, questions);
+      const refreshed = await services.aiGeneration.listApplicationMaterials(selectedJob.id);
       setApplicationMaterials(refreshed);
       setSelectedMaterialId(created.id);
     } catch (error) {
@@ -557,8 +536,8 @@ export function useJobDetailState({ loadJobs }: UseJobDetailStateOptions) {
     setGeneratingInterviewPrep(true);
     setInterviewPrepError(null);
     try {
-      const created = await generateInterviewPrepPack(selectedJob.id);
-      const refreshed = await listInterviewPrepPacks(selectedJob.id);
+      const created = await services.aiGeneration.generateInterviewPrepPack(selectedJob.id);
+      const refreshed = await services.aiGeneration.listInterviewPrepPacks(selectedJob.id);
       setInterviewPrepPacks(refreshed);
       setSelectedInterviewPrepId(created.id);
     } catch (error) {
@@ -580,8 +559,8 @@ export function useJobDetailState({ loadJobs }: UseJobDetailStateOptions) {
     setRegeneratingSection(section);
     setInterviewPrepError(null);
     try {
-      const updated = await regenerateInterviewPrepSection(selectedJob.id, section);
-      const refreshed = await listInterviewPrepPacks(selectedJob.id);
+      const updated = await services.aiGeneration.regenerateInterviewPrepSection(selectedJob.id, section);
+      const refreshed = await services.aiGeneration.listInterviewPrepPacks(selectedJob.id);
       setInterviewPrepPacks(refreshed);
       setSelectedInterviewPrepId(updated.id);
     } catch (error) {
@@ -622,7 +601,7 @@ export function useJobDetailState({ loadJobs }: UseJobDetailStateOptions) {
     setSavingInterviewPrep(true);
     setInterviewPrepError(null);
     try {
-      const saved = await updateInterviewPrepPack(
+      const saved = await services.aiGeneration.updateInterviewPrepPack(
         selectedJob.id,
         selectedInterviewPrepPack.id,
         sections,
@@ -657,7 +636,7 @@ export function useJobDetailState({ loadJobs }: UseJobDetailStateOptions) {
     setResumeTuningError(null);
     setResumeSyncNotice(null);
     try {
-      const result = await syncResumeProfile();
+      const result = await services.aiGeneration.syncResumeProfile();
       setResumeSyncNotice(
         `Synced ${result.ingested_count} resume section(s) from ${result.source_used}.`,
       );
@@ -678,8 +657,8 @@ export function useJobDetailState({ loadJobs }: UseJobDetailStateOptions) {
     setGeneratingResumeTuning(true);
     setResumeTuningError(null);
     try {
-      const created = await generateResumeTuning(selectedJob.id);
-      const refreshed = await listResumeTuning(selectedJob.id);
+      const created = await services.aiGeneration.generateResumeTuning(selectedJob.id);
+      const refreshed = await services.aiGeneration.listResumeTuning(selectedJob.id);
       setResumeTuningSuggestions(refreshed);
       setSelectedResumeTuningId(created.id);
     } catch (error) {
@@ -715,8 +694,8 @@ export function useJobDetailState({ loadJobs }: UseJobDetailStateOptions) {
     setDesirabilityError(null);
     try {
       const score = forceRefresh
-        ? await refreshDesirabilityScore(selectedJob.id)
-        : await scoreJobDesirability(selectedJob.id);
+        ? await services.aiGeneration.refreshDesirabilityScore(selectedJob.id)
+        : await services.aiGeneration.scoreJobDesirability(selectedJob.id);
       setSelectedJob((previous) =>
         previous
           ? {

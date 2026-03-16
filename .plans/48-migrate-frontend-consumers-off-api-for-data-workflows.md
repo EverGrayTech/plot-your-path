@@ -39,16 +39,16 @@ Refactor direction:
 ## Implementation Steps
 
 ### 1. Migrate hooks
-- [ ] Move jobs/skills/data-management hooks off `api.ts` for non-AI flows.
-- [ ] Remove direct non-AI endpoint assumptions from hook logic.
+- [x] Move jobs/skills/data-management hooks off `api.ts` for non-AI flows.
+- [x] Remove direct non-AI endpoint assumptions from hook logic.
 
 ### 2. Migrate components
-- [ ] Move feature components off direct non-AI `api.ts` imports where applicable.
-- [ ] Ensure consumer behavior remains stable through the new services.
+- [x] Move feature components off direct non-AI `api.ts` imports where applicable.
+- [x] Ensure consumer behavior remains stable through the new services.
 
 ### 3. Validate parity
-- [ ] Update/run frontend tests for migrated non-AI consumer flows.
-- [ ] Confirm active non-AI consumers no longer depend on endpoint helpers.
+- [x] Update/run frontend tests for migrated non-AI consumer flows.
+- [x] Confirm active non-AI consumers no longer depend on endpoint helpers.
 
 ## Affected Areas
 
@@ -59,6 +59,6 @@ Refactor direction:
 
 ## Success Criteria
 
-- [ ] Non-AI hooks/components no longer depend directly on `api.ts`.
-- [ ] UI logic depends on local service boundaries instead of endpoint helpers.
-- [ ] Tests cover the consumer cutover successfully.
+- [x] Non-AI hooks/components no longer depend directly on `api.ts`.
+- [x] UI logic depends on local service boundaries instead of endpoint helpers.
+- [x] Tests cover the consumer cutover successfully.

@@ -2,19 +2,14 @@
 
 import React, { useEffect, useState } from "react";
 
-import {
-  type JobDetail,
-  type SkillDetail,
-  type SkillListItem,
-  getJob,
-  getSkill,
-  listSkills,
-} from "../lib/api";
+import type { JobDetail, SkillDetail, SkillListItem } from "../lib/dataModels";
+import { getFrontendServices } from "../lib/services";
 import { Modal } from "./Modal";
 
 type SkillSortMode = "most_used" | "least_used" | "name_az";
 
 export function SkillsPageClient() {
+  const services = getFrontendServices();
   const [skills, setSkills] = useState<SkillListItem[]>([]);
   const [loadingSkills, setLoadingSkills] = useState(true);
   const [skillsError, setSkillsError] = useState<string | null>(null);
@@ -34,7 +29,7 @@ export function SkillsPageClient() {
       setLoadingSkills(true);
       setSkillsError(null);
       try {
-        const response = await listSkills();
+        const response = await services.skills.listSkills();
         setSkills(response);
       } catch (error) {
         if (error instanceof Error) {
@@ -48,7 +43,7 @@ export function SkillsPageClient() {
     };
 
     loadSkills();
-  }, []);
+  }, [services]);
 
   useEffect(() => {
     if (!selectedSkillId) {
@@ -60,7 +55,7 @@ export function SkillsPageClient() {
       setSelectedSkill(null);
       setSkillDetailError(null);
       try {
-        const response = await getSkill(selectedSkillId);
+        const response = await services.skills.getSkill(selectedSkillId);
         setSelectedSkill(response);
       } catch (error) {
         if (error instanceof Error) {
@@ -74,7 +69,7 @@ export function SkillsPageClient() {
     };
 
     loadSkillDetail();
-  }, [selectedSkillId]);
+  }, [selectedSkillId, services]);
 
   useEffect(() => {
     if (!selectedRoleId) {
@@ -86,7 +81,7 @@ export function SkillsPageClient() {
       setSelectedJob(null);
       setJobDetailError(null);
       try {
-        const response = await getJob(selectedRoleId);
+        const response = await services.jobs.getJob(selectedRoleId);
         setSelectedJob(response);
       } catch (error) {
         if (error instanceof Error) {
@@ -100,7 +95,7 @@ export function SkillsPageClient() {
     };
 
     loadJobDetail();
-  }, [selectedRoleId]);
+  }, [selectedRoleId, services]);
 
   const filteredSkills = skills.filter((skill) => {
     const query = search.trim().toLowerCase();
