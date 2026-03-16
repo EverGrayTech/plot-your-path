@@ -29,8 +29,7 @@ Refactor direction:
 
 Refactor direction:
 - Centralize how hooks/components obtain their data/services.
-- Avoid spreading direct storage/provider wiring throughout the UI.
-
+- Avoid spreading direct storage/provider wiring throughout UI
 ### 3. Transitional coexistence
 
 Refactor direction:
@@ -45,11 +44,11 @@ Refactor direction:
 
 ### 2. Centralize dependency wiring
 - [x] Add a coherent composition layer for frontend services.
-- [ ] Keep direct transport/storage/provider setup out of feature components.
+- [x] Keep direct transport/storage/provider setup out of feature components.
 
 ### 3. Prepare migration
 - [x] Document which current `api.ts` responsibilities map to which new services.
-- [ ] Ensure the structure supports incremental consumer cutover.
+- [x] Ensure the structure supports incremental consumer cutover.
 
 ## Affected Areas
 
@@ -60,5 +59,5 @@ Refactor direction:
 ## Success Criteria
 
 - [x] The frontend has a clear target service architecture.
-- [ ] Later migrations can move consumers incrementally without redesigning boundaries.
+- [x] Later migrations can move consumers incrementally without redesigning boundaries.
 - [x] `api.ts` is no longer the only obvious architectural interface.
