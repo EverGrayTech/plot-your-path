@@ -41,16 +41,16 @@ Refactor direction:
 ## Implementation Steps
 
 ### 1. Replace portability endpoints
-- [ ] Replace export/import/reset logic with browser-local implementations.
-- [ ] Implement local workspace summary metadata and backup reminder calculations.
+- [x] Replace export/import/reset logic with browser-local implementations.
+- [x] Implement local workspace summary metadata and backup reminder calculations.
 
 ### 2. Validate import/export semantics
-- [ ] Preserve readable archive structure, versioning, and merge-oriented import behavior.
-- [ ] Add/update tests for browser-local backup and restore flows.
+- [x] Preserve readable archive structure, versioning, and merge-oriented import behavior.
+- [x] Add/update tests for browser-local backup and restore flows.
 
 ### 3. Validate reset and trust behavior
-- [ ] Ensure reset clears the intended local workspace data only.
-- [ ] Keep API keys excluded from export flows.
+- [x] Ensure reset clears the intended local workspace data only.
+- [x] Keep API keys excluded from export flows.
 
 ## Affected Areas
 
@@ -61,6 +61,6 @@ Refactor direction:
 
 ## Success Criteria
 
-- [ ] Export/import/reset no longer require backend persistence endpoints.
-- [ ] Workspace management works entirely from browser-local data.
-- [ ] Backup UX remains trustworthy and understandable.
+- [x] Export/import/reset no longer require backend persistence endpoints.
+- [x] Workspace management works entirely from browser-local data.
+- [x] Backup UX remains trustworthy and understandable.
