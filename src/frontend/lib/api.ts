@@ -22,6 +22,27 @@ import {
   upsertLocalApplicationOps,
 } from "./localApplicationWorkflows";
 import {
+  analyzeLocalJobFit,
+  clearLocalAISettingToken,
+  generateLocalCoverLetter,
+  generateLocalInterviewPrepPack,
+  generateLocalQuestionAnswers,
+  generateLocalResumeTuning,
+  healthcheckLocalAISetting,
+  listLocalAISettings,
+  listLocalApplicationMaterials,
+  listLocalDesirabilityFactors,
+  listLocalInterviewPrepPacks,
+  listLocalResumeTuning,
+  refreshLocalJobDesirability,
+  regenerateLocalInterviewPrepSection,
+  scoreLocalJobDesirability,
+  syncLocalResumeProfile,
+  updateLocalAISetting,
+  updateLocalAISettingToken,
+  updateLocalInterviewPrepPack,
+} from "./localAi";
+import {
   exportLocalDataArchive,
   getLocalDataPortabilitySummary,
   importLocalDataArchive,
@@ -614,11 +635,7 @@ export async function updateJobStatus(roleId: number, status: RoleStatus): Promi
 }
 
 export async function analyzeJobFit(roleId: number): Promise<FitAnalysis> {
-  const response = await fetch(`${API_BASE_URL}/api/jobs/${roleId}/fit-analysis`, {
-    method: "POST",
-  });
-
-  return parseResponse<FitAnalysis>(response);
+  return analyzeLocalJobFit(roleId);
 }
 
 export async function createDesirabilityFactor(
@@ -645,37 +662,18 @@ export async function deleteDesirabilityFactor(factorId: number): Promise<void> 
 }
 
 export async function generateCoverLetter(roleId: number): Promise<ApplicationMaterial> {
-  const response = await fetch(
-    `${API_BASE_URL}/api/jobs/${roleId}/application-materials/cover-letter`,
-    {
-      method: "POST",
-    },
-  );
-
-  return parseResponse<ApplicationMaterial>(response);
+  return generateLocalCoverLetter(roleId);
 }
 
 export async function listDesirabilityFactors(): Promise<DesirabilityFactor[]> {
-  const response = await fetch(`${API_BASE_URL}/api/desirability/factors`);
-  return parseResponse<DesirabilityFactor[]>(response);
+  return listLocalDesirabilityFactors();
 }
 
 export async function generateQuestionAnswers(
   roleId: number,
   questions: string[],
 ): Promise<ApplicationMaterial> {
-  const response = await fetch(
-    `${API_BASE_URL}/api/jobs/${roleId}/application-materials/question-answers`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ questions }),
-    },
-  );
-
-  return parseResponse<ApplicationMaterial>(response);
+  return generateLocalQuestionAnswers(roleId, questions);
 }
 
 export async function getApplicationMaterial(
@@ -689,37 +687,22 @@ export async function getApplicationMaterial(
 }
 
 export async function listApplicationMaterials(roleId: number): Promise<ApplicationMaterial[]> {
-  const response = await fetch(`${API_BASE_URL}/api/jobs/${roleId}/application-materials`);
-  return parseResponse<ApplicationMaterial[]>(response);
+  return listLocalApplicationMaterials(roleId);
 }
 
 export async function generateInterviewPrepPack(roleId: number): Promise<InterviewPrepPack> {
-  const response = await fetch(`${API_BASE_URL}/api/jobs/${roleId}/interview-prep-pack`, {
-    method: "POST",
-  });
-  return parseResponse<InterviewPrepPack>(response);
+  return generateLocalInterviewPrepPack(roleId);
 }
 
 export async function listInterviewPrepPacks(roleId: number): Promise<InterviewPrepPack[]> {
-  const response = await fetch(`${API_BASE_URL}/api/jobs/${roleId}/interview-prep-pack`);
-  return parseResponse<InterviewPrepPack[]>(response);
+  return listLocalInterviewPrepPacks(roleId);
 }
 
 export async function regenerateInterviewPrepSection(
   roleId: number,
   section: InterviewPrepSectionKey,
 ): Promise<InterviewPrepPack> {
-  const response = await fetch(
-    `${API_BASE_URL}/api/jobs/${roleId}/interview-prep-pack/regenerate`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ section }),
-    },
-  );
-  return parseResponse<InterviewPrepPack>(response);
+  return regenerateLocalInterviewPrepSection(roleId, section);
 }
 
 export async function updateInterviewPrepPack(
@@ -727,51 +710,27 @@ export async function updateInterviewPrepPack(
   materialId: number,
   sections: InterviewPrepPackSections,
 ): Promise<InterviewPrepPack> {
-  const response = await fetch(
-    `${API_BASE_URL}/api/jobs/${roleId}/interview-prep-pack/${materialId}`,
-    {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ sections }),
-    },
-  );
-  return parseResponse<InterviewPrepPack>(response);
+  return updateLocalInterviewPrepPack(roleId, materialId, sections);
 }
 
 export async function syncResumeProfile(payload?: {
   resume_markdown?: string | null;
   source_record_id?: string;
 }): Promise<ResumeProfileSyncResult> {
-  const response = await fetch(`${API_BASE_URL}/api/jobs/profile/sync-resume`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload ?? {}),
-  });
-  return parseResponse<ResumeProfileSyncResult>(response);
+  void payload;
+  return syncLocalResumeProfile();
 }
 
 export async function generateResumeTuning(roleId: number): Promise<ResumeTuningSuggestion> {
-  const response = await fetch(`${API_BASE_URL}/api/jobs/${roleId}/resume-tuning`, {
-    method: "POST",
-  });
-  return parseResponse<ResumeTuningSuggestion>(response);
+  return generateLocalResumeTuning(roleId);
 }
 
 export async function listResumeTuning(roleId: number): Promise<ResumeTuningSuggestion[]> {
-  const response = await fetch(`${API_BASE_URL}/api/jobs/${roleId}/resume-tuning`);
-  return parseResponse<ResumeTuningSuggestion[]>(response);
+  return listLocalResumeTuning(roleId);
 }
 
 export async function refreshDesirabilityScore(roleId: number): Promise<DesirabilityScore> {
-  const response = await fetch(`${API_BASE_URL}/api/jobs/${roleId}/desirability-score/refresh`, {
-    method: "POST",
-  });
-
-  return parseResponse<DesirabilityScore>(response);
+  return refreshLocalJobDesirability(roleId);
 }
 
 export async function reorderDesirabilityFactors(
@@ -789,11 +748,7 @@ export async function reorderDesirabilityFactors(
 }
 
 export async function scoreJobDesirability(roleId: number): Promise<DesirabilityScore> {
-  const response = await fetch(`${API_BASE_URL}/api/jobs/${roleId}/desirability-score`, {
-    method: "POST",
-  });
-
-  return parseResponse<DesirabilityScore>(response);
+  return scoreLocalJobDesirability(roleId);
 }
 
 export async function updateDesirabilityFactor(
@@ -812,52 +767,31 @@ export async function updateDesirabilityFactor(
 }
 
 export async function listAISettings(): Promise<AISetting[]> {
-  const response = await fetch(`${API_BASE_URL}/api/ai-settings`);
-  return parseResponse<AISetting[]>(response);
+  return listLocalAISettings();
 }
 
 export async function updateAISetting(
   operationFamily: OperationFamily,
   payload: AISettingUpdate,
 ): Promise<AISetting> {
-  const response = await fetch(`${API_BASE_URL}/api/ai-settings/${operationFamily}`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
-  return parseResponse<AISetting>(response);
+  return updateLocalAISetting(operationFamily, payload);
 }
 
 export async function updateAISettingToken(
   operationFamily: OperationFamily,
   token: string,
 ): Promise<AISetting> {
-  const response = await fetch(`${API_BASE_URL}/api/ai-settings/${operationFamily}/token`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ token }),
-  });
-  return parseResponse<AISetting>(response);
+  return updateLocalAISettingToken(operationFamily, token);
 }
 
 export async function clearAISettingToken(operationFamily: OperationFamily): Promise<void> {
-  const response = await fetch(`${API_BASE_URL}/api/ai-settings/${operationFamily}/token`, {
-    method: "DELETE",
-  });
-  if (!response.ok) {
-    await parseResponse(response);
-  }
+  return clearLocalAISettingToken(operationFamily);
 }
 
 export async function healthcheckAISetting(
   operationFamily: OperationFamily,
 ): Promise<AISettingHealth> {
-  const response = await fetch(`${API_BASE_URL}/api/ai-settings/${operationFamily}/health`);
-  return parseResponse<AISettingHealth>(response);
+  return healthcheckLocalAISetting(operationFamily);
 }
 
 export async function getDataPortabilitySummary(): Promise<DataPortabilitySummary> {

@@ -48,16 +48,16 @@ Refactor direction:
 ## Implementation Steps
 
 ### 1. Replace AI settings management
-- [ ] Move AI settings and API-key handling fully into browser-local storage.
-- [ ] Replace backend AI settings and healthcheck flows with client-side equivalents where appropriate.
+- [x] Move AI settings and API-key handling fully into browser-local storage.
+- [x] Replace backend AI settings and healthcheck flows with client-side equivalents where appropriate.
 
 ### 2. Replace AI workflow orchestration
-- [ ] Reimplement core AI workflows in browser-local TypeScript services.
-- [ ] Persist generated outputs and analysis results to the browser-local data layer.
+- [x] Reimplement core AI workflows in browser-local TypeScript services.
+- [x] Persist generated outputs and analysis results to the browser-local data layer.
 
 ### 3. Validate parity and isolate backend remnants
-- [ ] Verify all in-scope AI MVP workflows function without backend AI endpoints.
-- [ ] Remove or isolate backend AI codepaths no longer needed after the replacement.
+- [x] Verify all in-scope AI MVP workflows function without backend AI endpoints.
+- [x] Remove or isolate backend AI codepaths no longer needed after the replacement.
 
 ## Affected Areas
 
@@ -69,6 +69,6 @@ Refactor direction:
 
 ## Success Criteria
 
-- [ ] In-scope AI MVP workflows run without Python backend orchestration.
-- [ ] API keys remain local-only and excluded from exports.
-- [ ] Generated outputs and analyses remain traceable and durable where intended.
+- [x] In-scope AI MVP workflows run without Python backend orchestration.
+- [x] API keys remain local-only and excluded from exports.
+- [x] Generated outputs and analyses remain traceable and durable where intended.
