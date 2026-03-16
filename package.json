@@ -4,12 +4,6 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "desktop:build": "node scripts/desktop-run-tauri.mjs build",
-    "desktop:build:backend": "node scripts/desktop-build-backend.mjs",
-    "desktop:dev": "node scripts/desktop-run-tauri.mjs dev",
-    "desktop:prepare": "pnpm desktop:build:backend && pnpm desktop:web:build",
-    "desktop:web:build": "node scripts/desktop-build-web.mjs",
-    "desktop:web:dev": "node scripts/desktop-dev-web.mjs",
     "dev": "next dev",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",

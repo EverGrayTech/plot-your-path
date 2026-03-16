@@ -38,16 +38,16 @@ Refactor direction:
 ## Implementation Steps
 
 ### 1. Clean active docs and scripts
-- [ ] Update active docs so browser-local web development is the only default path.
-- [ ] Remove or relocate legacy runtime commands from active package/script entry points where appropriate.
+- [x] Update active docs so browser-local web development is the only default path.
+- [x] Remove or relocate legacy runtime commands from active package/script entry points where appropriate.
 
 ### 2. Clean active UI and messaging
-- [ ] Remove remaining active-surface wording that implies the desktop/backend path is current.
-- [ ] Ensure archived context is clearly labeled and isolated.
+- [x] Remove remaining active-surface wording that implies the desktop/backend path is current.
+- [x] Ensure archived context is clearly labeled and isolated.
 
 ### 3. Clean active test expectations
-- [ ] Remove or rewrite tests that still assume the retired runtime is an active default.
-- [ ] Keep only tests relevant to the active web architecture.
+- [x] Remove or rewrite tests that still assume the retired runtime is an active default.
+- [x] Keep only tests relevant to the active web architecture.
 
 ## Affected Areas
 
@@ -58,6 +58,6 @@ Refactor direction:
 
 ## Success Criteria
 
-- [ ] A new contributor sees only the browser-local web path as the active architecture.
-- [ ] Legacy runtime materials no longer appear in active product or repo surfaces by default.
-- [ ] Active tests and scripts align with the intended MVP architecture.
+- [x] A new contributor sees only the browser-local web path as the active architecture.
+- [x] Legacy runtime materials no longer appear in active product or repo surfaces by default.
+- [x] Active tests and scripts align with the intended MVP architecture.
