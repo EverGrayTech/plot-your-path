@@ -418,6 +418,11 @@ export function JobDetailModal({
 
           <section>
             <h4>Fit analysis</h4>
+            <p className="form-helper">
+              Run fit analysis using your pasted role content and current resume/profile inputs.
+              Results are saved as analysis records, but future runs may vary because AI output is
+              assistive rather than deterministic.
+            </p>
             <button
               className="btn btn-primary"
               disabled={analyzingFit}
@@ -614,6 +619,10 @@ export function JobDetailModal({
 
           <section>
             <h4>Application Materials</h4>
+            <p className="form-helper">
+              Cover letters are treated as durable saved outputs. Question-answer drafts are useful
+              working assistance and may be regenerated as needed.
+            </p>
             <div className="form-grid">
               <button
                 className="btn btn-primary"
@@ -832,6 +841,10 @@ export function JobDetailModal({
 
           <section>
             <h4>Resume Tuning</h4>
+            <p className="form-helper">
+              For MVP, resume/profile work is driven by pasted text and locally configured AI
+              settings rather than file-upload parsing.
+            </p>
             <div className="flex-row mb-md">
               <button
                 className="btn btn-secondary"
