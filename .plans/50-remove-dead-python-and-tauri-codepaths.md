@@ -44,17 +44,17 @@ Refactor direction:
 ## Implementation Steps
 
 ### 1. Remove dead code and config
-- [ ] Remove dead Python/backend code confirmed unused by the audit.
-- [ ] Remove dead Tauri/desktop code confirmed unused by the audit.
-- [ ] Remove obsolete config, lockfiles, and build helpers tied only to removed paths.
+- [x] Remove dead Python/backend code confirmed unused by the audit.
+- [x] Remove dead Tauri/desktop code confirmed unused by the audit.
+- [x] Remove obsolete config, lockfiles, and build helpers tied only to removed paths.
 
 ### 2. Preserve intentional archive context
-- [ ] Keep only the minimal archived docs/materials needed for historical traceability.
-- [ ] Move any remaining reference-only material into clearly archived locations if needed.
+- [x] Keep only the minimal archived docs/materials needed for historical traceability.
+- [x] Move any remaining reference-only material into clearly archived locations if needed.
 
 ### 3. Validate repository health
-- [ ] Ensure active builds, tests, and docs pass without removed runtime baggage.
-- [ ] Confirm there are no dangling imports, scripts, or references to deleted areas.
+- [x] Ensure active builds, tests, and docs pass without removed runtime baggage.
+- [x] Confirm there are no dangling imports, scripts, or references to deleted areas.
 
 ## Affected Areas
 
@@ -66,6 +66,6 @@ Refactor direction:
 
 ## Success Criteria
 
-- [ ] Dead backend/Tauri implementation code is removed.
-- [ ] The repository no longer carries executable legacy runtime baggage.
-- [ ] The active project can be understood without mentally filtering old architecture.
+- [x] Dead backend/Tauri implementation code is removed.
+- [x] The repository no longer carries executable legacy runtime baggage.
+- [x] The active project can be understood without mentally filtering old architecture.

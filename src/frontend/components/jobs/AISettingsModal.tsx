@@ -143,9 +143,8 @@ export function AISettingsModal({
                 <p className="mt-sm">{healthByFamily[setting.operation_family]}</p>
               ) : null}
               <p className="form-helper mt-sm">
-                Use health checks to confirm the current provider and model are configured
-                correctly before generating fit analysis, desirability scoring, or application
-                materials.
+                Use health checks to confirm the current provider and model are configured correctly
+                before generating fit analysis, desirability scoring, or application materials.
               </p>
             </div>
           </li>

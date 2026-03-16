@@ -2,21 +2,21 @@ import React from "react";
 
 export function DesktopStatusCard() {
   return (
-    <section className="card" aria-label="Architecture status">
-      <h3>Architecture status</h3>
+    <section className="card" aria-label="Product architecture status">
+      <h3>Product architecture status</h3>
       <p>
-        The active MVP path is a browser-hosted, local-first web application. The earlier
-        desktop-runtime direction is now archived context rather than the primary product path.
+        Plot Your Path now ships as a browser-hosted, local-first web application focused on keeping
+        core workspace data on-device.
       </p>
       <p>
         Your workspace data is expected to stay local to this browser/device by default, with
         explicit export/import used for backup and portability.
       </p>
       <div className="structured-message structured-message-info">
-        <h4>Legacy path retirement</h4>
+        <h4>Architecture boundary</h4>
         <p>
-          Backend and desktop-runtime materials may remain in the repository for traceability, but
-          they should not be treated as the active MVP default.
+          The active experience is the web app itself. Archived implementation history may still
+          exist in documentation for traceability, but it is not part of the current runtime.
         </p>
       </div>
       <ul>

@@ -65,7 +65,13 @@ interface LocalSkillRecord {
   skillId: number;
   name: string;
   category: string | null;
-  jobRefs: Array<{ roleId: number; company: string; title: string; status: RoleStatus; createdAt: string }>;
+  jobRefs: Array<{
+    roleId: number;
+    company: string;
+    title: string;
+    status: RoleStatus;
+    createdAt: string;
+  }>;
   createdAt: string;
   updatedAt: string;
 }
@@ -101,7 +107,10 @@ function buildCompanySummary(record: LocalJobRecord): CompanySummary {
   };
 }
 
-function toJobSkillItems(names: string[], requirementLevel: "required" | "preferred"): JobSkillItem[] {
+function toJobSkillItems(
+  names: string[],
+  requirementLevel: "required" | "preferred",
+): JobSkillItem[] {
   return names.map((name, index) => ({
     id: index + 1,
     name,
@@ -214,9 +223,11 @@ function toSkillDetail(record: LocalSkillRecord): SkillDetail {
 
 export async function listLocalJobs(): Promise<JobListItem[]> {
   const records = await listStoreRecords<LocalJobRecord>("jobs");
-  return records.map(toJobListItem).sort((left, right) =>
-    new Date(right.created_at).getTime() - new Date(left.created_at).getTime(),
-  );
+  return records
+    .map(toJobListItem)
+    .sort(
+      (left, right) => new Date(right.created_at).getTime() - new Date(left.created_at).getTime(),
+    );
 }
 
 export async function getLocalJob(roleId: number): Promise<JobDetail> {
@@ -231,11 +242,15 @@ export async function getLocalJob(roleId: number): Promise<JobDetail> {
 
   const latestFitRecord = fitRecords
     .filter((item) => item.roleId === roleId)
-    .sort((left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime())[0];
+    .sort(
+      (left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime(),
+    )[0];
 
   const latestScoreRecord = scoreRecords
     .filter((item) => item.roleId === roleId)
-    .sort((left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime())[0];
+    .sort(
+      (left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime(),
+    )[0];
 
   return toJobDetail(
     record,
@@ -244,7 +259,10 @@ export async function getLocalJob(roleId: number): Promise<JobDetail> {
   );
 }
 
-export async function updateLocalJobStatus(roleId: number, status: RoleStatus): Promise<JobListItem> {
+export async function updateLocalJobStatus(
+  roleId: number,
+  status: RoleStatus,
+): Promise<JobListItem> {
   const records = await listStoreRecords<LocalJobRecord>("jobs");
   const record = records.find((item) => item.roleId === roleId);
   if (!record) {
@@ -278,7 +296,8 @@ export async function getLocalSkill(skillId: number): Promise<SkillDetail> {
 export async function captureLocalJob(request: JobScrapeRequest): Promise<JobScrapeResponse> {
   const timestamp = nowIso();
   const roleId = Date.now();
-  const companyName = request.url === "pasted-job-description" ? "Pasted Company" : "Imported Company";
+  const companyName =
+    request.url === "pasted-job-description" ? "Pasted Company" : "Imported Company";
   const title = request.fallback_text?.split(/\r?\n/)[0]?.slice(0, 80) || "Captured Role";
   const skills = extractSkillsFromText(request.fallback_text ?? title);
   const companySlug = slugify(companyName);
@@ -306,7 +325,9 @@ export async function captureLocalJob(request: JobScrapeRequest): Promise<JobScr
   const allSkillNames = [...skills.required, ...skills.preferred];
 
   for (const [index, skillName] of allSkillNames.entries()) {
-    const existing = skillRecords.find((item) => item.name.toLowerCase() === skillName.toLowerCase());
+    const existing = skillRecords.find(
+      (item) => item.name.toLowerCase() === skillName.toLowerCase(),
+    );
     const jobRef = {
       roleId,
       company: companyName,

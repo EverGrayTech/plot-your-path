@@ -1,9 +1,9 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
-import React from "react";
 import { indexedDB } from "fake-indexeddb";
+import React from "react";
 
 import { SkillsPageClient } from "../../../src/frontend/components/SkillsPageClient";
-import * as dataModels from "../../../src/frontend/lib/dataModels";
+import type * as dataModels from "../../../src/frontend/lib/dataModels";
 import { setFrontendServicesForTests } from "../../../src/frontend/lib/services";
 import type { FrontendServices } from "../../../src/frontend/lib/services/types";
 
@@ -97,7 +97,7 @@ describe("SkillsPageClient", () => {
 
   it("renders skills list and supports search + sort", async () => {
     const services = {
-      ...(({} as unknown) as FrontendServices),
+      ...({} as unknown as FrontendServices),
     };
 
     const listSkills = vi.fn().mockResolvedValue(skills);

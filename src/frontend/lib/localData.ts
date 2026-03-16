@@ -63,8 +63,10 @@ function requestToPromise<T>(request: IDBRequest<T>): Promise<T> {
 function transactionComplete(transaction: IDBTransaction): Promise<void> {
   return new Promise((resolve, reject) => {
     transaction.oncomplete = () => resolve();
-    transaction.onerror = () => reject(transaction.error ?? new Error("IndexedDB transaction failed."));
-    transaction.onabort = () => reject(transaction.error ?? new Error("IndexedDB transaction aborted."));
+    transaction.onerror = () =>
+      reject(transaction.error ?? new Error("IndexedDB transaction failed."));
+    transaction.onabort = () =>
+      reject(transaction.error ?? new Error("IndexedDB transaction aborted."));
   });
 }
 
@@ -105,7 +107,9 @@ export async function initializeLocalWorkspace(): Promise<WorkspaceMetadata> {
   try {
     const transaction = db.transaction("metadata", "readwrite");
     const store = transaction.objectStore("metadata");
-    const existing = await requestToPromise(store.get(WORKSPACE_METADATA_ID)) as WorkspaceMetadata | undefined;
+    const existing = (await requestToPromise(store.get(WORKSPACE_METADATA_ID))) as
+      | WorkspaceMetadata
+      | undefined;
 
     if (existing) {
       await transactionComplete(transaction);
@@ -137,7 +141,7 @@ export async function listStoreRecords<TRecord>(storeName: LocalStoreName): Prom
   try {
     const transaction = db.transaction(storeName, "readonly");
     const store = transaction.objectStore(storeName);
-    const records = await requestToPromise(store.getAll()) as TRecord[];
+    const records = (await requestToPromise(store.getAll())) as TRecord[];
     await transactionComplete(transaction);
     return records;
   } finally {

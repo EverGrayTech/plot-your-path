@@ -513,7 +513,10 @@ export function useJobDetailState({ loadJobs }: UseJobDetailStateOptions) {
     setGeneratingQA(true);
     setMaterialsError(null);
     try {
-      const created = await services.aiGeneration.generateQuestionAnswers(selectedJob.id, questions);
+      const created = await services.aiGeneration.generateQuestionAnswers(
+        selectedJob.id,
+        questions,
+      );
       const refreshed = await services.aiGeneration.listApplicationMaterials(selectedJob.id);
       setApplicationMaterials(refreshed);
       setSelectedMaterialId(created.id);
@@ -559,7 +562,10 @@ export function useJobDetailState({ loadJobs }: UseJobDetailStateOptions) {
     setRegeneratingSection(section);
     setInterviewPrepError(null);
     try {
-      const updated = await services.aiGeneration.regenerateInterviewPrepSection(selectedJob.id, section);
+      const updated = await services.aiGeneration.regenerateInterviewPrepSection(
+        selectedJob.id,
+        section,
+      );
       const refreshed = await services.aiGeneration.listInterviewPrepPacks(selectedJob.id);
       setInterviewPrepPacks(refreshed);
       setSelectedInterviewPrepId(updated.id);

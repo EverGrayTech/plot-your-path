@@ -140,7 +140,9 @@ describe("CaptureJobForm", () => {
 
     render(<CaptureJobForm />);
 
-    expect(screen.getByText(/preferred MVP workflow is to paste the job description text/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/preferred MVP workflow is to paste the job description text/i),
+    ).toBeInTheDocument();
     expect(screen.getByLabelText("Capture method")).toHaveValue("paste");
 
     fireEvent.change(screen.getByLabelText(/Pasted job description text/i), {
@@ -155,7 +157,9 @@ describe("CaptureJobForm", () => {
       });
     });
 
-    expect(await screen.findByRole("status")).toHaveTextContent(/Role captured:\s*Typed Role\s*at\s*Paste Co/i);
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      /Role captured:\s*Typed Role\s*at\s*Paste Co/i,
+    );
   });
 
   it("shows returned error message for failed URL capture", async () => {
