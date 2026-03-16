@@ -2,7 +2,8 @@
 
 import React, { type FormEvent, useEffect, useState } from "react";
 
-import { ApiError, type JobScrapeResponse, scrapeJob } from "../lib/api";
+import type { JobScrapeResponse } from "../lib/dataModels";
+import { getFrontendServices } from "../lib/services";
 
 type Phase = "idle" | "submitting" | "success" | "error";
 
@@ -18,6 +19,7 @@ interface CaptureJobFormProps {
 }
 
 export function CaptureJobForm({ onCaptured }: CaptureJobFormProps) {
+  const services = getFrontendServices();
   const [url, setUrl] = useState("");
   const [jobText, setJobText] = useState("");
   const [captureMode, setCaptureMode] = useState<"url" | "paste">("paste");
@@ -58,20 +60,14 @@ export function CaptureJobForm({ onCaptured }: CaptureJobFormProps) {
           : needsFallbackText
             ? { url, fallback_text: jobText.trim() }
             : { url };
-      const response = await scrapeJob(payload);
+      const response = await services.jobs.scrapeJob(payload);
       setResult(response);
       setNeedsFallbackText(false);
       setJobText("");
       setPhase("success");
       onCaptured?.(response);
     } catch (error) {
-      if (error instanceof ApiError && error.code === "FALLBACK_TEXT_REQUIRED") {
-        setNeedsFallbackText(true);
-        setErrorMessage(
-          error.message ||
-            "We couldn't parse that URL automatically. Paste the job description text and try again.",
-        );
-      } else if (error instanceof Error) {
+      if (error instanceof Error) {
         setErrorMessage(error.message);
       } else {
         setErrorMessage("Something went wrong. Please try again.");

@@ -14,5 +14,6 @@ describe("DesktopStatusCard", () => {
     ).toBeInTheDocument();
     expect(screen.getByText(/Legacy path retirement/i)).toBeInTheDocument();
     expect(screen.getByText(/browser-local workspace \+ explicit backups/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Active browser API base/i)).not.toBeInTheDocument();
   });
 });

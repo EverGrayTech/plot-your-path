@@ -39,16 +39,16 @@ Refactor direction:
 ## Implementation Steps
 
 ### 1. Remove obsolete transport helpers
-- [ ] Remove unused endpoint-oriented helpers and API plumbing.
-- [ ] Keep any intentionally remaining transport boundaries narrow and explicit.
+- [x] Remove unused endpoint-oriented helpers and API plumbing.
+- [x] Keep any intentionally remaining transport boundaries narrow and explicit.
 
 ### 2. Remove obsolete config assumptions
-- [ ] Remove `NEXT_PUBLIC_API_URL` and related local-server assumptions if no longer needed.
-- [ ] Remove obsolete parsing and transport-error scaffolding where safe.
+- [x] Remove `NEXT_PUBLIC_API_URL` and related local-server assumptions if no longer needed.
+- [x] Remove obsolete parsing and transport-error scaffolding where safe.
 
 ### 3. Validate final frontend dependency state
-- [ ] Verify active frontend code no longer structurally depends on backend HTTP APIs.
-- [ ] Update docs/tests to reflect the new frontend architecture.
+- [x] Verify active frontend code no longer structurally depends on backend HTTP APIs.
+- [x] Update docs/tests to reflect the new frontend architecture.
 
 ## Affected Areas
 
@@ -58,6 +58,6 @@ Refactor direction:
 
 ## Success Criteria
 
-- [ ] The frontend no longer carries obsolete transport-era abstractions.
-- [ ] Remaining transport assumptions, if any, are explicit and minimal.
-- [ ] The frontend architecture matches the browser-local product direction.
+- [x] The frontend no longer carries obsolete transport-era abstractions.
+- [x] Remaining transport assumptions, if any, are explicit and minimal.
+- [x] The frontend architecture matches the browser-local product direction.
