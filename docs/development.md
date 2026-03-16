@@ -8,11 +8,40 @@ This document covers the practical workflows for running and testing the project
 
 For product intent and architectural direction, start with [Product Overview → In scope](./product-overview.md#in-scope) and [System Specification → Roadmap framing](./system-spec.md#roadmap-framing).
 
+## Current direction note
+
+The current MVP direction is shifting away from the split Python backend plus Tauri desktop runtime and toward a browser-hosted local-first web application with a TypeScript-centered architecture.
+
+That means this document should now be read in two layers:
+
+- the **target direction** for upcoming work is the simplified browser-local web app model
+- some workflows below still describe the **legacy development/runtime path** that exists in the repository during transition
+
+Until the codebase is fully aligned, treat desktop-runtime and Python-backend instructions as transition-era context rather than the preferred long-term MVP direction.
+
 ## Set up Development Environment
 
 These steps assume development from the repository root.
 
-### 1. Set up the Python virtual environment
+### 1. Install Node dependencies
+
+```bash
+pnpm install
+```
+
+### 2. Configure the environment
+
+```bash
+cp .env.example .env
+```
+
+The primary local app URL is:
+
+- frontend app: `http://localhost:3000`
+
+### 3. Legacy transition setup for the existing Python backend
+
+The repository still contains Python backend workflows while the architecture transition is in progress.
 
 Create the project-local virtual environment:
 
@@ -30,36 +59,17 @@ source .venv/bin/activate
 .venv\Scripts\Activate.ps1
 ```
 
-### 2. Install dependencies
+Install Python dependencies only if you need to work on the legacy backend during the transition:
 
 ```bash
-# Python / backend
 uv sync --extra dev
-
-# Node / frontend
-pnpm install
 ```
-
-### 3. Configure the environment
-
-```bash
-cp .env.example .env
-```
-
-The default local URLs are:
-
-- backend API: `http://localhost:8000`
-- frontend app: `http://localhost:3000`
 
 ## Run the app locally
 
-### 1. Start the backend
+### Preferred current workflow
 
-```bash
-uv run uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
-```
-
-### 2. Start the frontend
+Start the frontend:
 
 ```bash
 pnpm dev src/frontend --hostname 0.0.0.0 --port 3000
@@ -67,7 +77,25 @@ pnpm dev src/frontend --hostname 0.0.0.0 --port 3000
 
 The frontend lives in `src/frontend`, so the app directory must be passed when running from the repository root.
 
-### 3. Open the app
+Open:
+
+- `http://localhost:3000`
+
+### Legacy transition workflow: start the backend
+
+If you are still working with the pre-pivot runtime during transition, start the backend with:
+
+```bash
+uv run uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+### Legacy transition workflow: start the frontend
+
+```bash
+pnpm dev src/frontend --hostname 0.0.0.0 --port 3000
+```
+
+### Open the app
 
 Open:
 
@@ -81,9 +109,9 @@ hostname -I
 
 ## Run tests
 
-This project includes backend and frontend tests.
+This project currently includes backend and frontend tests during the transition.
 
-### Backend tests
+### Legacy backend tests
 
 Run all backend tests:
 
@@ -117,9 +145,9 @@ Run a single frontend test file:
 pnpm vitest run tests/frontend/app/jobs.page.test.tsx
 ```
 
-## Desktop runtime workflows
+## Legacy desktop runtime workflows
 
-The desktop runtime packages the existing frontend and backend into a local Tauri shell.
+The repository still contains documentation for the earlier desktop runtime packaging model. That path is no longer the preferred MVP direction and should be treated as legacy transition context unless explicitly needed.
 
 ### Prerequisites
 
@@ -168,9 +196,9 @@ If Linux release builds produce `.deb` and `.rpm` bundles but fail during the Ap
 pnpm desktop:build
 ```
 
-For runtime architecture details, data-root behavior, and packaging constraints, see [Desktop Runtime Foundation](./desktop-runtime.md).
+For archived runtime architecture details, data-root behavior, and packaging constraints, see [Desktop Runtime Foundation](./desktop-runtime.md).
 
-For the Windows tester-handoff checklist and smoke-test matrix, see [Windows Release Readiness](./windows-release-readiness.md).
+For archived Windows tester-handoff material, see [Windows Release Readiness](./windows-release-readiness.md).
 
 ## Design system consumption
 

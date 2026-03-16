@@ -1,18 +1,20 @@
-# Plot Your Path — Desktop Runtime Foundation
+# Plot Your Path — Desktop Runtime Foundation (Archived Direction)
 
 See also: [Development Workflows](./development.md#desktop-runtime-workflows), [Windows Release Readiness](./windows-release-readiness.md), [System Specification](./system-spec.md#local-first-by-default), [README](../README.md#documentation-map)
 
 ## Purpose
 
-This document defines the desktop runtime foundation for Plot Your Path.
+This document records the earlier desktop runtime foundation for Plot Your Path.
 
-It explains how the Tauri shell, exported frontend, and packaged backend work together so future contributors can evolve onboarding, release hardening, backup flows, and troubleshooting without re-deriving the runtime model.
+It explains how the Tauri shell, exported frontend, and packaged backend were intended to work together during the previous desktop-packaging phase.
+
+This is now archived architectural context rather than the preferred MVP direction. The active MVP direction is a browser-hosted local-first web application with a TypeScript-centered architecture and browser-local persistence.
 
 ## Packaging decision
 
-The desktop foundation uses **Tauri 2** as the desktop shell.
+At the time this document was written, the desktop foundation used **Tauri 2** as the desktop shell.
 
-That choice fits the current architecture because it allows the project to:
+That choice fit the architecture at that time because it allowed the project to:
 
 - keep the existing React and Next.js frontend
 - keep the FastAPI backend as a local HTTP service

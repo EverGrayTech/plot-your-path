@@ -1,6 +1,8 @@
 # Windows Release Readiness
 
-See also: [Desktop Runtime Foundation](./desktop-runtime.md), [Development Workflows](./development.md#desktop-runtime-workflows)
+See also: [Desktop Runtime Foundation](./desktop-runtime.md), [Development Workflows](./development.md#legacy-desktop-runtime-workflows)
+
+> Archived direction note: this document reflects the earlier Windows desktop packaging path and is no longer the preferred MVP direction.
 
 ## Purpose
 
