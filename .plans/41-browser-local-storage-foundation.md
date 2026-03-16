@@ -40,16 +40,16 @@ Refactor direction:
 ## Implementation Steps
 
 ### 1. Build the storage foundation
-- [ ] Implement the browser-local storage engine and schema/version scaffolding.
-- [ ] Add repository/service primitives for core entity access.
+- [x] Implement the browser-local storage engine and schema/version scaffolding.
+- [x] Add repository/service primitives for core entity access.
 
 ### 2. Add cross-cutting local-data utilities
-- [ ] Add ID, timestamp, serialization, and migration helpers as needed.
-- [ ] Add test coverage for storage initialization and basic CRUD behavior.
+- [x] Add ID, timestamp, serialization, and migration helpers as needed.
+- [x] Add test coverage for storage initialization and basic CRUD behavior.
 
 ### 3. Prepare later migrations
-- [ ] Document the local data boundaries future phases should migrate to.
-- [ ] Ensure the foundation supports later portability and AI artifact persistence work.
+- [x] Document the local data boundaries future phases should migrate to.
+- [x] Ensure the foundation supports later portability and AI artifact persistence work.
 
 ## Affected Areas
 
@@ -59,6 +59,6 @@ Refactor direction:
 
 ## Success Criteria
 
-- [ ] The app has a real browser-local persistence foundation.
-- [ ] Later workflow migrations can target local repositories rather than inventing storage ad hoc.
-- [ ] Storage/versioning concerns are handled centrally.
+- [x] The app has a real browser-local persistence foundation.
+- [x] Later workflow migrations can target local repositories rather than inventing storage ad hoc.
+- [x] Storage/versioning concerns are handled centrally.
