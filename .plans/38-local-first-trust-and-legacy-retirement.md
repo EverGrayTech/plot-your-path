@@ -44,17 +44,17 @@ Refactor direction:
 ## Implementation Steps
 
 ### 1. Add trust UX
-- [ ] Add clear local-storage and export/import messaging in the product.
-- [ ] Add reset/remove controls for local data and local AI settings where appropriate.
+- [x] Add clear local-storage and export/import messaging in the product.
+- [x] Add reset/remove controls for local data and local AI settings where appropriate.
 
 ### 2. Add backup confidence features
-- [ ] Implement backup reminder behavior.
-- [ ] Improve export/import result messaging and confirmation surfaces.
+- [x] Implement backup reminder behavior.
+- [x] Improve export/import result messaging and confirmation surfaces.
 
 ### 3. Retire the legacy path deliberately
-- [ ] Audit legacy backend, desktop scripts, and runtime assumptions.
-- [ ] Remove or archive surfaces that no longer belong in the active MVP path.
-- [ ] Update contributor guidance so the active path is unambiguous.
+- [x] Audit legacy backend, desktop scripts, and runtime assumptions.
+- [x] Remove or archive surfaces that no longer belong in the active MVP path.
+- [x] Update contributor guidance so the active path is unambiguous.
 
 ## Affected Areas
 
@@ -65,6 +65,6 @@ Refactor direction:
 
 ## Success Criteria
 
-- [ ] Users understand that their data is local by default and know how to back it up.
-- [ ] The active MVP path no longer depends on the legacy desktop/backend runtime.
-- [ ] The repository clearly distinguishes active architecture from archived history.
+- [x] Users understand that their data is local by default and know how to back it up.
+- [x] The active MVP path no longer depends on the legacy desktop/backend runtime.
+- [x] The repository clearly distinguishes active architecture from archived history.

@@ -2,39 +2,31 @@ import React from "react";
 
 import { API_BASE_URL } from "../lib/api";
 
-function desktopDataPathLabel(): string {
-  if (typeof window === "undefined") {
-    return "your local application data directory";
-  }
-
-  const platform = window.navigator.platform.toLowerCase();
-  if (platform.includes("mac")) {
-    return "~/Library/Application Support/Plot Your Path";
-  }
-  if (platform.includes("win")) {
-    return "%LOCALAPPDATA%\\Plot Your Path";
-  }
-  return "$XDG_DATA_HOME/plot-your-path (or ~/.local/share/plot-your-path)";
-}
-
 export function DesktopStatusCard() {
   return (
-    <section className="card" aria-label="Desktop runtime status">
-      <h3>Desktop runtime foundation</h3>
+    <section className="card" aria-label="Architecture status">
+      <h3>Architecture status</h3>
       <p>
-        Desktop builds run the frontend inside a Tauri shell and launch the packaged backend
-        automatically, so users do not need to manage separate terminals or ports.
+        The active MVP path is a browser-hosted, local-first web application. The earlier
+        desktop-runtime direction is now archived context rather than the primary product path.
       </p>
-      <p>Your workspace data stays in a local application folder unless you export a backup.</p>
+      <p>
+        Your workspace data is expected to stay local to this browser/device by default, with
+        explicit export/import used for backup and portability.
+      </p>
+      <div className="structured-message structured-message-info">
+        <h4>Legacy path retirement</h4>
+        <p>
+          Backend and desktop-runtime materials may remain in the repository for traceability, but
+          they should not be treated as the active MVP default.
+        </p>
+      </div>
       <ul>
         <li>
-          API endpoint: <code>{API_BASE_URL}</code>
+          Active browser API base: <code>{API_BASE_URL}</code>
         </li>
         <li>
-          Desktop data root: <code>{desktopDataPathLabel()}</code>
-        </li>
-        <li>
-          Healthcheck: <code>{`${API_BASE_URL}/api/health`}</code>
+          Active trust model: <code>browser-local workspace + explicit backups</code>
         </li>
       </ul>
     </section>

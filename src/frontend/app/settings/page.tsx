@@ -10,9 +10,17 @@ export default function SettingsPage() {
         <h1>Settings</h1>
       </header>
       <p className="page-description">
-        Configuration and administration for AI models, desirability scoring, local data safety, and
-        packaged desktop behavior.
+        Configuration and administration for AI models, desirability scoring, local data safety,
+        backups, and the browser-local MVP workflow.
       </p>
+
+      <section className="structured-message structured-message-info">
+        <h3>Local-first trust model</h3>
+        <p>
+          Plot Your Path is designed so sensitive career data stays local by default. Use export and
+          import deliberately to back up your workspace or move it between devices.
+        </p>
+      </section>
 
       <section>
         <h3>AI Model Configuration</h3>

@@ -5,7 +5,7 @@ import React from "react";
 import SettingsPage from "../../../src/frontend/app/settings/page";
 
 describe("SettingsPage", () => {
-  it("renders settings sections and desktop runtime guidance", async () => {
+  it("renders settings sections and local-first trust guidance", async () => {
     vi.spyOn(global, "fetch").mockResolvedValue(
       new Response(
         JSON.stringify({
@@ -29,12 +29,11 @@ describe("SettingsPage", () => {
     render(<SettingsPage />);
 
     expect(screen.getByRole("heading", { name: "Settings" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /Local-first trust model/i })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /AI Model Configuration/i })).toBeInTheDocument();
     await waitFor(() => {
       expect(screen.getByRole("heading", { name: /Local data and backup/i })).toBeInTheDocument();
     });
-    expect(
-      screen.getByRole("heading", { name: /Desktop runtime foundation/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /Architecture status/i })).toBeInTheDocument();
   });
 });

@@ -4,16 +4,15 @@ import React from "react";
 import { DesktopStatusCard } from "../../../src/frontend/components/DesktopStatusCard";
 
 describe("DesktopStatusCard", () => {
-  it("renders the desktop runtime API and healthcheck details", () => {
+  it("renders the active browser-local architecture guidance", () => {
     render(<DesktopStatusCard />);
 
+    expect(screen.getByRole("heading", { name: /Architecture status/i })).toBeInTheDocument();
+    expect(screen.getByText(/active MVP path is a browser-hosted, local-first web application/i)).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: /Desktop runtime foundation/i }),
+      screen.getByText(/workspace data is expected to stay local to this browser\/device/i),
     ).toBeInTheDocument();
-    expect(screen.getByText(/launch the packaged backend automatically/i)).toBeInTheDocument();
-    expect(
-      screen.getByText(/workspace data stays in a local application folder/i),
-    ).toBeInTheDocument();
-    expect(screen.getByText(/http:\/\/localhost:8000\/api\/health/i)).toBeInTheDocument();
+    expect(screen.getByText(/Legacy path retirement/i)).toBeInTheDocument();
+    expect(screen.getByText(/browser-local workspace \+ explicit backups/i)).toBeInTheDocument();
   });
 });
