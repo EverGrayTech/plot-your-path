@@ -240,9 +240,9 @@ export function DataManagementPanel() {
       ) : null}
 
       {!loading && summary && !summary.desktop_runtime ? (
-        <output aria-live="polite" className="alert alert-warning">
-          You are viewing this through the browser-hosted or transition runtime rather than the
-          archived packaged desktop path.
+        <output aria-live="polite" className="alert alert-info">
+          You are using the active browser-local MVP path. Legacy packaged desktop behavior is
+          archived context, not the current default.
         </output>
       ) : null}
 
@@ -300,6 +300,10 @@ export function DataManagementPanel() {
             <p>
               The export contains your local workspace data as a portable zip archive with readable
               JSON and durable artifacts. API keys are excluded from backups.
+            </p>
+            <p>
+              Export after meaningful changes, before resetting local data, and before moving to a
+              different browser profile or device.
             </p>
           </div>
         </div>

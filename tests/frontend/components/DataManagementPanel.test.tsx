@@ -42,6 +42,8 @@ describe("DataManagementPanel", () => {
     expect(screen.getByText(/Consider exporting a fresh backup/i)).toBeInTheDocument();
     expect(screen.getByText(/Browser-managed local storage/i)).toBeInTheDocument();
     expect(screen.getByText(/portable zip archive with readable JSON/i)).toBeInTheDocument();
+    expect(screen.getByText(/active browser-local MVP path/i)).toBeInTheDocument();
+    expect(screen.getByText(/Export after meaningful changes/i)).toBeInTheDocument();
     expect(screen.getByText("2")).toBeInTheDocument();
     expect(screen.getByText("5")).toBeInTheDocument();
     expect(screen.getByText(/Download backup/i)).toBeInTheDocument();
