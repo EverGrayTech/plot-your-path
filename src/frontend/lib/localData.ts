@@ -12,7 +12,13 @@ export interface WorkspaceMetadata extends LocalRecordBase {
   lastResetAt: string | null;
 }
 
-export type LocalStoreName = "metadata" | "jobs" | "skills" | "applicationOps" | "outcomes";
+export type LocalStoreName =
+  | "metadata"
+  | "jobs"
+  | "skills"
+  | "applicationOps"
+  | "interviewStages"
+  | "outcomes";
 
 export interface LocalStoreDefinition<TRecord> {
   name: LocalStoreName;
@@ -29,6 +35,7 @@ const STORE_DEFINITIONS: Array<LocalStoreDefinition<Record<string, unknown>>> = 
   { name: "jobs", keyPath: "id" },
   { name: "skills", keyPath: "id" },
   { name: "applicationOps", keyPath: "id" },
+  { name: "interviewStages", keyPath: "id" },
   { name: "outcomes", keyPath: "id" },
 ];
 

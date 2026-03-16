@@ -11,6 +11,16 @@ import {
   listLocalSkills,
   updateLocalJobStatus,
 } from "./localJobs";
+import {
+  addLocalInterviewStage,
+  addLocalOutcomeEvent,
+  getLocalApplicationOps,
+  listLocalInterviewStages,
+  listLocalOutcomeEvents,
+  listLocalPipeline,
+  updateLocalNextAction,
+  upsertLocalApplicationOps,
+} from "./localApplicationWorkflows";
 
 export interface CompanySummary {
   id: number;
@@ -520,32 +530,22 @@ export async function getJob(roleId: number): Promise<JobDetail> {
 }
 
 export async function getApplicationOps(roleId: number): Promise<ApplicationOps> {
-  const response = await fetch(`${API_BASE_URL}/api/jobs/${roleId}/application-ops`);
-  return parseResponse<ApplicationOps>(response);
+  return getLocalApplicationOps(roleId);
 }
 
 export async function listInterviewStages(roleId: number): Promise<InterviewStageEvent[]> {
-  const response = await fetch(`${API_BASE_URL}/api/jobs/${roleId}/interview-stages`);
-  return parseResponse<InterviewStageEvent[]>(response);
+  return listLocalInterviewStages(roleId);
 }
 
 export async function createOutcomeEvent(
   roleId: number,
   payload: OutcomeEventCreate,
 ): Promise<OutcomeEvent> {
-  const response = await fetch(`${API_BASE_URL}/api/jobs/${roleId}/outcomes`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
-  return parseResponse<OutcomeEvent>(response);
+  return addLocalOutcomeEvent(roleId, payload);
 }
 
 export async function listOutcomeEvents(roleId: number): Promise<OutcomeEvent[]> {
-  const response = await fetch(`${API_BASE_URL}/api/jobs/${roleId}/outcomes`);
-  return parseResponse<OutcomeEvent[]>(response);
+  return listLocalOutcomeEvents(roleId);
 }
 
 export async function getOutcomeInsights(): Promise<OutcomeInsights> {
@@ -563,20 +563,7 @@ export async function listPipeline(options?: {
   thisWeekDeadlines?: boolean;
   recentlyUpdated?: boolean;
 }): Promise<PipelineResponse> {
-  const params = new URLSearchParams();
-  if (options?.overdueOnly) {
-    params.set("overdue_only", "true");
-  }
-  if (options?.thisWeekDeadlines) {
-    params.set("this_week_deadlines", "true");
-  }
-  if (options?.recentlyUpdated) {
-    params.set("recently_updated", "true");
-  }
-  const query = params.toString();
-  const url = `${API_BASE_URL}/api/jobs/pipeline${query ? `?${query}` : ""}`;
-  const response = await fetch(url);
-  return parseResponse<PipelineResponse>(response);
+  return listLocalPipeline(options);
 }
 
 export async function listJobs(): Promise<JobListItem[]> {
@@ -587,42 +574,21 @@ export async function upsertApplicationOps(
   roleId: number,
   payload: ApplicationOpsUpdate,
 ): Promise<ApplicationOps> {
-  const response = await fetch(`${API_BASE_URL}/api/jobs/${roleId}/application-ops`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
-  return parseResponse<ApplicationOps>(response);
+  return upsertLocalApplicationOps(roleId, payload);
 }
 
 export async function updateInterviewStage(
   roleId: number,
   payload: InterviewStageEventCreate,
 ): Promise<InterviewStageEvent> {
-  const response = await fetch(`${API_BASE_URL}/api/jobs/${roleId}/interview-stages`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
-  return parseResponse<InterviewStageEvent>(response);
+  return addLocalInterviewStage(roleId, payload);
 }
 
 export async function updateNextAction(
   roleId: number,
   next_action_at: string | null,
 ): Promise<ApplicationOps> {
-  const response = await fetch(`${API_BASE_URL}/api/jobs/${roleId}/application-ops/next-action`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ next_action_at }),
-  });
-  return parseResponse<ApplicationOps>(response);
+  return updateLocalNextAction(roleId, next_action_at);
 }
 
 export async function listSkills(): Promise<SkillListItem[]> {

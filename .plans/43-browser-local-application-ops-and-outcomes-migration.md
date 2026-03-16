@@ -39,16 +39,16 @@ Refactor direction:
 ## Implementation Steps
 
 ### 1. Migrate application ops
-- [ ] Replace application ops read/write flows with browser-local persistence.
-- [ ] Preserve next-action and attention-related behavior locally.
+- [x] Replace application ops read/write flows with browser-local persistence.
+- [x] Preserve next-action and attention-related behavior locally.
 
 ### 2. Migrate interview stages and outcomes
-- [ ] Replace interview stage timeline storage with browser-local persistence.
-- [ ] Replace outcome event logging and retrieval with browser-local persistence.
+- [x] Replace interview stage timeline storage with browser-local persistence.
+- [x] Replace outcome event logging and retrieval with browser-local persistence.
 
 ### 3. Rebuild derived workflow views
-- [ ] Replace pipeline-related backend dependencies with local derived queries.
-- [ ] Add/update tests for application-ops and outcomes flows.
+- [x] Replace pipeline-related backend dependencies with local derived queries.
+- [x] Add/update tests for application-ops and outcomes flows.
 
 ## Affected Areas
 
@@ -59,6 +59,6 @@ Refactor direction:
 
 ## Success Criteria
 
-- [ ] Application tracking workflows no longer require backend persistence.
-- [ ] Interview stages, next actions, and outcome events persist locally.
-- [ ] Pipeline-style derived views work from browser-local data.
+- [x] Application tracking workflows no longer require backend persistence.
+- [x] Interview stages, next actions, and outcome events persist locally.
+- [x] Pipeline-style derived views work from browser-local data.
