@@ -5,9 +5,12 @@ import { DataManagementPanel } from "../../../src/frontend/components/DataManage
 
 describe("DataManagementPanel", () => {
   const summaryPayload = {
-    data_root: "/tmp/plot-your-path",
-    database_path: "/tmp/plot-your-path/plot_your_path.db",
-    desktop_runtime: true,
+    data_root: null,
+    database_path: null,
+    desktop_runtime: false,
+    storage_mode: "browser_local",
+    backup_reminder_level: "recommended",
+    backup_reminder_message: "Consider exporting a fresh backup after recent changes.",
     has_resume: true,
     jobs_count: 2,
     last_export_at: null,
@@ -36,6 +39,9 @@ describe("DataManagementPanel", () => {
       expect(screen.getByRole("heading", { name: /Local data and backup/i })).toBeInTheDocument();
     });
 
+    expect(screen.getByText(/Consider exporting a fresh backup/i)).toBeInTheDocument();
+    expect(screen.getByText(/Browser-managed local storage/i)).toBeInTheDocument();
+    expect(screen.getByText(/portable zip archive with readable JSON/i)).toBeInTheDocument();
     expect(screen.getByText("2")).toBeInTheDocument();
     expect(screen.getByText("5")).toBeInTheDocument();
     expect(screen.getByText(/Download backup/i)).toBeInTheDocument();
@@ -55,6 +61,9 @@ describe("DataManagementPanel", () => {
           JSON.stringify({
             completed_at: "2026-03-14T00:00:00Z",
             message: "Local data reset successfully.",
+            added_count: 0,
+            updated_count: 0,
+            unchanged_count: 0,
           }),
           {
             headers: { "Content-Type": "application/json" },
@@ -70,6 +79,8 @@ describe("DataManagementPanel", () => {
             jobs_count: 0,
             last_reset_at: "2026-03-14T00:00:00Z",
             skills_count: 0,
+            backup_reminder_level: "none",
+            backup_reminder_message: null,
           }),
           {
             headers: { "Content-Type": "application/json" },

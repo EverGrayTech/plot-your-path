@@ -263,9 +263,12 @@ export interface AISettingHealth {
 }
 
 export interface DataPortabilitySummary {
-  data_root: string;
-  database_path: string;
+  data_root: string | null;
+  database_path: string | null;
   desktop_runtime: boolean;
+  storage_mode?: "browser_local" | "desktop_local" | "transition";
+  backup_reminder_level?: "none" | "recommended" | "overdue";
+  backup_reminder_message?: string | null;
   has_resume: boolean;
   jobs_count: number;
   last_export_at: string | null;
@@ -277,6 +280,9 @@ export interface DataPortabilitySummary {
 export interface DataOperationResult {
   completed_at: string;
   message: string;
+  added_count?: number;
+  updated_count?: number;
+  unchanged_count?: number;
 }
 
 export interface DesirabilityFactorCreate {
