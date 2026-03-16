@@ -1,8 +1,9 @@
+import { indexedDB } from "fake-indexeddb";
 import * as api from "../../../src/frontend/lib/api";
 import {
   clearAISettingToken,
-  createOutcomeEvent,
   createDesirabilityFactor,
+  createOutcomeEvent,
   deleteDesirabilityFactor,
   generateCoverLetter,
   generateQuestionAnswers,
@@ -22,7 +23,6 @@ import {
   updateDesirabilityFactor,
   updateJobStatus,
 } from "../../../src/frontend/lib/api";
-import { indexedDB } from "fake-indexeddb";
 
 beforeEach(() => {
   Object.defineProperty(window, "indexedDB", {

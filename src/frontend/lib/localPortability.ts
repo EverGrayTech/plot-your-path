@@ -31,8 +31,10 @@ async function updateWorkspaceMetadata(
     transaction.objectStore("metadata").put(next);
     await new Promise<void>((resolve, reject) => {
       transaction.oncomplete = () => resolve();
-      transaction.onerror = () => reject(transaction.error ?? new Error("Failed to update metadata."));
-      transaction.onabort = () => reject(transaction.error ?? new Error("Metadata update aborted."));
+      transaction.onerror = () =>
+        reject(transaction.error ?? new Error("Failed to update metadata."));
+      transaction.onabort = () =>
+        reject(transaction.error ?? new Error("Metadata update aborted."));
     });
   } finally {
     db.close();
@@ -157,7 +159,8 @@ export async function importLocalDataArchive(archiveBase64: string): Promise<Dat
     completed_at: completedAt,
     message: "Backup restored into the current browser-local workspace.",
     added_count: snapshot.jobs.length + snapshot.skills.length,
-    updated_count: snapshot.applicationOps.length + snapshot.interviewStages.length + snapshot.outcomes.length,
+    updated_count:
+      snapshot.applicationOps.length + snapshot.interviewStages.length + snapshot.outcomes.length,
     unchanged_count: 0,
   };
 }

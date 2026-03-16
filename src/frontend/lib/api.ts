@@ -4,25 +4,6 @@ export interface JobScrapeRequest {
 }
 
 import {
-  captureLocalJob,
-  getLocalJob,
-  getLocalSkill,
-  listLocalJobs,
-  listLocalSkills,
-  updateLocalJobStatus,
-} from "./localJobs";
-import {
-  addLocalInterviewStage,
-  addLocalOutcomeEvent,
-  getLocalApplicationOps,
-  listAllLocalOutcomeEvents,
-  listLocalInterviewStages,
-  listLocalOutcomeEvents,
-  listLocalPipeline,
-  updateLocalNextAction,
-  upsertLocalApplicationOps,
-} from "./localApplicationWorkflows";
-import {
   analyzeLocalJobFit,
   clearLocalAISettingToken,
   generateLocalCoverLetter,
@@ -43,6 +24,25 @@ import {
   updateLocalAISettingToken,
   updateLocalInterviewPrepPack,
 } from "./localAi";
+import {
+  addLocalInterviewStage,
+  addLocalOutcomeEvent,
+  getLocalApplicationOps,
+  listAllLocalOutcomeEvents,
+  listLocalInterviewStages,
+  listLocalOutcomeEvents,
+  listLocalPipeline,
+  updateLocalNextAction,
+  upsertLocalApplicationOps,
+} from "./localApplicationWorkflows";
+import {
+  captureLocalJob,
+  getLocalJob,
+  getLocalSkill,
+  listLocalJobs,
+  listLocalSkills,
+  updateLocalJobStatus,
+} from "./localJobs";
 import {
   exportLocalDataArchive,
   getLocalDataPortabilitySummary,
@@ -607,15 +607,16 @@ export async function getOutcomeTuningSuggestions(): Promise<OutcomeTuningSugges
 
   return {
     confidence_message: insights.confidence_message,
-    suggestions: openAiRow || insights.total_events === 0
-      ? [
-          {
-            recommendation: "Prefer openai for new drafts.",
-            rationale: "Current conversion appears stronger.",
-            reversible_action: "Re-check after 5 additional events.",
-          },
-        ]
-      : [],
+    suggestions:
+      openAiRow || insights.total_events === 0
+        ? [
+            {
+              recommendation: "Prefer openai for new drafts.",
+              rationale: "Current conversion appears stronger.",
+              reversible_action: "Re-check after 5 additional events.",
+            },
+          ]
+        : [],
   };
 }
 

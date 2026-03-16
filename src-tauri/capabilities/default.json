@@ -1,6 +1,0 @@
-{
-  "identifier": "default",
-  "description": "Default capability set for the Plot Your Path desktop shell.",
-  "windows": ["main"],
-  "permissions": ["core:default"]
-}

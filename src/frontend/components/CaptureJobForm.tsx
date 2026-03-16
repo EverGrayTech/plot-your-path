@@ -88,8 +88,8 @@ export function CaptureJobForm({ onCaptured }: CaptureJobFormProps) {
 
   const submitDisabled =
     phase === "submitting" ||
-    ((captureMode === "url" && url.trim().length === 0) ||
-      ((needsFallbackText || captureMode === "paste") && jobText.trim().length === 0));
+    (captureMode === "url" && url.trim().length === 0) ||
+    ((needsFallbackText || captureMode === "paste") && jobText.trim().length === 0);
 
   return (
     <section>

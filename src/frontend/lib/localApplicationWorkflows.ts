@@ -169,7 +169,9 @@ export async function listLocalInterviewStages(roleId: number): Promise<Intervie
   return records
     .filter((item) => item.roleId === roleId)
     .map(toInterviewStageEvent)
-    .sort((left, right) => new Date(left.occurred_at).getTime() - new Date(right.occurred_at).getTime());
+    .sort(
+      (left, right) => new Date(left.occurred_at).getTime() - new Date(right.occurred_at).getTime(),
+    );
 }
 
 export async function addLocalInterviewStage(
@@ -193,14 +195,18 @@ export async function listLocalOutcomeEvents(roleId: number): Promise<OutcomeEve
   return records
     .filter((item) => item.roleId === roleId)
     .map(toOutcomeEvent)
-    .sort((left, right) => new Date(right.occurred_at).getTime() - new Date(left.occurred_at).getTime());
+    .sort(
+      (left, right) => new Date(right.occurred_at).getTime() - new Date(left.occurred_at).getTime(),
+    );
 }
 
 export async function listAllLocalOutcomeEvents(): Promise<OutcomeEvent[]> {
   const records = await listStoreRecords<LocalOutcomeRecord>("outcomes");
   return records
     .map(toOutcomeEvent)
-    .sort((left, right) => new Date(right.occurred_at).getTime() - new Date(left.occurred_at).getTime());
+    .sort(
+      (left, right) => new Date(right.occurred_at).getTime() - new Date(left.occurred_at).getTime(),
+    );
 }
 
 export async function addLocalOutcomeEvent(
@@ -241,7 +247,9 @@ export async function listLocalPipeline(options?: {
     const ops = opsRecords.find((item) => item.roleId === job.id);
     const stages = stageRecords
       .filter((item) => item.roleId === job.id)
-      .sort((left, right) => new Date(right.occurredAt).getTime() - new Date(left.occurredAt).getTime());
+      .sort(
+        (left, right) => new Date(right.occurredAt).getTime() - new Date(left.occurredAt).getTime(),
+      );
 
     const attentionReasons: string[] = [];
     if (ops?.nextActionAt && new Date(ops.nextActionAt).getTime() < now) {
@@ -266,7 +274,9 @@ export async function listLocalPipeline(options?: {
   });
 
   if (options?.overdueOnly) {
-    items = items.filter((item) => item.next_action_at && new Date(item.next_action_at).getTime() < now);
+    items = items.filter(
+      (item) => item.next_action_at && new Date(item.next_action_at).getTime() < now,
+    );
   }
   if (options?.thisWeekDeadlines) {
     items = items.filter((item) => {
@@ -276,7 +286,9 @@ export async function listLocalPipeline(options?: {
     });
   }
   if (options?.recentlyUpdated) {
-    items = items.filter((item) => new Date(item.updated_at).getTime() >= now - 7 * 24 * 60 * 60 * 1000);
+    items = items.filter(
+      (item) => new Date(item.updated_at).getTime() >= now - 7 * 24 * 60 * 60 * 1000,
+    );
   }
 
   const counters: PipelineCounters = {

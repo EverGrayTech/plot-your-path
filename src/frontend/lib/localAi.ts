@@ -166,9 +166,7 @@ export async function clearLocalAISettingToken(family: OperationFamily): Promise
   });
 }
 
-export async function healthcheckLocalAISetting(
-  family: OperationFamily,
-): Promise<AISettingHealth> {
+export async function healthcheckLocalAISetting(family: OperationFamily): Promise<AISettingHealth> {
   const settings = await ensureLocalAISettings();
   const existing = settings.find((setting) => setting.operation_family === family);
   const ok = Boolean(existing?.token);
@@ -211,7 +209,8 @@ export async function analyzeLocalJobFit(roleId: number): Promise<FitAnalysis> {
     missing_required_skills: [],
     covered_preferred_skills: ["Adaptability"],
     missing_preferred_skills: [],
-    rationale: "Browser-local heuristic fit analysis based on captured role content and local profile context.",
+    rationale:
+      "Browser-local heuristic fit analysis based on captured role content and local profile context.",
     rationale_citations: buildTraceability("fit_rationale", roleId)[0].citations,
     unsupported_claims: [],
     fallback_used: true,
@@ -222,7 +221,12 @@ export async function analyzeLocalJobFit(roleId: number): Promise<FitAnalysis> {
     created_at: createdAt,
   };
 
-  await saveStoreRecord("jobs", { id: createLocalId("fit_shadow"), roleId, fit, createdAt } satisfies LocalFitAnalysisRecord);
+  await saveStoreRecord("jobs", {
+    id: createLocalId("fit_shadow"),
+    roleId,
+    fit,
+    createdAt,
+  } satisfies LocalFitAnalysisRecord);
   return fit;
 }
 
@@ -244,7 +248,12 @@ export async function scoreLocalJobDesirability(roleId: number): Promise<Desirab
     created_at: createdAt,
   };
 
-  await saveStoreRecord("jobs", { id: createLocalId("desirability_shadow"), roleId, score, createdAt } satisfies LocalDesirabilityRecord);
+  await saveStoreRecord("jobs", {
+    id: createLocalId("desirability_shadow"),
+    roleId,
+    score,
+    createdAt,
+  } satisfies LocalDesirabilityRecord);
   return score;
 }
 
@@ -252,9 +261,13 @@ export async function refreshLocalJobDesirability(roleId: number): Promise<Desir
   return scoreLocalJobDesirability(roleId);
 }
 
-export async function listLocalApplicationMaterials(roleId: number): Promise<ApplicationMaterial[]> {
+export async function listLocalApplicationMaterials(
+  roleId: number,
+): Promise<ApplicationMaterial[]> {
   const records = await listStoreRecords<LocalMaterialRecord>("jobs");
-  return records.filter((record) => record.roleId === roleId && "material" in record).map((record) => record.material);
+  return records
+    .filter((record) => record.roleId === roleId && "material" in record)
+    .map((record) => record.material);
 }
 
 async function saveMaterial(roleId: number, material: ApplicationMaterial): Promise<void> {
@@ -273,7 +286,8 @@ export async function generateLocalCoverLetter(roleId: number): Promise<Applicat
     role_id: roleId,
     artifact_type: "cover_letter",
     version: 1,
-    content: "Dear hiring manager,\n\nI am excited to apply based on the role details captured in my local workspace.",
+    content:
+      "Dear hiring manager,\n\nI am excited to apply based on the role details captured in my local workspace.",
     questions: null,
     section_traceability: buildTraceability("cover_letter", roleId),
     unsupported_claims: [],
@@ -297,7 +311,9 @@ export async function generateLocalQuestionAnswers(
     role_id: roleId,
     artifact_type: "application_qa",
     version: 1,
-    content: questions.map((q, i) => `Q${i + 1}: ${q}\nA: Drafted locally from your saved workspace context.`).join("\n\n"),
+    content: questions
+      .map((q, i) => `Q${i + 1}: ${q}\nA: Drafted locally from your saved workspace context.`)
+      .join("\n\n"),
     questions,
     section_traceability: buildTraceability("application_qa", roleId),
     unsupported_claims: [],
@@ -313,7 +329,9 @@ export async function generateLocalQuestionAnswers(
 
 export async function listLocalInterviewPrepPacks(roleId: number): Promise<InterviewPrepPack[]> {
   const records = await listStoreRecords<LocalInterviewPrepRecord>("jobs");
-  return records.filter((record) => record.roleId === roleId && "pack" in record).map((record) => record.pack);
+  return records
+    .filter((record) => record.roleId === roleId && "pack" in record)
+    .map((record) => record.pack);
 }
 
 async function saveInterviewPrep(roleId: number, pack: InterviewPrepPack): Promise<void> {
@@ -397,12 +415,12 @@ export async function syncLocalResumeProfile(): Promise<ResumeProfileSyncResult>
 
 export async function listLocalResumeTuning(roleId: number): Promise<ResumeTuningSuggestion[]> {
   const records = await listStoreRecords<LocalResumeTuningRecord>("jobs");
-  return records.filter((record) => record.roleId === roleId && "suggestion" in record).map((record) => record.suggestion);
+  return records
+    .filter((record) => record.roleId === roleId && "suggestion" in record)
+    .map((record) => record.suggestion);
 }
 
-export async function generateLocalResumeTuning(
-  roleId: number,
-): Promise<ResumeTuningSuggestion> {
+export async function generateLocalResumeTuning(roleId: number): Promise<ResumeTuningSuggestion> {
   const createdAt = nowIso();
   const suggestion: ResumeTuningSuggestion = {
     id: Date.now(),

@@ -1,12 +1,12 @@
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
-import React from "react";
 import { indexedDB } from "fake-indexeddb";
+import React from "react";
 
 import { JobsPageClient } from "../../../src/frontend/components/JobsPageClient";
 import * as api from "../../../src/frontend/lib/api";
 import { setFrontendServicesForTests } from "../../../src/frontend/lib/services";
-import { setJobsLoaderForTests } from "../../../src/frontend/lib/useJobsBoard";
 import type { FrontendServices } from "../../../src/frontend/lib/services/types";
+import { setJobsLoaderForTests } from "../../../src/frontend/lib/useJobsBoard";
 
 describe("JobsPageClient", () => {
   const jobs: api.JobListItem[] = [
@@ -1232,7 +1232,11 @@ describe("JobsPageClient", () => {
     const outcomeInsightsHeading = await screen.findByRole("heading", { name: "Outcome Insights" });
     const outcomeInsightsDialog = outcomeInsightsHeading.closest("dialog") as HTMLElement;
     expect(outcomeInsightsHeading).toBeInTheDocument();
-    expect(await within(outcomeInsightsDialog).findByText(/Conversion by Fit Band/i)).toBeInTheDocument();
-    expect(await within(outcomeInsightsDialog).findByText(/Prefer openai for new drafts/i)).toBeInTheDocument();
+    expect(
+      await within(outcomeInsightsDialog).findByText(/Conversion by Fit Band/i),
+    ).toBeInTheDocument();
+    expect(
+      await within(outcomeInsightsDialog).findByText(/Prefer openai for new drafts/i),
+    ).toBeInTheDocument();
   }, 20000);
 });
