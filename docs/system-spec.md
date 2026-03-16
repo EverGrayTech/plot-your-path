@@ -79,6 +79,20 @@ As usage accumulates, the system should surface high-value patterns, especially 
 
 ## Architectural direction
 
+### MVP runtime direction
+
+The current MVP direction is to simplify the system into a browser-hosted local-first web application.
+
+That means the system should:
+
+- keep the application experience in the web UI layer
+- move core application logic toward TypeScript rather than a split Python-plus-frontend runtime
+- prefer browser-local persistence for single-user workflows
+- make data portability explicit through export and import rather than app-owned desktop file roots
+- avoid packaged desktop runtime complexity unless a future product need clearly justifies it
+
+For MVP planning, local-first should be interpreted as **data staying on the user's device/browser by default**, not as a requirement for a native desktop shell.
+
 ### Core data domains
 
 The system should maintain clear boundaries between:
@@ -89,6 +103,17 @@ The system should maintain clear boundaries between:
 - operational workflow records such as applications and outcomes
 
 Keeping those domains distinct helps the system stay understandable and easier to evolve.
+
+### Persistence and portability
+
+For MVP, runtime persistence and portability should be treated as separate concerns.
+
+- runtime persistence should favor browser-local storage suitable for structured single-user data
+- export and import should be first-class product workflows rather than hidden implementation details
+- exported data should be understandable and inspectable by a motivated user
+- the system should support merge-oriented import behavior so older backups do not overwrite newer local changes by default
+
+This keeps the product aligned with local-first trust while avoiding unnecessary coupling to desktop packaging decisions.
 
 ### Derived outputs should remain traceable
 
@@ -109,6 +134,8 @@ The durable value of the system comes from:
 
 AI should strengthen those things, not replace them.
 
+For MVP, AI integrations may be user-configured and client-driven, but they should remain clearly separable from the application's core data model and workflows.
+
 ### Persistence should preserve reuse
 
 The system should store information in ways that support later retrieval and recombination.
@@ -120,6 +147,8 @@ That is especially important for:
 - generated materials
 - outcomes
 - historical changes over time
+
+For the current MVP direction, that persistence strategy should favor simple, explicit, browser-local storage and clear exportability over more complex multi-runtime infrastructure.
 
 ## User experience expectations
 

@@ -71,6 +71,8 @@ The project aims to be:
 - **progressive** so it gives value early and grows with deeper use
 - **practical** in scope, favoring clear decisions over exhaustive analysis
 
+The current MVP direction is to deliver Plot Your Path as a browser-hosted local-first web application rather than a packaged desktop app. The product should keep user data on the user's device, store core workspace data in browser-local persistence, and make portability explicit through clear export and import workflows.
+
 ## Documentation map
 
 The documentation is intentionally split by purpose:
@@ -79,7 +81,8 @@ The documentation is intentionally split by purpose:
 - [Concept Model](docs/concept-model.md) — shared conceptual language and core entities
 - [System Spec](docs/system-spec.md) — system-level boundaries, architectural direction, and product guardrails
 - [Development](docs/development.md) — local development and testing workflows
-- [Desktop Runtime Foundation](docs/desktop-runtime.md) — Tauri packaging model, local runtime behavior, and desktop build workflows
+- [Web Local-First Architecture Pivot](docs/architecture-pivot-web-local-first.md) — architectural decision record and rationale for the browser-hosted local-first MVP direction
+- [Desktop Runtime Foundation](docs/desktop-runtime.md) — archived context for the earlier Tauri desktop runtime direction
 
 If you are new to the project, read them in that order.
 
