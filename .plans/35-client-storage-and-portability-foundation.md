@@ -51,21 +51,21 @@ Refactor direction:
 ## Implementation Steps
 
 ### 1. Define local data contracts
-- [ ] Define the durable entity and metadata requirements needed for local persistence.
-- [ ] Ensure stable IDs and timestamps are available where merge behavior requires them.
+- [x] Define the durable entity and metadata requirements needed for local persistence.
+- [x] Ensure stable IDs and timestamps are available where merge behavior requires them.
 
 ### 2. Build the persistence layer
-- [ ] Implement a light client-side repository/storage abstraction.
-- [ ] Add IndexedDB-backed persistence for the core MVP workspace entities.
+- [x] Implement a light client-side repository/storage abstraction.
+- [x] Add IndexedDB-backed persistence for the core MVP workspace entities.
 
 ### 3. Build export/import workflows
-- [ ] Implement zip-based export generation.
-- [ ] Implement import validation against manifest/schema expectations.
-- [ ] Implement merge-on-import with deterministic update rules.
+- [x] Implement zip-based export generation.
+- [x] Implement import validation against manifest/schema expectations.
+- [x] Implement merge-on-import with deterministic update rules.
 
 ### 4. Add trust-oriented UX hooks
-- [ ] Add export/import status messaging.
-- [ ] Add backup reminder support after major changes and over time.
+- [x] Add export/import status messaging.
+- [x] Add backup reminder support after major changes and over time.
 
 ## Affected Areas
 
@@ -76,7 +76,7 @@ Refactor direction:
 
 ## Success Criteria
 
-- [ ] Core workspace data persists locally in the browser without relying on the legacy backend.
-- [ ] Users can export a meaningful workspace archive.
-- [ ] Users can import older backups without losing newer local data by default.
-- [ ] API keys are excluded from exports.
+- [x] Core workspace data persists locally in the browser without relying on the legacy backend.
+- [x] Users can export a meaningful workspace archive.
+- [x] Users can import older backups without losing newer local data by default.
+- [x] API keys are excluded from exports.

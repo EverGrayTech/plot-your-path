@@ -27,6 +27,19 @@ function describeRuntime(desktopRuntime: boolean): string {
   return desktopRuntime ? "Packaged desktop runtime" : "Browser-connected development runtime";
 }
 
+function describeStorageMode(summary: DataPortabilitySummary): string {
+  if (summary.storage_mode === "browser_local") {
+    return "Browser-local workspace";
+  }
+  if (summary.storage_mode === "desktop_local") {
+    return "Desktop-local workspace";
+  }
+  if (summary.storage_mode === "transition") {
+    return "Transition-era local workspace";
+  }
+  return describeRuntime(summary.desktop_runtime);
+}
+
 function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -51,6 +64,7 @@ export function DataManagementPanel() {
   const [error, setError] = React.useState<string | null>(null);
   const [notice, setNotice] = React.useState<string | null>(null);
   const [operationError, setOperationError] = React.useState<string | null>(null);
+  const [operationNotice, setOperationNotice] = React.useState<string | null>(null);
   const [exporting, setExporting] = React.useState(false);
   const [importing, setImporting] = React.useState(false);
   const [resetting, setResetting] = React.useState(false);
@@ -90,13 +104,16 @@ export function DataManagementPanel() {
   }, []);
 
   React.useEffect(() => {
-    if (!notice) {
+    if (!notice && !operationNotice) {
       return;
     }
 
-    const timer = window.setTimeout(() => setNotice(null), 4500);
+    const timer = window.setTimeout(() => {
+      setNotice(null);
+      setOperationNotice(null);
+    }, 4500);
     return () => window.clearTimeout(timer);
-  }, [notice]);
+  }, [notice, operationNotice]);
 
   async function handleExport() {
     setExporting(true);
@@ -135,8 +152,17 @@ export function DataManagementPanel() {
 
     try {
       const payload = await fileToBase64(file);
-      await importDataArchive(payload);
+      const result = await importDataArchive(payload);
       setNotice("Backup restored.");
+      if (
+        typeof result.added_count === "number" ||
+        typeof result.updated_count === "number" ||
+        typeof result.unchanged_count === "number"
+      ) {
+        setOperationNotice(
+          `Import summary: ${result.added_count ?? 0} added, ${result.updated_count ?? 0} updated, ${result.unchanged_count ?? 0} unchanged.`,
+        );
+      }
       await loadSummary();
     } catch (actionError) {
       const message =
@@ -184,6 +210,12 @@ export function DataManagementPanel() {
         </div>
       ) : null}
 
+      {operationNotice ? (
+        <div className="toast-container">
+          <output className="toast toast-success">{operationNotice}</output>
+        </div>
+      ) : null}
+
       {summary ? (
         <div className="flex-row mb-md">
           <span className="badge badge-neutral">
@@ -198,10 +230,19 @@ export function DataManagementPanel() {
         </div>
       ) : null}
 
+      {!loading && summary?.backup_reminder_message ? (
+        <output
+          aria-live="polite"
+          className={`alert ${summary.backup_reminder_level === "overdue" ? "alert-warning" : "alert-info"}`}
+        >
+          {summary.backup_reminder_message}
+        </output>
+      ) : null}
+
       {!loading && summary && !summary.desktop_runtime ? (
         <output aria-live="polite" className="alert alert-warning">
-          Desktop packaging checks are most accurate in the packaged app. You are currently viewing
-          this through the browser-connected development runtime.
+          You are viewing this through the browser-hosted or transition runtime rather than the
+          archived packaged desktop path.
         </output>
       ) : null}
 
@@ -233,16 +274,16 @@ export function DataManagementPanel() {
           <div className="metadata-block">
             <span className="metadata-key">Workspace location</span>
             <span className="metadata-value">
-              <code>{summary.data_root}</code>
+              <code>{summary.data_root ?? "Browser-managed local storage"}</code>
             </span>
 
             <span className="metadata-key">Database file</span>
             <span className="metadata-value">
-              <code>{summary.database_path}</code>
+              <code>{summary.database_path ?? "Not applicable in browser-local mode"}</code>
             </span>
 
             <span className="metadata-key">Runtime</span>
-            <span className="metadata-value">{describeRuntime(summary.desktop_runtime)}</span>
+            <span className="metadata-value">{describeStorageMode(summary)}</span>
 
             <span className="metadata-key">Roles captured</span>
             <span className="metadata-value">{summary.jobs_count}</span>
@@ -257,8 +298,8 @@ export function DataManagementPanel() {
           <div className="structured-message structured-message-info">
             <h4>What a backup includes</h4>
             <p>
-              The export contains your SQLite database plus captured local files such as cleaned job
-              descriptions and resume/profile artifacts.
+              The export contains your local workspace data as a portable zip archive with readable
+              JSON and durable artifacts. API keys are excluded from backups.
             </p>
           </div>
         </div>
@@ -303,7 +344,7 @@ export function DataManagementPanel() {
 
       {importing ? (
         <div aria-live="polite" className="progress-panel mt-md">
-          <p>Restoring backup and replacing the current local workspace.</p>
+          <p>Restoring backup and merging it into the current local workspace.</p>
           <progress className="progress-bar" />
           <p className="form-helper">Do not close the app until the restore finishes.</p>
         </div>
