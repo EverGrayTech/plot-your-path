@@ -21,6 +21,12 @@ import {
   updateLocalNextAction,
   upsertLocalApplicationOps,
 } from "./localApplicationWorkflows";
+import {
+  exportLocalDataArchive,
+  getLocalDataPortabilitySummary,
+  importLocalDataArchive,
+  resetLocalWorkspace,
+} from "./localPortability";
 
 export interface CompanySummary {
   id: number;
@@ -855,38 +861,17 @@ export async function healthcheckAISetting(
 }
 
 export async function getDataPortabilitySummary(): Promise<DataPortabilitySummary> {
-  const response = await fetch(`${API_BASE_URL}/api/system/data-portability`);
-  return parseResponse<DataPortabilitySummary>(response);
+  return getLocalDataPortabilitySummary();
 }
 
 export async function exportDataArchive(): Promise<{ blob: Blob; filename: string }> {
-  const response = await fetch(`${API_BASE_URL}/api/system/data-portability/export`);
-  if (!response.ok) {
-    await throwApiError(response);
-  }
-
-  const disposition = response.headers.get("Content-Disposition") ?? "";
-  const match = disposition.match(/filename="([^"]+)"/);
-  return {
-    blob: await response.blob(),
-    filename: match?.[1] ?? "plot-your-path-backup.zip",
-  };
+  return exportLocalDataArchive();
 }
 
 export async function importDataArchive(archiveBase64: string): Promise<DataOperationResult> {
-  const response = await fetch(`${API_BASE_URL}/api/system/data-portability/import`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ archive_base64: archiveBase64 }),
-  });
-  return parseResponse<DataOperationResult>(response);
+  return importLocalDataArchive(archiveBase64);
 }
 
 export async function resetDataWorkspace(): Promise<DataOperationResult> {
-  const response = await fetch(`${API_BASE_URL}/api/system/data-portability/reset`, {
-    method: "POST",
-  });
-  return parseResponse<DataOperationResult>(response);
+  return resetLocalWorkspace();
 }
