@@ -39,16 +39,16 @@ Refactor direction:
 ## Implementation Steps
 
 ### 1. Migrate jobs persistence
-- [ ] Replace local job list/detail reads with browser-local repositories.
-- [ ] Replace job status and related non-AI job updates with browser-local persistence.
+- [x] Replace local job list/detail reads with browser-local repositories.
+- [x] Replace job status and related non-AI job updates with browser-local persistence.
 
 ### 2. Migrate skills persistence
-- [ ] Replace skill list/detail flows with browser-local repositories.
-- [ ] Preserve cross-navigation between jobs and skills using local data.
+- [x] Replace skill list/detail flows with browser-local repositories.
+- [x] Preserve cross-navigation between jobs and skills using local data.
 
 ### 3. Validate workflow parity
-- [ ] Ensure job capture persists locally and makes new roles visible immediately.
-- [ ] Add/update frontend tests for jobs and skills on browser-local data.
+- [x] Ensure job capture persists locally and makes new roles visible immediately.
+- [x] Add/update frontend tests for jobs and skills on browser-local data.
 
 ## Affected Areas
 
@@ -59,6 +59,6 @@ Refactor direction:
 
 ## Success Criteria
 
-- [ ] Jobs and skills workflows no longer require backend CRUD endpoints.
-- [ ] Captured roles and extracted skills persist locally in the browser.
-- [ ] Job/skill browsing behavior remains stable for users.
+- [x] Jobs and skills workflows no longer require backend CRUD endpoints.
+- [x] Captured roles and extracted skills persist locally in the browser.
+- [x] Job/skill browsing behavior remains stable for users.
