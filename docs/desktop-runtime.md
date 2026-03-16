@@ -1,6 +1,6 @@
 # Plot Your Path — Desktop Runtime Foundation (Archived Direction)
 
-See also: [Development Workflows](./development.md#desktop-runtime-workflows), [Windows Release Readiness](./windows-release-readiness.md), [System Specification](./system-spec.md#local-first-by-default), [README](../README.md#documentation-map)
+See also: [Development Workflows](./development.md#legacy-desktop-runtime-workflows), [Windows Release Readiness](./windows-release-readiness.md), [System Specification](./system-spec.md#local-first-by-default), [README](../README.md#documentation-map), [Web Local-First Architecture Pivot](./architecture-pivot-web-local-first.md)
 
 ## Purpose
 

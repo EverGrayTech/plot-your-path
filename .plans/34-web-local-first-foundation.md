@@ -42,16 +42,16 @@ Refactor direction:
 ## Implementation Steps
 
 ### 1. Align repository guidance
-- [ ] Ensure top-level and architecture docs point to the browser-local MVP as the active direction.
-- [ ] Mark desktop-runtime material as archived or transition-era where needed.
+- [x] Ensure top-level and architecture docs point to the browser-local MVP as the active direction.
+- [x] Mark desktop-runtime material as archived or transition-era where needed.
 
 ### 2. Define the implementation sequence baseline
-- [ ] Create follow-on plans for client persistence, AI workflows, and legacy retirement under the new direction.
-- [ ] Ensure those plans reference the architecture pivot doc rather than restating it inconsistently.
+- [x] Create follow-on plans for client persistence, AI workflows, and legacy retirement under the new direction.
+- [x] Ensure those plans reference the architecture pivot doc rather than restating it inconsistently.
 
 ### 3. Reduce active ambiguity
-- [ ] Remove or relocate ad hoc notes that mix architecture rationale with phase-specific implementation work.
-- [ ] Ensure contributors can tell which phases are active versus archived.
+- [x] Remove or relocate ad hoc notes that mix architecture rationale with phase-specific implementation work.
+- [x] Ensure contributors can tell which phases are active versus archived.
 
 ## Affected Areas
 
@@ -62,6 +62,6 @@ Refactor direction:
 
 ## Success Criteria
 
-- [ ] Contributors can identify the browser-hosted local-first MVP as the active architecture without ambiguity.
-- [ ] Architectural rationale lives in `docs/`, not mixed into implementation phases.
-- [ ] The follow-on plan set is ready for execution in scoped phases.
+- [x] Contributors can identify the browser-hosted local-first MVP as the active architecture without ambiguity.
+- [x] Architectural rationale lives in `docs/`, not mixed into implementation phases.
+- [x] The follow-on plan set is ready for execution in scoped phases.

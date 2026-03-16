@@ -227,5 +227,6 @@ When making non-trivial changes:
 1. use the [Product Overview](./product-overview.md) to check product intent and scope
 2. use the [Concept Model](./concept-model.md) to keep terminology consistent
 3. use the [System Specification](./system-spec.md) to preserve architectural guardrails
+4. use the [Web Local-First Architecture Pivot](./architecture-pivot-web-local-first.md) when deciding whether work belongs on the new MVP path or in archived transition context
 
 If implementation direction starts to drift from these docs, resolve it deliberately rather than letting the project evolve by accident.
