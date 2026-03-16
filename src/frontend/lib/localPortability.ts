@@ -1,10 +1,16 @@
-import type { DataOperationResult, DataPortabilitySummary } from "./api";
-import { initializeLocalWorkspace, listStoreRecords, nowIso, openLocalWorkspaceDb } from "./localData";
+import type { DataOperationResult, DataPortabilitySummary } from "./dataModels";
+import {
+  type WorkspaceMetadata,
+  initializeLocalWorkspace,
+  listStoreRecords,
+  nowIso,
+  openLocalWorkspaceDb,
+} from "./localData";
 
 interface PortableWorkspaceSnapshot {
   version: number;
   exported_at: string;
-  metadata: Record<string, unknown>;
+  metadata: WorkspaceMetadata;
   jobs: Record<string, unknown>[];
   skills: Record<string, unknown>[];
   applicationOps: Record<string, unknown>[];
@@ -15,10 +21,8 @@ interface PortableWorkspaceSnapshot {
 const PORTABLE_WORKSPACE_VERSION = 1;
 
 async function updateWorkspaceMetadata(
-  updater: (current: Awaited<ReturnType<typeof initializeLocalWorkspace>>) => Awaited<
-    ReturnType<typeof initializeLocalWorkspace>
-  >,
-) {
+  updater: (current: WorkspaceMetadata) => WorkspaceMetadata,
+): Promise<void> {
   const current = await initializeLocalWorkspace();
   const next = await updater(current);
   const db = await openLocalWorkspaceDb();
@@ -104,7 +108,7 @@ export async function exportLocalDataArchive(): Promise<{ blob: Blob; filename: 
     outcomes: await listStoreRecords<Record<string, unknown>>("outcomes"),
   };
 
-  await updateWorkspaceMetadata(async (current) => ({
+  await updateWorkspaceMetadata((current) => ({
     ...current,
     lastExportAt: snapshot.exported_at,
     updatedAt: snapshot.exported_at,
@@ -143,7 +147,7 @@ export async function importLocalDataArchive(archiveBase64: string): Promise<Dat
     db.close();
   }
 
-  await updateWorkspaceMetadata(async (current) => ({
+  await updateWorkspaceMetadata((current) => ({
     ...current,
     lastImportAt: completedAt,
     updatedAt: completedAt,
@@ -179,7 +183,7 @@ export async function resetLocalWorkspace(): Promise<DataOperationResult> {
     db.close();
   }
 
-  await updateWorkspaceMetadata(async (current) => ({
+  await updateWorkspaceMetadata((current) => ({
     ...current,
     lastResetAt: completedAt,
     updatedAt: completedAt,

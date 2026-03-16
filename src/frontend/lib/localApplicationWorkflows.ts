@@ -10,7 +10,7 @@ import type {
   PipelineCounters,
   PipelineItem,
   PipelineResponse,
-} from "./api";
+} from "./dataModels";
 import { createLocalId, listStoreRecords, nowIso, saveStoreRecord } from "./localData";
 import { listLocalJobs } from "./localJobs";
 

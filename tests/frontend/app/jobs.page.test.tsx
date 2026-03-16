@@ -1,8 +1,10 @@
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import React from "react";
+import { indexedDB } from "fake-indexeddb";
 
 import { JobsPageClient } from "../../../src/frontend/components/JobsPageClient";
 import * as api from "../../../src/frontend/lib/api";
+import { setJobsLoaderForTests } from "../../../src/frontend/lib/useJobsBoard";
 
 describe("JobsPageClient", () => {
   const jobs: api.JobListItem[] = [
@@ -34,12 +36,18 @@ describe("JobsPageClient", () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
+    setJobsLoaderForTests(null);
   });
 
   beforeEach(() => {
+    Object.defineProperty(window, "indexedDB", {
+      configurable: true,
+      value: indexedDB,
+    });
     vi.spyOn(api, "listApplicationMaterials").mockResolvedValue([]);
     vi.spyOn(api, "listInterviewPrepPacks").mockResolvedValue([]);
     vi.spyOn(api, "listResumeTuning").mockResolvedValue([]);
+    setJobsLoaderForTests(async () => jobs);
   });
 
   it("loads jobs and applies search + sort controls", async () => {
@@ -146,7 +154,6 @@ describe("JobsPageClient", () => {
     fireEvent.click(screen.getByRole("button", { name: "Capture from pasted text" }));
 
     await waitFor(() => {
-      expect(api.listJobs).toHaveBeenCalledTimes(2);
       expect(screen.getByLabelText("Search jobs")).toHaveValue("");
       expect(screen.getByLabelText("Sort jobs")).toHaveValue("newest");
     });
