@@ -35,6 +35,19 @@ export function AISettingsModal({
 }: AISettingsModalProps) {
   return (
     <Modal onClose={onClose} title="AI Settings">
+      <div className="structured-message structured-message-info mb-md">
+        <h4>Browser-local AI configuration</h4>
+        <p>
+          Plot Your Path currently supports one provider-oriented browser MVP flow. API keys are
+          stored locally on this device for convenience, are removable at any time, and are not
+          included in exported backups.
+        </p>
+        <p>
+          AI outputs are assistive, not authoritative. Final judgment, edits, and submitted content
+          remain the user&apos;s responsibility.
+        </p>
+      </div>
+
       {loading ? <p>Loading AI settings...</p> : null}
       {error ? <p role="alert">{error}</p> : null}
 
@@ -88,6 +101,9 @@ export function AISettingsModal({
                 />
               </label>
               <p className="mt-sm">Runtime token: {setting.token_masked ?? "Not set"}</p>
+              <p className="form-helper">
+                Stored locally for this browser only. Tokens are excluded from workspace exports.
+              </p>
               <label className="form-label">
                 Update runtime token
                 <input
@@ -126,6 +142,11 @@ export function AISettingsModal({
               {healthByFamily[setting.operation_family] ? (
                 <p className="mt-sm">{healthByFamily[setting.operation_family]}</p>
               ) : null}
+              <p className="form-helper mt-sm">
+                Use health checks to confirm the current provider and model are configured
+                correctly before generating fit analysis, desirability scoring, or application
+                materials.
+              </p>
             </div>
           </li>
         ))}

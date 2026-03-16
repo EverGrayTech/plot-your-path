@@ -389,7 +389,11 @@ export function useJobDetailState({ loadJobs }: UseJobDetailStateOptions) {
       );
       await loadJobs();
     } catch (error) {
-      setFitError(error instanceof Error ? error.message : "Failed to analyze fit.");
+      setFitError(
+        error instanceof Error
+          ? error.message
+          : "Failed to analyze fit. Confirm your local AI provider settings and resume/job inputs.",
+      );
     } finally {
       setAnalyzingFit(false);
     }
@@ -518,7 +522,9 @@ export function useJobDetailState({ loadJobs }: UseJobDetailStateOptions) {
       .filter(Boolean);
 
     if (questions.length === 0) {
-      setMaterialsError("Add at least one application question before generating Q&A drafts.");
+      setMaterialsError(
+        "Add at least one application question before generating Q&A drafts. AI assistance works best with explicit pasted prompts.",
+      );
       return;
     }
 
@@ -531,7 +537,9 @@ export function useJobDetailState({ loadJobs }: UseJobDetailStateOptions) {
       setSelectedMaterialId(created.id);
     } catch (error) {
       setMaterialsError(
-        error instanceof Error ? error.message : "Failed to generate application Q&A.",
+        error instanceof Error
+          ? error.message
+          : "Failed to generate application Q&A. Confirm local AI settings and try again.",
       );
     } finally {
       setGeneratingQA(false);
@@ -552,7 +560,9 @@ export function useJobDetailState({ loadJobs }: UseJobDetailStateOptions) {
       setSelectedInterviewPrepId(created.id);
     } catch (error) {
       setInterviewPrepError(
-        error instanceof Error ? error.message : "Failed to generate interview prep pack.",
+        error instanceof Error
+          ? error.message
+          : "Failed to generate cover letter. Confirm local AI settings and the role inputs.",
       );
     } finally {
       setGeneratingInterviewPrep(false);
@@ -715,7 +725,9 @@ export function useJobDetailState({ loadJobs }: UseJobDetailStateOptions) {
       await loadJobs();
     } catch (error) {
       setDesirabilityError(
-        error instanceof Error ? error.message : "Failed to score desirability.",
+        error instanceof Error
+          ? error.message
+          : "Failed to score desirability. Confirm local AI settings and try again.",
       );
     } finally {
       setScoringDesirability(false);
