@@ -46,16 +46,16 @@ Refactor direction:
 ## Implementation Steps
 
 ### 1. Audit active dependencies
-- [ ] Audit frontend runtime/API assumptions that still require backend-era services.
-- [ ] Audit scripts, config, and test flows that still assume desktop/backend execution.
+- [x] Audit frontend runtime/API assumptions that still require backend-era services.
+- [x] Audit scripts, config, and test flows that still assume desktop/backend execution.
 
 ### 2. Classify legacy surfaces
-- [ ] Produce a clear keep / transition / archive / remove classification across legacy directories and docs.
-- [ ] Identify any hidden dependencies that must be refactored before removal.
+- [x] Produce a clear keep / transition / archive / remove classification across legacy directories and docs.
+- [x] Identify any hidden dependencies that must be refactored before removal.
 
 ### 3. Define the cut line
-- [ ] Document the exact removal boundary for later cleanup phases.
-- [ ] Create follow-up issues/plans for any speculative or blocked removals.
+- [x] Document the exact removal boundary for later cleanup phases.
+- [x] Create follow-up issues/plans for any speculative or blocked removals.
 
 ## Affected Areas
 
@@ -67,6 +67,6 @@ Refactor direction:
 
 ## Success Criteria
 
-- [ ] The repository has a documented legacy dependency map.
-- [ ] It is clear which legacy areas can be removed immediately versus later.
-- [ ] Later removal phases can proceed without guesswork.
+- [x] The repository has a documented legacy dependency map.
+- [x] It is clear which legacy areas can be removed immediately versus later.
+- [x] Later removal phases can proceed without guesswork.
