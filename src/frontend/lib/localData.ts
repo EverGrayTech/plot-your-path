@@ -17,6 +17,8 @@ export type LocalStoreName =
   | "aiSettings"
   | "jobs"
   | "skills"
+  | "fitAnalyses"
+  | "desirabilityScores"
   | "applicationOps"
   | "interviewStages"
   | "outcomes";
@@ -36,6 +38,8 @@ const STORE_DEFINITIONS: Array<LocalStoreDefinition<Record<string, unknown>>> = 
   { name: "aiSettings", keyPath: "id" },
   { name: "jobs", keyPath: "id" },
   { name: "skills", keyPath: "id" },
+  { name: "fitAnalyses", keyPath: "id" },
+  { name: "desirabilityScores", keyPath: "id" },
   { name: "applicationOps", keyPath: "id" },
   { name: "interviewStages", keyPath: "id" },
   { name: "outcomes", keyPath: "id" },

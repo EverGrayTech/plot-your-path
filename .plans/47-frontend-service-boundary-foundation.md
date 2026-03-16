@@ -40,15 +40,15 @@ Refactor direction:
 ## Implementation Steps
 
 ### 1. Define the new service structure
-- [ ] Create frontend service/repository modules aligned to the web-local architecture.
-- [ ] Introduce the shared interfaces/hooks needed for later consumer migration.
+- [x] Create frontend service/repository modules aligned to the web-local architecture.
+- [x] Introduce the shared interfaces/hooks needed for later consumer migration.
 
 ### 2. Centralize dependency wiring
-- [ ] Add a coherent composition layer for frontend services.
+- [x] Add a coherent composition layer for frontend services.
 - [ ] Keep direct transport/storage/provider setup out of feature components.
 
 ### 3. Prepare migration
-- [ ] Document which current `api.ts` responsibilities map to which new services.
+- [x] Document which current `api.ts` responsibilities map to which new services.
 - [ ] Ensure the structure supports incremental consumer cutover.
 
 ## Affected Areas
@@ -59,6 +59,6 @@ Refactor direction:
 
 ## Success Criteria
 
-- [ ] The frontend has a clear target service architecture.
+- [x] The frontend has a clear target service architecture.
 - [ ] Later migrations can move consumers incrementally without redesigning boundaries.
-- [ ] `api.ts` is no longer the only obvious architectural interface.
+- [x] `api.ts` is no longer the only obvious architectural interface.

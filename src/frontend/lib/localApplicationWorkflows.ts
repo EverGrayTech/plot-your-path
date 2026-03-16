@@ -46,6 +46,9 @@ interface LocalOutcomeRecord {
   fitAnalysisId: number | null;
   desirabilityScoreId: number | null;
   applicationMaterialId: number | null;
+  modelFamily: string | null;
+  model: string | null;
+  promptVersion: string | null;
   createdAt: string;
 }
 
@@ -96,9 +99,9 @@ function toOutcomeEvent(record: LocalOutcomeRecord): OutcomeEvent {
     fit_analysis_id: record.fitAnalysisId,
     desirability_score_id: record.desirabilityScoreId,
     application_material_id: record.applicationMaterialId,
-    model_family: null,
-    model: null,
-    prompt_version: null,
+    model_family: record.modelFamily,
+    model: record.model,
+    prompt_version: record.promptVersion,
     created_at: record.createdAt,
   };
 }
@@ -193,6 +196,13 @@ export async function listLocalOutcomeEvents(roleId: number): Promise<OutcomeEve
     .sort((left, right) => new Date(right.occurred_at).getTime() - new Date(left.occurred_at).getTime());
 }
 
+export async function listAllLocalOutcomeEvents(): Promise<OutcomeEvent[]> {
+  const records = await listStoreRecords<LocalOutcomeRecord>("outcomes");
+  return records
+    .map(toOutcomeEvent)
+    .sort((left, right) => new Date(right.occurred_at).getTime() - new Date(left.occurred_at).getTime());
+}
+
 export async function addLocalOutcomeEvent(
   roleId: number,
   payload: OutcomeEventCreate,
@@ -207,6 +217,9 @@ export async function addLocalOutcomeEvent(
     fitAnalysisId: payload.fit_analysis_id ?? null,
     desirabilityScoreId: payload.desirability_score_id ?? null,
     applicationMaterialId: payload.application_material_id ?? null,
+    modelFamily: payload.model_family ?? null,
+    model: payload.model ?? null,
+    promptVersion: payload.prompt_version ?? null,
     createdAt: nowIso(),
   };
   await saveStoreRecord("outcomes", record);

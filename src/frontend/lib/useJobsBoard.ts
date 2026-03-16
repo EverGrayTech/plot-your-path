@@ -4,14 +4,14 @@ import type { Dispatch, SetStateAction } from "react";
 import { useEffect, useState } from "react";
 
 import type { FitRecommendation, JobListItem, JobScrapeResponse } from "./dataModels";
-import { listLocalJobs } from "./localJobs";
+import { getFrontendServices } from "./services";
 
 type ListJobsFn = () => Promise<JobListItem[]>;
 
-let jobsLoader: ListJobsFn = listLocalJobs;
+let jobsLoader: ListJobsFn = () => getFrontendServices().jobs.listJobs();
 
 export function setJobsLoaderForTests(loader: ListJobsFn | null) {
-  jobsLoader = loader ?? listLocalJobs;
+  jobsLoader = loader ?? (() => getFrontendServices().jobs.listJobs());
 }
 
 export type SortMode = "newest" | "oldest" | "company_az" | "desirability_desc" | "smart_sort";

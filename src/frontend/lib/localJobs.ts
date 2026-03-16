@@ -1,5 +1,8 @@
 import type {
   CompanySummary,
+  DesirabilityScore,
+  FitAnalysis,
+  FitRecommendation,
   JobDetail,
   JobListItem,
   JobScrapeRequest,
@@ -11,6 +14,35 @@ import type {
   SkillListItem,
 } from "./dataModels";
 import { createLocalId, listStoreRecords, nowIso, saveStoreRecord } from "./localData";
+
+interface LocalFitAnalysisRecord {
+  id: string;
+  roleId: number;
+  fitScore: number;
+  recommendation: FitRecommendation;
+  coveredRequiredSkills: string[];
+  missingRequiredSkills: string[];
+  coveredPreferredSkills: string[];
+  missingPreferredSkills: string[];
+  rationale: string;
+  provider: string;
+  model: string;
+  version: string;
+  createdAt: string;
+}
+
+interface LocalDesirabilityScoreRecord {
+  id: string;
+  scoreId: number;
+  roleId: number;
+  companyId: number;
+  totalScore: number;
+  createdAt: string;
+  cacheExpiresAt: string;
+  provider: string;
+  model: string;
+  version: string;
+}
 
 interface LocalJobRecord {
   id: string;
@@ -92,7 +124,47 @@ function toJobListItem(record: LocalJobRecord): JobListItem {
   };
 }
 
-function toJobDetail(record: LocalJobRecord): JobDetail {
+function toFitAnalysis(record: LocalFitAnalysisRecord): FitAnalysis {
+  return {
+    id: Number.parseInt(record.id.replace(/\D/g, "").slice(-6) || "1", 10),
+    role_id: record.roleId,
+    fit_score: record.fitScore,
+    recommendation: record.recommendation,
+    covered_required_skills: record.coveredRequiredSkills,
+    missing_required_skills: record.missingRequiredSkills,
+    covered_preferred_skills: record.coveredPreferredSkills,
+    missing_preferred_skills: record.missingPreferredSkills,
+    rationale: record.rationale,
+    provider: record.provider,
+    model: record.model,
+    version: record.version,
+    created_at: record.createdAt,
+  };
+}
+
+function toDesirabilityScore(record: LocalDesirabilityScoreRecord): DesirabilityScore {
+  return {
+    id: record.scoreId,
+    company_id: record.companyId,
+    role_id: record.roleId,
+    total_score: record.totalScore,
+    factor_breakdown: [],
+    score_scope: "company",
+    fallback_used: false,
+    cache_expires_at: record.cacheExpiresAt,
+    is_stale: false,
+    provider: record.provider,
+    model: record.model,
+    version: record.version,
+    created_at: record.createdAt,
+  };
+}
+
+function toJobDetail(
+  record: LocalJobRecord,
+  fitAnalysis: FitAnalysis | null,
+  desirabilityScore: DesirabilityScore | null,
+): JobDetail {
   return {
     id: record.roleId,
     company: buildCompanySummary(record),
@@ -108,8 +180,8 @@ function toJobDetail(record: LocalJobRecord): JobDetail {
     created_at: record.createdAt,
     status: record.status,
     status_history: [],
-    latest_fit_analysis: null,
-    latest_desirability_score: null,
+    latest_fit_analysis: fitAnalysis,
+    latest_desirability_score: desirabilityScore,
   };
 }
 
@@ -153,7 +225,23 @@ export async function getLocalJob(roleId: number): Promise<JobDetail> {
   if (!record) {
     throw new Error("Job not found in local workspace.");
   }
-  return toJobDetail(record);
+
+  const fitRecords = await listStoreRecords<LocalFitAnalysisRecord>("fitAnalyses");
+  const scoreRecords = await listStoreRecords<LocalDesirabilityScoreRecord>("desirabilityScores");
+
+  const latestFitRecord = fitRecords
+    .filter((item) => item.roleId === roleId)
+    .sort((left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime())[0];
+
+  const latestScoreRecord = scoreRecords
+    .filter((item) => item.roleId === roleId)
+    .sort((left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime())[0];
+
+  return toJobDetail(
+    record,
+    latestFitRecord ? toFitAnalysis(latestFitRecord) : null,
+    latestScoreRecord ? toDesirabilityScore(latestScoreRecord) : null,
+  );
 }
 
 export async function updateLocalJobStatus(roleId: number, status: RoleStatus): Promise<JobListItem> {
