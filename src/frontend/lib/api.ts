@@ -3,6 +3,15 @@ export interface JobScrapeRequest {
   fallback_text?: string;
 }
 
+import {
+  captureLocalJob,
+  getLocalJob,
+  getLocalSkill,
+  listLocalJobs,
+  listLocalSkills,
+  updateLocalJobStatus,
+} from "./localJobs";
+
 export interface CompanySummary {
   id: number;
   name: string;
@@ -507,8 +516,7 @@ async function throwApiError(response: Response): Promise<never> {
 }
 
 export async function getJob(roleId: number): Promise<JobDetail> {
-  const response = await fetch(`${API_BASE_URL}/api/jobs/${roleId}`);
-  return parseResponse<JobDetail>(response);
+  return getLocalJob(roleId);
 }
 
 export async function getApplicationOps(roleId: number): Promise<ApplicationOps> {
@@ -572,8 +580,7 @@ export async function listPipeline(options?: {
 }
 
 export async function listJobs(): Promise<JobListItem[]> {
-  const response = await fetch(`${API_BASE_URL}/api/jobs`);
-  return parseResponse<JobListItem[]>(response);
+  return listLocalJobs();
 }
 
 export async function upsertApplicationOps(
@@ -619,37 +626,19 @@ export async function updateNextAction(
 }
 
 export async function listSkills(): Promise<SkillListItem[]> {
-  const response = await fetch(`${API_BASE_URL}/api/skills`);
-  return parseResponse<SkillListItem[]>(response);
+  return listLocalSkills();
 }
 
 export async function getSkill(skillId: number): Promise<SkillDetail> {
-  const response = await fetch(`${API_BASE_URL}/api/skills/${skillId}`);
-  return parseResponse<SkillDetail>(response);
+  return getLocalSkill(skillId);
 }
 
 export async function scrapeJob(request: JobScrapeRequest): Promise<JobScrapeResponse> {
-  const response = await fetch(`${API_BASE_URL}/api/jobs/scrape`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(request),
-  });
-
-  return parseResponse<JobScrapeResponse>(response);
+  return captureLocalJob(request);
 }
 
 export async function updateJobStatus(roleId: number, status: RoleStatus): Promise<JobListItem> {
-  const response = await fetch(`${API_BASE_URL}/api/jobs/${roleId}/status`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ status }),
-  });
-
-  return parseResponse<JobListItem>(response);
+  return updateLocalJobStatus(roleId, status);
 }
 
 export async function analyzeJobFit(roleId: number): Promise<FitAnalysis> {
