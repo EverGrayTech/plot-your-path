@@ -3,8 +3,16 @@
 import type { Dispatch, SetStateAction } from "react";
 import { useEffect, useState } from "react";
 
-import type { FitRecommendation, JobListItem, JobScrapeResponse } from "./api";
-import { listJobs } from "./api";
+import type { FitRecommendation, JobListItem, JobScrapeResponse } from "./dataModels";
+import { listLocalJobs } from "./localJobs";
+
+type ListJobsFn = () => Promise<JobListItem[]>;
+
+let jobsLoader: ListJobsFn = listLocalJobs;
+
+export function setJobsLoaderForTests(loader: ListJobsFn | null) {
+  jobsLoader = loader ?? listLocalJobs;
+}
 
 export type SortMode = "newest" | "oldest" | "company_az" | "desirability_desc" | "smart_sort";
 export type RecommendationFilter = "all" | FitRecommendation | "not_analyzed";
@@ -21,7 +29,7 @@ async function fetchJobsList(
   setLoadingJobs(true);
   setListError(null);
   try {
-    const response = await listJobs();
+    const response = await jobsLoader();
     setJobs(response);
   } catch (error) {
     if (error instanceof Error) {

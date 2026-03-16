@@ -9,7 +9,7 @@ import type {
   SkillDetail,
   SkillJobReference,
   SkillListItem,
-} from "./api";
+} from "./dataModels";
 import { createLocalId, listStoreRecords, nowIso, saveStoreRecord } from "./localData";
 
 interface LocalJobRecord {

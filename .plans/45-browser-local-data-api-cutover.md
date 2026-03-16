@@ -40,16 +40,16 @@ Refactor direction:
 ## Implementation Steps
 
 ### 1. Replace non-AI API usage
-- [ ] Migrate hooks/components off backend CRUD/data-portability API helpers.
-- [ ] Remove obsolete non-AI API helpers from `src/frontend/lib/api.ts` where appropriate.
+- [x] Migrate hooks/components off backend CRUD/data-portability API helpers.
+- [x] Remove obsolete non-AI API helpers from `src/frontend/lib/api.ts` where appropriate.
 
 ### 2. Verify parity
-- [ ] Run and update tests covering jobs, skills, ops, outcomes, and data management flows.
-- [ ] Confirm no active non-AI workflow depends on backend persistence endpoints.
+- [x] Run and update tests covering jobs, skills, ops, outcomes, and data management flows.
+- [x] Confirm no active non-AI workflow depends on backend persistence endpoints.
 
 ### 3. Record remaining backend dependence
-- [ ] Document what backend dependence remains after non-AI cutover, if any.
-- [ ] Keep the remaining scope narrow and explicit for later plans.
+- [x] Document what backend dependence remains after non-AI cutover, if any.
+- [x] Keep the remaining scope narrow and explicit for later plans.
 
 ## Affected Areas
 
@@ -60,6 +60,6 @@ Refactor direction:
 
 ## Success Criteria
 
-- [ ] Core non-AI MVP workflows no longer depend on backend persistence APIs.
-- [ ] Remaining backend dependence, if any, is explicitly limited to later phases.
-- [ ] The codebase reflects the browser-local data architecture for non-AI behavior.
+- [x] Core non-AI MVP workflows no longer depend on backend persistence APIs.
+- [x] Remaining backend dependence, if any, is explicitly limited to later phases.
+- [x] The codebase reflects the browser-local data architecture for non-AI behavior.
