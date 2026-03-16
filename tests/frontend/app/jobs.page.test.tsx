@@ -139,10 +139,11 @@ describe("JobsPageClient", () => {
     fireEvent.click(screen.getByRole("button", { name: "Add Job" }));
     expect(screen.getByRole("dialog")).toBeInTheDocument();
 
-    fireEvent.change(screen.getByLabelText("Job URL"), {
-      target: { value: "https://example.com/jobs/new" },
+    expect(screen.getByLabelText("Capture method")).toHaveValue("paste");
+    fireEvent.change(screen.getByLabelText(/Pasted job description text/i), {
+      target: { value: "New Role at New Co with 5 extracted skills." },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Capture job" }));
+    fireEvent.click(screen.getByRole("button", { name: "Capture from pasted text" }));
 
     await waitFor(() => {
       expect(api.listJobs).toHaveBeenCalledTimes(2);

@@ -20,6 +20,7 @@ interface CaptureJobFormProps {
 export function CaptureJobForm({ onCaptured }: CaptureJobFormProps) {
   const [url, setUrl] = useState("");
   const [jobText, setJobText] = useState("");
+  const [captureMode, setCaptureMode] = useState<"url" | "paste">("paste");
   const [needsFallbackText, setNeedsFallbackText] = useState(false);
   const [phase, setPhase] = useState<Phase>("idle");
   const [progressIndex, setProgressIndex] = useState(0);
@@ -48,7 +49,15 @@ export function CaptureJobForm({ onCaptured }: CaptureJobFormProps) {
     setResult(null);
 
     try {
-      const payload = needsFallbackText ? { url, fallback_text: jobText.trim() } : { url };
+      const payload =
+        captureMode === "paste"
+          ? {
+              fallback_text: jobText.trim(),
+              url: url.trim() || "pasted-job-description",
+            }
+          : needsFallbackText
+            ? { url, fallback_text: jobText.trim() }
+            : { url };
       const response = await scrapeJob(payload);
       setResult(response);
       setNeedsFallbackText(false);
@@ -74,6 +83,7 @@ export function CaptureJobForm({ onCaptured }: CaptureJobFormProps) {
   function resetForm() {
     setUrl("");
     setJobText("");
+    setCaptureMode("paste");
     setNeedsFallbackText(false);
     setPhase("idle");
     setErrorMessage(null);
@@ -82,31 +92,60 @@ export function CaptureJobForm({ onCaptured }: CaptureJobFormProps) {
 
   const submitDisabled =
     phase === "submitting" ||
-    url.trim().length === 0 ||
-    (needsFallbackText && jobText.trim().length === 0);
+    ((captureMode === "url" && url.trim().length === 0) ||
+      ((needsFallbackText || captureMode === "paste") && jobText.trim().length === 0));
 
   return (
     <section>
       {phase !== "success" ? (
         <form className="form-grid" onSubmit={handleSubmit}>
-          <div className="form-label">
-            <label htmlFor="job-url">Job URL</label>
-            <input
-              className="form-input"
-              id="job-url"
-              name="job-url"
-              onChange={(event) => setUrl(event.target.value)}
-              placeholder="https://..."
-              required
-              type="url"
-              value={url}
-            />
-            <span className="form-helper">
-              Paste the full URL of the job posting you want to capture.
-            </span>
+          <div className="structured-message structured-message-info">
+            <h4>MVP capture mode</h4>
+            <p>
+              The preferred MVP workflow is to paste the job description text directly. URL-based
+              capture remains available only as transition-era compatibility while the browser-local
+              workflow is being completed.
+            </p>
           </div>
 
-          {needsFallbackText ? (
+          <label className="form-label">
+            Capture method
+            <select
+              className="form-select"
+              onChange={(event) => {
+                const nextMode = event.target.value as "url" | "paste";
+                setCaptureMode(nextMode);
+                setNeedsFallbackText(nextMode === "paste");
+                setErrorMessage(null);
+              }}
+              value={captureMode}
+            >
+              <option value="paste">Paste job description text</option>
+              <option value="url">Use job URL (legacy transition mode)</option>
+            </select>
+          </label>
+
+          {captureMode === "url" ? (
+            <div className="form-label">
+              <label htmlFor="job-url">Job URL</label>
+              <input
+                className="form-input"
+                id="job-url"
+                name="job-url"
+                onChange={(event) => setUrl(event.target.value)}
+                placeholder="https://..."
+                required={captureMode === "url"}
+                type="url"
+                value={url}
+              />
+              <span className="form-helper">
+                URL capture is transition-era compatibility. Prefer pasted job text for the browser
+                MVP workflow.
+              </span>
+            </div>
+          ) : null}
+
+          {needsFallbackText || captureMode === "paste" ? (
             <div className="form-label">
               <label htmlFor="fallback-text">Pasted job description text</label>
               <textarea
@@ -119,8 +158,8 @@ export function CaptureJobForm({ onCaptured }: CaptureJobFormProps) {
                 value={jobText}
               />
               <span className="form-helper">
-                The URL could not be scraped automatically. Paste the full job description text so
-                it can be parsed directly.
+                Paste the full job description text. This is the preferred MVP input path for the
+                browser-local workflow.
               </span>
             </div>
           ) : null}
@@ -133,9 +172,11 @@ export function CaptureJobForm({ onCaptured }: CaptureJobFormProps) {
             >
               {phase === "submitting"
                 ? "Capturing"
-                : needsFallbackText
-                  ? "Submit with pasted text"
-                  : "Capture job"}
+                : captureMode === "paste"
+                  ? "Capture from pasted text"
+                  : needsFallbackText
+                    ? "Submit with pasted text"
+                    : "Capture job"}
             </button>
           </div>
         </form>
@@ -162,6 +203,9 @@ export function CaptureJobForm({ onCaptured }: CaptureJobFormProps) {
           <div className="alert alert-success mt-md">
             <p>
               Role captured: <strong>{result.title}</strong> at <strong>{result.company}</strong>.
+            </p>
+            <p className="form-helper">
+              This role is now available for local-first evaluation and application-help workflows.
             </p>
           </div>
           <button className="btn btn-secondary mt-md" onClick={resetForm} type="button">

@@ -21,6 +21,10 @@ describe("CaptureJobForm", () => {
 
     render(<CaptureJobForm />);
 
+    fireEvent.change(screen.getByLabelText("Capture method"), {
+      target: { value: "url" },
+    });
+
     fireEvent.change(screen.getByLabelText("Job URL"), {
       target: { value: "https://example.com/jobs/123" },
     });
@@ -31,6 +35,36 @@ describe("CaptureJobForm", () => {
     );
     expect(screen.queryByLabelText("Job URL")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Capture job" })).not.toBeInTheDocument();
+  });
+
+  it("defaults to pasted job description capture for the browser MVP", async () => {
+    vi.spyOn(api, "scrapeJob").mockResolvedValue({
+      status: "success",
+      role_id: 22,
+      company: "Paste Co",
+      title: "Typed Role",
+      skills_extracted: 3,
+      processing_time_seconds: 0.9,
+    });
+
+    render(<CaptureJobForm />);
+
+    expect(screen.getByText(/preferred MVP workflow is to paste the job description text/i)).toBeInTheDocument();
+    expect(screen.getByLabelText("Capture method")).toHaveValue("paste");
+
+    fireEvent.change(screen.getByLabelText(/Pasted job description text/i), {
+      target: { value: "Senior engineer role with TypeScript and systems design." },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /Capture from pasted text/i }));
+
+    await waitFor(() => {
+      expect(api.scrapeJob).toHaveBeenCalledWith({
+        fallback_text: "Senior engineer role with TypeScript and systems design.",
+        url: "pasted-job-description",
+      });
+    });
+
+    expect(await screen.findByRole("status")).toHaveTextContent(/Role captured:\s*Typed Role\s*at\s*Paste Co/i);
   });
 
   it("reveals fallback textarea when API requests fallback", async () => {
@@ -47,6 +81,10 @@ describe("CaptureJobForm", () => {
     );
 
     render(<CaptureJobForm />);
+
+    fireEvent.change(screen.getByLabelText("Capture method"), {
+      target: { value: "url" },
+    });
 
     fireEvent.change(screen.getByLabelText("Job URL"), {
       target: { value: "https://example.com/jobs/blocked" },
@@ -84,6 +122,10 @@ describe("CaptureJobForm", () => {
 
     render(<CaptureJobForm />);
 
+    fireEvent.change(screen.getByLabelText("Capture method"), {
+      target: { value: "url" },
+    });
+
     fireEvent.change(screen.getByLabelText("Job URL"), {
       target: { value: "https://example.com/jobs/blocked" },
     });
@@ -113,6 +155,10 @@ describe("CaptureJobForm", () => {
     );
 
     render(<CaptureJobForm />);
+
+    fireEvent.change(screen.getByLabelText("Capture method"), {
+      target: { value: "url" },
+    });
 
     fireEvent.change(screen.getByLabelText("Job URL"), {
       target: { value: "https://example.com/jobs/500" },

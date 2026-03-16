@@ -48,20 +48,20 @@ Refactor direction:
 ## Implementation Steps
 
 ### 1. Resume flow
-- [ ] Implement resume creation and editing from pasted text.
-- [ ] Persist resume content locally in the new storage path.
+- [x] Implement resume creation and editing from pasted text.
+- [x] Persist resume content locally in the new storage path.
 
 ### 2. Job description flow
-- [ ] Implement job creation and editing from pasted text.
-- [ ] Persist role/job records locally in the new storage path.
+- [x] Implement job creation and editing from pasted text.
+- [x] Persist role/job records locally in the new storage path.
 
 ### 3. Evaluation flow
-- [ ] Connect local role records and resume content to fit/desirability evaluation.
-- [ ] Surface saved versus regenerable outputs appropriately.
+- [x] Connect local role records and resume content to fit/desirability evaluation.
+- [x] Surface saved versus regenerable outputs appropriately.
 
 ### 4. Application-help flow
-- [ ] Build the durable cover-letter workflow.
-- [ ] Build the temporary application-answer support workflow.
+- [x] Build the durable cover-letter workflow.
+- [x] Build the temporary application-answer support workflow.
 
 ## Affected Areas
 
@@ -73,6 +73,6 @@ Refactor direction:
 
 ## Success Criteria
 
-- [ ] A user can paste a resume, paste a job description, and evaluate the role in the browser-local MVP path.
-- [ ] A user can generate and retain a cover letter for a role.
-- [ ] The core MVP loop works without requiring the legacy Python/Tauri runtime path.
+- [x] A user can paste a resume, paste a job description, and evaluate the role in the browser-local MVP path.
+- [x] A user can generate and retain a cover letter for a role.
+- [x] The core MVP loop works without requiring the legacy Python/Tauri runtime path.
