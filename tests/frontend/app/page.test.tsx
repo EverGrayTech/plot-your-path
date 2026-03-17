@@ -13,7 +13,7 @@ describe("HomePage", () => {
     expect(screen.getByRole("link", { name: /Start here/i })).toHaveAttribute("href", "/jobs");
     expect(screen.getAllByRole("link", { name: /Jobs/ })[0]).toHaveAttribute("href", "/jobs");
     expect(screen.getByRole("link", { name: /Skills/ })).toHaveAttribute("href", "/skills");
-    expect(screen.getByRole("heading", { name: /Architecture status/i })).toBeInTheDocument();
-    expect(screen.getByText(/Legacy path retirement/i)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /Product architecture status/i })).toBeInTheDocument();
+    expect(screen.getByText(/Architecture boundary/i)).toBeInTheDocument();
   });
 });

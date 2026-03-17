@@ -17,6 +17,7 @@ describe("SkillsPageClient", () => {
   afterEach(() => {
     vi.restoreAllMocks();
     setFrontendServicesForTests(null);
+    (globalThis as { fetch?: typeof fetch }).fetch = undefined;
   });
 
   beforeEach(() => {
@@ -89,10 +90,6 @@ describe("SkillsPageClient", () => {
     global.fetch = vi.fn(async () => {
       throw new Error("Unexpected fetch in SkillsPageClient test");
     }) as typeof fetch;
-  });
-
-  afterEach(() => {
-    delete (globalThis as { fetch?: typeof fetch }).fetch;
   });
 
   it("renders skills list and supports search + sort", async () => {

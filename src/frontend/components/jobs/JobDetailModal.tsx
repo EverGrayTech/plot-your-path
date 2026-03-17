@@ -10,7 +10,7 @@ import type {
   OutcomeEventType,
   ResumeTuningSuggestion,
   RoleStatus,
-} from "../../lib/api";
+} from "../../lib/dataModels";
 import {
   interviewStageLabel,
   outcomeEventLabel,

@@ -39,16 +39,16 @@ Refactor direction:
 ## Implementation Steps
 
 ### 1. Restructure around the active web app
-- [ ] Reorganize project structure so the active web architecture is obvious.
-- [ ] Align docs, scripts, and naming with the final web-local product shape.
+- [x] Reorganize project structure so the active web architecture is obvious.
+- [x] Align docs, scripts, and naming with the final web-local product shape.
 
 ### 2. Remove transitional abstractions
-- [ ] Simplify modules, types, and utilities that only existed to bridge old and new architectures.
-- [ ] Remove stale compatibility layers and obsolete API-era naming where appropriate.
+- [x] Simplify modules, types, and utilities that only existed to bridge old and new architectures.
+- [x] Remove stale compatibility layers and obsolete API-era naming where appropriate.
 
 ### 3. Final cleanup pass
-- [ ] Run a final dead-code audit across the remaining codebase.
-- [ ] Resolve confirmed dead code and record any remaining narrow investigations explicitly.
+- [x] Run a final dead-code audit across the remaining codebase.
+- [x] Resolve confirmed dead code and record any remaining narrow investigations explicitly.
 
 ## Affected Areas
 
@@ -58,7 +58,6 @@ Refactor direction:
 - remaining transition-era naming
 
 ## Success Criteria
-
-- [ ] The repository is clearly organized around the web app as the sole active product.
-- [ ] Confirmed dead code and transitional scaffolding are removed.
-- [ ] Any remaining uncertainties are small, explicit, and intentionally tracked.
+- [x] The repository is clearly organized around the web app as the sole active product.
+- [x] Confirmed dead code and transitional scaffolding are removed.
+- [x] Any remaining uncertainties are small, explicit, and intentionally tracked.

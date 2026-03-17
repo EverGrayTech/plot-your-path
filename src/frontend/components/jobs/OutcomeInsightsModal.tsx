@@ -1,6 +1,6 @@
 import React from "react";
 
-import type { OutcomeInsights, OutcomeTuningSuggestions } from "../../lib/api";
+import type { OutcomeInsights, OutcomeTuningSuggestions } from "../../lib/dataModels";
 import { toPercent } from "../../lib/jobsPageUtils";
 import { Modal } from "../Modal";
 

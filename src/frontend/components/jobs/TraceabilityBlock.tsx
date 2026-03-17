@@ -1,6 +1,6 @@
 import React from "react";
 
-import type { SectionTraceability } from "../../lib/api";
+import type { SectionTraceability } from "../../lib/dataModels";
 
 interface TraceabilityBlockProps {
   traceability?: SectionTraceability[];
@@ -18,6 +18,7 @@ export function TraceabilityBlock({ traceability, unsupportedClaims }: Traceabil
   return (
     <div className="mt-md">
       <h5 className="mb-sm">Evidence Traceability</h5>
+      {traces.length ? <p><strong>Evidence references:</strong></p> : null}
       {traces.length ? (
         <ul>
           {traces.map((trace) => (

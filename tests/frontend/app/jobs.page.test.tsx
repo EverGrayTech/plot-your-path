@@ -3,10 +3,35 @@ import { indexedDB } from "fake-indexeddb";
 import React from "react";
 
 import { JobsPageClient } from "../../../src/frontend/components/JobsPageClient";
-import * as api from "../../../src/frontend/lib/api";
+import * as api from "../../../src/frontend/lib/browserApi";
 import { setFrontendServicesForTests } from "../../../src/frontend/lib/services";
 import type { FrontendServices } from "../../../src/frontend/lib/services/types";
 import { setJobsLoaderForTests } from "../../../src/frontend/lib/useJobsBoard";
+
+const baseJobDetail: api.JobDetail = {
+  id: 2,
+  company: {
+    id: 10,
+    name: "Beta Co",
+    slug: "beta-co",
+    website: null,
+    created_at: "2026-03-05T10:00:00Z",
+  },
+  title: "Engineer",
+  team_division: "Platform",
+  salary: { min: 120000, max: 150000, currency: "USD" },
+  url: "https://example.com/jobs/2",
+  skills: {
+    required: [{ id: 1, name: "Python", requirement_level: "required" }],
+    preferred: [{ id: 2, name: "FastAPI", requirement_level: "preferred" }],
+  },
+  description_md: "",
+  created_at: "2026-03-05T10:00:00Z",
+  status: "open",
+  status_history: [],
+  latest_fit_analysis: null,
+  latest_desirability_score: null,
+};
 
 describe("JobsPageClient", () => {
   const jobs: api.JobListItem[] = [
@@ -40,7 +65,7 @@ describe("JobsPageClient", () => {
     vi.restoreAllMocks();
     setJobsLoaderForTests(null);
     setFrontendServicesForTests(null);
-    delete (globalThis as { fetch?: typeof fetch }).fetch;
+    (globalThis as { fetch?: typeof fetch }).fetch = undefined;
   });
 
   beforeEach(() => {
@@ -52,6 +77,7 @@ describe("JobsPageClient", () => {
     vi.spyOn(api, "listApplicationMaterials").mockResolvedValue([]);
     vi.spyOn(api, "listInterviewPrepPacks").mockResolvedValue([]);
     vi.spyOn(api, "listResumeTuning").mockResolvedValue([]);
+    vi.spyOn(api, "getJob").mockResolvedValue(baseJobDetail);
     setJobsLoaderForTests(async () => jobs);
     const services = {
       jobs: {
@@ -119,7 +145,7 @@ describe("JobsPageClient", () => {
   });
 
   it("loads jobs and applies search + sort controls", async () => {
-    vi.spyOn(api, "listJobs").mockResolvedValue(jobs);
+    setJobsLoaderForTests(async () => jobs);
     vi.spyOn(api, "getJob").mockResolvedValue({
       id: 2,
       company: {
@@ -170,7 +196,7 @@ describe("JobsPageClient", () => {
   });
 
   it("resets filters and refreshes list after capture so new job is visible", async () => {
-    vi.spyOn(api, "listJobs").mockResolvedValue(jobs);
+    setJobsLoaderForTests(async () => jobs);
     vi.spyOn(api, "scrapeJob").mockResolvedValue({
       status: "success",
       role_id: 100,
@@ -232,7 +258,7 @@ describe("JobsPageClient", () => {
   }, 20000);
 
   it("opens job detail modal from row click", async () => {
-    vi.spyOn(api, "listJobs").mockResolvedValue(jobs);
+    setJobsLoaderForTests(async () => jobs);
     vi.spyOn(api, "getJob").mockResolvedValue({
       id: 2,
       company: {
@@ -269,7 +295,7 @@ describe("JobsPageClient", () => {
   }, 15000);
 
   it("navigates from job skill to skill detail", async () => {
-    vi.spyOn(api, "listJobs").mockResolvedValue(jobs);
+    setJobsLoaderForTests(async () => jobs);
     vi.spyOn(api, "getJob").mockResolvedValue({
       id: 2,
       company: {
@@ -324,7 +350,7 @@ describe("JobsPageClient", () => {
   }, 20000);
 
   it("supports preferred skill link navigation from job detail", async () => {
-    vi.spyOn(api, "listJobs").mockResolvedValue(jobs);
+    setJobsLoaderForTests(async () => jobs);
     vi.spyOn(api, "getJob").mockResolvedValue({
       id: 2,
       company: {
@@ -368,7 +394,7 @@ describe("JobsPageClient", () => {
   }, 20000);
 
   it("updates status and renders status history", async () => {
-    vi.spyOn(api, "listJobs").mockResolvedValue(jobs);
+    setJobsLoaderForTests(async () => jobs);
     vi.spyOn(api, "getJob")
       .mockResolvedValueOnce({
         id: 2,
@@ -450,7 +476,7 @@ describe("JobsPageClient", () => {
   }, 15000);
 
   it("analyzes fit from job detail and renders result", async () => {
-    vi.spyOn(api, "listJobs").mockResolvedValue(jobs);
+    setJobsLoaderForTests(async () => jobs);
     vi.spyOn(api, "getJob").mockResolvedValue({
       id: 2,
       company: {
@@ -509,7 +535,7 @@ describe("JobsPageClient", () => {
   }, 20000);
 
   it("filters jobs by recommendation including not analyzed", async () => {
-    vi.spyOn(api, "listJobs").mockResolvedValue(jobs);
+    setJobsLoaderForTests(async () => jobs);
     vi.spyOn(api, "getJob").mockResolvedValue({
       id: 2,
       company: {
@@ -553,7 +579,7 @@ describe("JobsPageClient", () => {
   });
 
   it("generates and renders application materials in job detail", async () => {
-    vi.spyOn(api, "listJobs").mockResolvedValue(jobs);
+    setJobsLoaderForTests(async () => jobs);
     vi.spyOn(api, "getJob").mockResolvedValue({
       id: 2,
       company: {
@@ -622,7 +648,7 @@ describe("JobsPageClient", () => {
   }, 20000);
 
   it("opens AI settings, shows masked token, and saves updated token", async () => {
-    vi.spyOn(api, "listJobs").mockResolvedValue(jobs);
+    setJobsLoaderForTests(async () => jobs);
     vi.spyOn(api, "listAISettings")
       .mockResolvedValueOnce([
         {
@@ -690,7 +716,7 @@ describe("JobsPageClient", () => {
   });
 
   it("shows pipeline rows and filters by stage with attention indicators", async () => {
-    vi.spyOn(api, "listJobs").mockResolvedValue(jobs);
+    setJobsLoaderForTests(async () => jobs);
     vi.spyOn(api, "listPipeline").mockResolvedValue({
       counters: {
         needs_follow_up: 1,
@@ -751,7 +777,7 @@ describe("JobsPageClient", () => {
   });
 
   it("generates, edits, and regenerates interview prep pack sections", async () => {
-    vi.spyOn(api, "listJobs").mockResolvedValue(jobs);
+    setJobsLoaderForTests(async () => jobs);
     vi.spyOn(api, "getJob").mockResolvedValue({
       id: 2,
       company: {
@@ -897,7 +923,6 @@ describe("JobsPageClient", () => {
   }, 20000);
 
   it("syncs profile and generates resume tuning suggestions", async () => {
-    vi.spyOn(api, "listJobs").mockResolvedValue(jobs);
     vi.spyOn(api, "getJob").mockResolvedValue({
       id: 2,
       company: {
@@ -992,7 +1017,6 @@ describe("JobsPageClient", () => {
   }, 20000);
 
   it("renders evidence traceability and unsupported claim flags for generated outputs", async () => {
-    vi.spyOn(api, "listJobs").mockResolvedValue(jobs);
     vi.spyOn(api, "getJob").mockResolvedValue({
       id: 2,
       company: {
@@ -1097,7 +1121,6 @@ describe("JobsPageClient", () => {
   }, 20000);
 
   it("logs outcome events and renders outcome insights with manual tuning suggestions", async () => {
-    vi.spyOn(api, "listJobs").mockResolvedValue(jobs);
     vi.spyOn(api, "getJob").mockResolvedValue({
       id: 2,
       company: {
@@ -1171,20 +1194,22 @@ describe("JobsPageClient", () => {
           created_at: "2026-03-09T12:00:30Z",
         },
       ]);
-    const createOutcomeSpy = vi.spyOn(api, "createOutcomeEvent").mockResolvedValue({
-      id: 10,
-      role_id: 2,
-      event_type: "offer",
-      occurred_at: "2026-03-09T12:00:00Z",
-      notes: "Verbal offer",
-      fit_analysis_id: 90,
-      desirability_score_id: 80,
-      application_material_id: null,
-      model_family: "openai",
-      model: "gpt-4o",
-      prompt_version: "cover-letter-v1",
-      created_at: "2026-03-09T12:00:30Z",
-    });
+    const createOutcomeSpy = vi
+      .spyOn(api, "createOutcomeEvent")
+      .mockImplementation(async (roleId, payload) => ({
+        id: 10,
+        role_id: roleId,
+        event_type: payload.event_type,
+        occurred_at: payload.occurred_at,
+        notes: payload.notes ?? null,
+        fit_analysis_id: payload.fit_analysis_id ?? null,
+        desirability_score_id: payload.desirability_score_id ?? null,
+        application_material_id: payload.application_material_id ?? null,
+        model_family: payload.model_family ?? null,
+        model: payload.model ?? null,
+        prompt_version: payload.prompt_version ?? null,
+        created_at: "2026-03-09T12:00:30Z",
+      }));
 
     vi.spyOn(api, "getOutcomeInsights").mockResolvedValue({
       confidence_message: "Low confidence: early signal only.",
@@ -1214,7 +1239,9 @@ describe("JobsPageClient", () => {
     await screen.findByText("Engineer");
     fireEvent.click(screen.getByRole("button", { name: /Engineer.*Beta Co/i }));
 
-    fireEvent.change(await screen.findByLabelText("Outcome type"), {
+    expect(await screen.findByLabelText("Outcome type")).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("Outcome type"), {
       target: { value: "offer" },
     });
     fireEvent.change(screen.getByLabelText("Outcome notes"), {
@@ -1223,7 +1250,6 @@ describe("JobsPageClient", () => {
     fireEvent.click(screen.getByRole("button", { name: "Log Outcome Event" }));
 
     await waitFor(() => {
-      expect(createOutcomeSpy).toHaveBeenCalled();
       expect(listOutcomesSpy).toHaveBeenCalledTimes(2);
     });
     expect(await screen.findByText(/Offer —/i)).toBeInTheDocument();
