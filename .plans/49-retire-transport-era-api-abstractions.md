@@ -52,7 +52,7 @@ Refactor direction:
 
 ## Affected Areas
 
-- `src/frontend/lib/api.ts`
+- `src/lib/api.ts`
 - frontend env/config assumptions
 - transport-era shared helpers and tests
 

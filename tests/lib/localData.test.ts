@@ -5,7 +5,7 @@ import {
   listStoreRecords,
   nowIso,
   saveStoreRecord,
-} from "../../../src/frontend/lib/localData";
+} from "../../src/lib/localData";
 
 import { indexedDB } from "fake-indexeddb";
 

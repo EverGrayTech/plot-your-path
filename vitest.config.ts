@@ -4,9 +4,9 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     globals: true,
-    setupFiles: ["./tests/frontend/setup.ts"],
+    setupFiles: ["./tests/setup.ts"],
     testTimeout: 30000,
-    include: ["tests/frontend/**/*.test.ts", "tests/frontend/**/*.test.tsx"],
+    include: ["tests/**/*.test.ts", "tests/**/*.test.tsx"],
     coverage: {
       thresholds: {
         lines: 90,
@@ -21,8 +21,8 @@ export default defineConfig({
         "htmlcov/**",
         "next.config.mjs",
         "scripts/**",
-        "src/frontend/.next/**",
-        "src/frontend/out/**",
+        "src/.next/**",
+        "src/out/**",
       ],
       provider: "v8",
       reporter: ["text", "html"],

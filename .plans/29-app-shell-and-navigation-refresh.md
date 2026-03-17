@@ -121,12 +121,12 @@ Refactor direction:
 
 ## Affected Areas
 
-- `src/frontend/app/layout.tsx`
-- `src/frontend/app/page.tsx`
-- `src/frontend/app/jobs/page.tsx`
-- `src/frontend/app/skills/page.tsx`
-- new shell/navigation components under `src/frontend/components/`
-- frontend tests under `tests/frontend/`
+- `src/app/layout.tsx`
+- `src/app/page.tsx`
+- `src/app/jobs/page.tsx`
+- `src/app/skills/page.tsx`
+- new shell/navigation components under `src/components/`
+- frontend tests under `tests/`
 
 ## Success Criteria
 

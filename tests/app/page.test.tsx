@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
 
-import HomePage from "../../../src/frontend/app/page";
+import HomePage from "../../src/app/page";
 
 describe("HomePage", () => {
   it("renders a landing view with navigation cards", () => {

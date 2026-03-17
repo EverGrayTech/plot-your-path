@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 
-import { JobsToolbar } from "../../../../src/frontend/components/jobs/JobsToolbar";
+import { JobsToolbar } from "../../../src/components/jobs/JobsToolbar";
 
 describe("JobsToolbar", () => {
   it("wires search, sort, filter, and action callbacks", () => {

@@ -94,9 +94,9 @@ Refactor direction:
 
 ## Affected Areas
 
-- `src/frontend/components/JobsPageClient.tsx`
-- new component/hook files under `src/frontend/components/` and `src/frontend/lib/`
-- related frontend tests under `tests/frontend/`
+- `src/components/JobsPageClient.tsx`
+- new component/hook files under `src/components/` and `src/lib/`
+- related frontend tests under `tests/`
 
 ## Success Criteria
 

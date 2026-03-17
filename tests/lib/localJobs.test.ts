@@ -2,7 +2,7 @@ import {
   analyzeLocalJobFit,
   generateLocalInterviewPrepPack,
   generateLocalResumeTuning,
-} from "../../../src/frontend/lib/localAi";
+} from "../../src/lib/localAi";
 import {
   captureLocalJob,
   getLocalJob,
@@ -10,7 +10,7 @@ import {
   listLocalJobs,
   listLocalSkills,
   updateLocalJobStatus,
-} from "../../../src/frontend/lib/localJobs";
+} from "../../src/lib/localJobs";
 
 import { indexedDB } from "fake-indexeddb";
 

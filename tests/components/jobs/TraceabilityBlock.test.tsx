@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
 
-import { TraceabilityBlock } from "../../../../src/frontend/components/jobs/TraceabilityBlock";
+import { TraceabilityBlock } from "../../../src/components/jobs/TraceabilityBlock";
 
 describe("TraceabilityBlock", () => {
   it("renders citations and unsupported claim flags", () => {

@@ -138,11 +138,11 @@ Refactor direction:
 
 ## Affected Areas
 
-- `src/frontend/components/CaptureJobForm.tsx`
-- `src/frontend/components/JobsPageClient.tsx`
-- `src/frontend/components/jobs/`
-- supporting frontend utilities under `src/frontend/lib/`
-- frontend tests under `tests/frontend/`
+- `src/components/CaptureJobForm.tsx`
+- `src/components/JobsPageClient.tsx`
+- `src/components/jobs/`
+- supporting frontend utilities under `src/lib/`
+- frontend tests under `tests/`
 
 ## Success Criteria
 

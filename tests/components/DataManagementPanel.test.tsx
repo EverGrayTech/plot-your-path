@@ -2,10 +2,10 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 
 import { indexedDB } from "fake-indexeddb";
-import { DataManagementPanel } from "../../../src/frontend/components/DataManagementPanel";
-import * as api from "../../../src/frontend/lib/browserApi";
-import { setFrontendServicesForTests } from "../../../src/frontend/lib/services";
-import type { FrontendServices } from "../../../src/frontend/lib/services/types";
+import { DataManagementPanel } from "../../src/components/DataManagementPanel";
+import * as api from "../../src/lib/browserApi";
+import { setFrontendServicesForTests } from "../../src/lib/services";
+import type { FrontendServices } from "../../src/lib/services/types";
 
 describe("DataManagementPanel", () => {
   beforeEach(() => {

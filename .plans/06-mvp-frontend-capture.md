@@ -97,7 +97,7 @@ Error handling branches:
   - [x] Add success and error message regions.
 
 ### 3. Add frontend API client integration**
-  - [x] Implement typed request/response helpers in `src/frontend/lib/`.
+  - [x] Implement typed request/response helpers in `src/lib/`.
   - [x] Parse structured backend errors, specifically `FALLBACK_TEXT_REQUIRED`.
 
 ### 4. Add MVP progress feedback behavior**
@@ -120,12 +120,12 @@ Error handling branches:
 ## Affected Files (Planned)
 
 - Frontend
-  - `src/frontend/app/*` (new app route/layout/page)
-  - `src/frontend/components/*` (capture form/status UI)
-  - `src/frontend/lib/*` (API client + error typing)
-  - `tests/frontend/app/*`
-  - `tests/frontend/components/*`
-  - `tests/frontend/lib/*`
+  - `src/app/*` (new app route/layout/page)
+  - `src/components/*` (capture form/status UI)
+  - `src/lib/*` (API client + error typing)
+  - `tests/app/*`
+  - `tests/components/*`
+  - `tests/lib/*`
 
 - Backend
   - `src/backend/schemas/job.py` (optional fallback text field)

@@ -13,12 +13,12 @@ Establish `/jobs` as the primary landing workflow, move job capture into a modal
 ## Implementation Checklist
 
 ### 1. Routing and Navigation Shell
-- [x] Add global nav in `src/frontend/app/layout.tsx` with links to `/jobs` and `/skills`
-- [x] Update `src/frontend/app/page.tsx` to redirect to `/jobs`
+- [x] Add global nav in `src/app/layout.tsx` with links to `/jobs` and `/skills`
+- [x] Update `src/app/page.tsx` to redirect to `/jobs`
 - [x] Ensure navigation is visible and stable across pages
 
 ### 2. Jobs Page Foundation
-- [x] Create `src/frontend/app/jobs/page.tsx`
+- [x] Create `src/app/jobs/page.tsx`
 - [x] Add page heading and large primary `Add Job` button
 - [x] Add a shared search input for company/title matching
 - [x] Add sort dropdown with: `Newest`, `Oldest`, `Company A→Z`

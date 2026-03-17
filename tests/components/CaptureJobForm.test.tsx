@@ -1,9 +1,9 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 
-import { CaptureJobForm } from "../../../src/frontend/components/CaptureJobForm";
-import { setFrontendServicesForTests } from "../../../src/frontend/lib/services";
-import type { FrontendServices } from "../../../src/frontend/lib/services/types";
+import { CaptureJobForm } from "../../src/components/CaptureJobForm";
+import { setFrontendServicesForTests } from "../../src/lib/services";
+import type { FrontendServices } from "../../src/lib/services/types";
 
 function createServices(overrides?: Partial<FrontendServices>): FrontendServices {
   return {

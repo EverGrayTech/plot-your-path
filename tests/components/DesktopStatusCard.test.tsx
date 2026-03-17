@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
 
-import { DesktopStatusCard } from "../../../src/frontend/components/DesktopStatusCard";
+import { DesktopStatusCard } from "../../src/components/DesktopStatusCard";
 
 describe("DesktopStatusCard", () => {
   it("renders the active browser-local architecture guidance", () => {

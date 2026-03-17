@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 
-import { JobsList } from "../../../../src/frontend/components/jobs/JobsList";
+import { JobsList } from "../../../src/components/jobs/JobsList";
 
 describe("JobsList", () => {
   it("renders capture notice and job rows, then forwards selection", () => {

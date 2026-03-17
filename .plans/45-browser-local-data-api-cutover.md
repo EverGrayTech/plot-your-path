@@ -41,7 +41,7 @@ Refactor direction:
 
 ### 1. Replace non-AI API usage
 - [x] Migrate hooks/components off backend CRUD/data-portability API helpers.
-- [x] Remove obsolete non-AI API helpers from `src/frontend/lib/api.ts` where appropriate.
+- [x] Remove obsolete non-AI API helpers from `src/lib/api.ts` where appropriate.
 
 ### 2. Verify parity
 - [x] Run and update tests covering jobs, skills, ops, outcomes, and data management flows.
@@ -53,7 +53,7 @@ Refactor direction:
 
 ## Affected Areas
 
-- `src/frontend/lib/api.ts`
+- `src/lib/api.ts`
 - jobs and skills hooks/components
 - data management panel
 - tests covering non-AI workflows
