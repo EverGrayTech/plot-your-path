@@ -14,7 +14,7 @@ interface AISettingsModalProps {
   onTokenInputChange: (family: OperationFamily, value: string) => void;
   onUpdateConfig: (
     family: OperationFamily,
-    payload: { api_key_env?: string; model?: string; provider?: string },
+    payload: { token_label?: string; model?: string; provider?: string },
   ) => void;
   onUpdateToken: (family: OperationFamily) => void;
   tokenInputs: Record<OperationFamily, string>;
@@ -87,14 +87,14 @@ export function AISettingsModal({
                 />
               </label>
               <label className="form-label mt-sm">
-                API key env
+                Token label
                 <input
                   className="form-input"
-                  defaultValue={setting.api_key_env}
+                  defaultValue={setting.token_label}
                   onBlur={(event) => {
-                    if (event.target.value !== setting.api_key_env) {
+                    if (event.target.value !== setting.token_label) {
                       onUpdateConfig(setting.operation_family, {
-                        api_key_env: event.target.value,
+                        token_label: event.target.value,
                       });
                     }
                   }}

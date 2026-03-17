@@ -8,6 +8,12 @@ export default defineConfig({
     testTimeout: 30000,
     include: ["tests/frontend/**/*.test.ts", "tests/frontend/**/*.test.tsx"],
     coverage: {
+      thresholds: {
+        lines: 90,
+        functions: 90,
+        branches: 90,
+        statements: 90,
+      },
       exclude: [
         ".next/**",
         "coverage/**",

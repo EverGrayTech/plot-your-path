@@ -51,31 +51,31 @@ Refactor direction:
 ## Implementation Steps
 
 ### 1. Align portability behavior with the documented product contract
-- [ ] Resolve the mismatch between zip-based portability messaging and JSON-based export/import implementation.
-- [ ] Make file extensions, import acceptance rules, and restore logic match the supported archive format.
-- [ ] Add or update tests for export/import round-trips and portability format expectations.
+- [x] Resolve the mismatch between zip-based portability messaging and JSON-based export/import implementation.
+- [x] Make file extensions, import acceptance rules, and restore logic match the supported archive format.
+- [x] Add or update tests for export/import round-trips and portability format expectations.
 
 ### 2. Normalize browser-local persistence boundaries
-- [ ] Separate generated artifacts and shadow analysis records from the `jobs` store.
-- [ ] Use dedicated browser-local stores for fit analyses, desirability scores, and generated materials where appropriate.
-- [ ] Ensure workspace summary counts and export payloads reflect clear domain boundaries.
-- [ ] Add migration handling if existing browser-local data could be affected.
+- [x] Separate generated artifacts and shadow analysis records from the `jobs` store.
+- [x] Use dedicated browser-local stores for fit analyses, desirability scores, and generated materials where appropriate.
+- [x] Ensure workspace summary counts and export payloads reflect clear domain boundaries.
+- [x] Add migration handling if existing browser-local data could be affected.
 
 ### 3. Remove or isolate transition-era active surface area
-- [ ] Simplify `DataPortabilitySummary` and related UI away from archived runtime branches that are no longer real active modes.
-- [ ] Decide whether URL capture remains supported and either remove it or clearly isolate it as temporary compatibility.
-- [ ] Remove transition-era runtime copy from active UI where it no longer serves a supported workflow.
+- [x] Simplify `DataPortabilitySummary` and related UI away from archived runtime branches that are no longer real active modes.
+- [x] Decide whether URL capture remains supported and either remove it or clearly isolate it as temporary compatibility.
+- [x] Remove transition-era runtime copy from active UI where it no longer serves a supported workflow.
 
 ### 4. Clean up naming and compatibility layers
-- [ ] Audit and reduce imports that still depend on `src/frontend/lib/api.ts` as a compatibility alias.
-- [ ] Rename or reframe `api_key_env` and similar backend-era terminology to match browser-local token storage behavior.
-- [ ] Simplify service and type names that still reflect transport-era assumptions.
+- [x] Audit and reduce imports that still depend on `src/frontend/lib/api.ts` as a compatibility alias.
+- [x] Rename or reframe `api_key_env` and similar backend-era terminology to match browser-local token storage behavior.
+- [x] Simplify service and type names that still reflect transport-era assumptions.
 
 ### 5. Repair and harden testing
-- [ ] Fix failing tests that no longer reflect current browser-local behavior, including the jobs-page outcome flow.
-- [ ] Remove invalid Jest-oriented test invocation assumptions from active workflows and docs.
-- [ ] Add coverage thresholds to `vitest.config.ts` so the documented 90% line-coverage standard is enforced.
-- [ ] Add focused tests for persistence boundaries, portability behavior, and migration-sensitive cases.
+- [x] Fix failing tests that no longer reflect current browser-local behavior, including the jobs-page outcome flow.
+- [x] Remove invalid Jest-oriented test invocation assumptions from active workflows and docs.
+- [x] Add coverage thresholds to `vitest.config.ts` so the documented 90% line-coverage standard is enforced.
+- [x] Add focused tests for persistence boundaries, portability behavior, and migration-sensitive cases.
 
 ## Affected Areas
 
@@ -86,8 +86,8 @@ Refactor direction:
 - frontend test suite and Vitest configuration
 
 ## Success Criteria
-- [ ] Active runtime behavior matches the documented browser-local MVP contract.
-- [ ] Archived desktop/transition concerns are removed from active user-facing flows unless explicitly required.
-- [ ] Browser-local persistence boundaries are clear and no longer mix unrelated record types in unsafe ways.
-- [ ] Tests pass through the supported Vitest workflow and coverage standards are enforced in config.
-- [ ] Remaining cleanup debt is explicit, narrow, and no longer hidden behind transitional abstractions.
+- [x] Active runtime behavior matches the documented browser-local MVP contract.
+- [x] Archived desktop/transition concerns are removed from active user-facing flows unless explicitly required.
+- [x] Browser-local persistence boundaries are clear and no longer mix unrelated record types in unsafe ways.
+- [x] Tests pass through the supported Vitest workflow and coverage standards are enforced in config.
+- [x] Remaining cleanup debt is explicit, narrow, and no longer hidden behind transitional abstractions.

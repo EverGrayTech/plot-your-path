@@ -11,7 +11,7 @@ import type {
   OutcomeTuningSuggestions,
   PipelineCounters,
   PipelineItem,
-} from "./api";
+} from "./dataModels";
 import { getFrontendServices } from "./services";
 
 export type StageFilter = "all" | InterviewStage;
@@ -173,7 +173,7 @@ export function useJobsFeatureModals() {
 
   const handleUpdateAIConfig = async (
     family: OperationFamily,
-    payload: { api_key_env?: string; model?: string; provider?: string },
+    payload: { token_label?: string; model?: string; provider?: string },
   ) => {
     try {
       await getFrontendServices().aiSettings.updateAISetting(family, payload);

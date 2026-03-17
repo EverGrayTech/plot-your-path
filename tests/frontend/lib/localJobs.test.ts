@@ -1,4 +1,9 @@
 import {
+  analyzeLocalJobFit,
+  generateLocalInterviewPrepPack,
+  generateLocalResumeTuning,
+} from "../../../src/frontend/lib/localAi";
+import {
   captureLocalJob,
   getLocalJob,
   getLocalSkill,
@@ -50,5 +55,21 @@ describe("localJobs migration foundation", () => {
 
     const updated = await updateLocalJobStatus(captured.role_id, "submitted");
     expect(updated.status).toBe("submitted");
+  });
+
+  it("hydrates generated browser-local detail surfaces from dedicated stores", async () => {
+    const captured = await captureLocalJob({
+      url: "pasted-job-description",
+      fallback_text: "Staff Engineer\nTypeScript\nSystems design",
+    });
+
+    await analyzeLocalJobFit(captured.role_id);
+    await generateLocalInterviewPrepPack(captured.role_id);
+    await generateLocalResumeTuning(captured.role_id);
+
+    const job = await getLocalJob(captured.role_id);
+    expect(job.latest_fit_analysis).not.toBeNull();
+    expect(job.interview_stage_timeline).toEqual([]);
+    expect(job.application_ops).toBeNull();
   });
 });
