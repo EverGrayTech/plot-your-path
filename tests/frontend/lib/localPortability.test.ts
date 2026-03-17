@@ -34,6 +34,7 @@ describe("local portability", () => {
     });
 
     const exported = await exportLocalDataArchive();
+    expect(exported.filename).toMatch(/\.json$/i);
     const text = await exported.blob.text();
     const base64 = btoa(text);
 

@@ -97,7 +97,7 @@ describe("DataManagementPanel", () => {
 
     expect(screen.getByText(/No backup exported yet/i)).toBeInTheDocument();
     expect(screen.getByText(/Browser-managed local storage/i)).toBeInTheDocument();
-    expect(screen.getByText(/portable zip archive with readable JSON/i)).toBeInTheDocument();
+    expect(screen.getByText(/readable JSON archive with durable artifacts/i)).toBeInTheDocument();
     expect(screen.getByText(/active browser-local MVP path/i)).toBeInTheDocument();
     expect(screen.getByText(/Export after meaningful changes/i)).toBeInTheDocument();
     expect(screen.getAllByText("0")).toHaveLength(2);

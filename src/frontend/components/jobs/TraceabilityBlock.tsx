@@ -18,7 +18,11 @@ export function TraceabilityBlock({ traceability, unsupportedClaims }: Traceabil
   return (
     <div className="mt-md">
       <h5 className="mb-sm">Evidence Traceability</h5>
-      {traces.length ? <p><strong>Evidence references:</strong></p> : null}
+      {traces.length ? (
+        <p>
+          <strong>Evidence references:</strong>
+        </p>
+      ) : null}
       {traces.length ? (
         <ul>
           {traces.map((trace) => (

@@ -11,7 +11,7 @@ describe("SettingsPage", () => {
         JSON.stringify({
           data_root: "/tmp/plot-your-path",
           database_path: "/tmp/plot-your-path/plot_your_path.db",
-          desktop_runtime: true,
+          storage_mode: "browser_local",
           has_resume: false,
           jobs_count: 0,
           last_export_at: null,

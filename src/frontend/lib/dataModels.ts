@@ -239,7 +239,7 @@ export interface AISetting {
   operation_family: OperationFamily;
   provider: string;
   model: string;
-  api_key_env: string;
+  token_label: string;
   base_url: string | null;
   temperature: number;
   max_tokens: number;
@@ -252,7 +252,7 @@ export interface AISetting {
 export interface AISettingUpdate {
   provider?: string;
   model?: string;
-  api_key_env?: string;
+  token_label?: string;
   base_url?: string | null;
   temperature?: number;
   max_tokens?: number;
@@ -267,8 +267,7 @@ export interface AISettingHealth {
 export interface DataPortabilitySummary {
   data_root: string | null;
   database_path: string | null;
-  desktop_runtime: boolean;
-  storage_mode?: "browser_local" | "desktop_local" | "transition";
+  storage_mode?: "browser_local";
   backup_reminder_level?: "none" | "recommended" | "overdue";
   backup_reminder_message?: string | null;
   has_resume: boolean;

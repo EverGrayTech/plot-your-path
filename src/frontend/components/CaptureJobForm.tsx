@@ -117,7 +117,7 @@ export function CaptureJobForm({ onCaptured }: CaptureJobFormProps) {
               value={captureMode}
             >
               <option value="paste">Paste job description text</option>
-              <option value="url">Use job URL (legacy transition mode)</option>
+              <option value="url">Use job URL (temporary compatibility mode)</option>
             </select>
           </label>
 

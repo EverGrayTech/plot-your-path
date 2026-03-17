@@ -27,10 +27,27 @@ interface LocalGeneratedRecordBase {
 }
 
 interface LocalFitAnalysisRecord extends LocalGeneratedRecordBase {
+  fitScore: number;
+  recommendation: FitAnalysis["recommendation"];
+  coveredRequiredSkills: string[];
+  missingRequiredSkills: string[];
+  coveredPreferredSkills: string[];
+  missingPreferredSkills: string[];
+  rationale: string;
+  provider: string;
+  model: string;
+  version: string;
   fit: FitAnalysis;
 }
 
 interface LocalDesirabilityRecord extends LocalGeneratedRecordBase {
+  scoreId: number;
+  companyId: number;
+  totalScore: number;
+  cacheExpiresAt: string;
+  provider: string;
+  model: string;
+  version: string;
   score: DesirabilityScore;
 }
 
@@ -55,7 +72,7 @@ const DEFAULT_AI_SETTINGS: AISetting[] = [
   operation_family: family as OperationFamily,
   provider: "openai",
   model: "gpt-4o-mini",
-  api_key_env: "BROWSER_LOCAL_TOKEN",
+  token_label: "Local browser token",
   base_url: null,
   temperature: 0.2,
   max_tokens: 4000,
@@ -221,9 +238,19 @@ export async function analyzeLocalJobFit(roleId: number): Promise<FitAnalysis> {
     created_at: createdAt,
   };
 
-  await saveStoreRecord("jobs", {
+  await saveStoreRecord("fitAnalyses", {
     id: createLocalId("fit_shadow"),
     roleId,
+    fitScore: fit.fit_score,
+    recommendation: fit.recommendation,
+    coveredRequiredSkills: fit.covered_required_skills,
+    missingRequiredSkills: fit.missing_required_skills,
+    coveredPreferredSkills: fit.covered_preferred_skills,
+    missingPreferredSkills: fit.missing_preferred_skills,
+    rationale: fit.rationale,
+    provider: fit.provider,
+    model: fit.model,
+    version: fit.version,
     fit,
     createdAt,
   } satisfies LocalFitAnalysisRecord);
@@ -248,11 +275,18 @@ export async function scoreLocalJobDesirability(roleId: number): Promise<Desirab
     created_at: createdAt,
   };
 
-  await saveStoreRecord("jobs", {
+  await saveStoreRecord("desirabilityScores", {
     id: createLocalId("desirability_shadow"),
+    scoreId: score.id,
     roleId,
+    companyId: score.company_id,
+    totalScore: score.total_score,
     score,
     createdAt,
+    cacheExpiresAt: score.cache_expires_at,
+    provider: score.provider,
+    model: score.model,
+    version: score.version,
   } satisfies LocalDesirabilityRecord);
   return score;
 }
@@ -264,14 +298,14 @@ export async function refreshLocalJobDesirability(roleId: number): Promise<Desir
 export async function listLocalApplicationMaterials(
   roleId: number,
 ): Promise<ApplicationMaterial[]> {
-  const records = await listStoreRecords<LocalMaterialRecord>("jobs");
+  const records = await listStoreRecords<LocalMaterialRecord>("applicationMaterials");
   return records
     .filter((record) => record.roleId === roleId && "material" in record)
     .map((record) => record.material);
 }
 
 async function saveMaterial(roleId: number, material: ApplicationMaterial): Promise<void> {
-  await saveStoreRecord("jobs", {
+  await saveStoreRecord("applicationMaterials", {
     id: createLocalId("material"),
     roleId,
     createdAt: material.created_at,
@@ -328,14 +362,14 @@ export async function generateLocalQuestionAnswers(
 }
 
 export async function listLocalInterviewPrepPacks(roleId: number): Promise<InterviewPrepPack[]> {
-  const records = await listStoreRecords<LocalInterviewPrepRecord>("jobs");
+  const records = await listStoreRecords<LocalInterviewPrepRecord>("interviewPrepPacks");
   return records
     .filter((record) => record.roleId === roleId && "pack" in record)
     .map((record) => record.pack);
 }
 
 async function saveInterviewPrep(roleId: number, pack: InterviewPrepPack): Promise<void> {
-  await saveStoreRecord("jobs", {
+  await saveStoreRecord("interviewPrepPacks", {
     id: createLocalId("prep"),
     roleId,
     createdAt: pack.created_at,
@@ -414,7 +448,7 @@ export async function syncLocalResumeProfile(): Promise<ResumeProfileSyncResult>
 }
 
 export async function listLocalResumeTuning(roleId: number): Promise<ResumeTuningSuggestion[]> {
-  const records = await listStoreRecords<LocalResumeTuningRecord>("jobs");
+  const records = await listStoreRecords<LocalResumeTuningRecord>("resumeTuning");
   return records
     .filter((record) => record.roleId === roleId && "suggestion" in record)
     .map((record) => record.suggestion);
@@ -444,7 +478,7 @@ export async function generateLocalResumeTuning(roleId: number): Promise<ResumeT
     created_at: createdAt,
   };
 
-  await saveStoreRecord("jobs", {
+  await saveStoreRecord("resumeTuning", {
     id: createLocalId("resume_tuning"),
     roleId,
     createdAt,

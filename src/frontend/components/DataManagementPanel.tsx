@@ -18,21 +18,10 @@ function describeResumePresence(hasResume: boolean): string {
   return hasResume ? "Available" : "Not added yet";
 }
 
-function describeRuntime(isDesktopMode: boolean): string {
-  return isDesktopMode ? "Archived desktop runtime" : "Browser-local web app";
-}
-
 function describeStorageMode(summary: DataPortabilitySummary): string {
-  if (summary.storage_mode === "browser_local") {
-    return "Browser-local workspace";
-  }
-  if (summary.storage_mode === "desktop_local") {
-    return "Archived desktop-local workspace";
-  }
-  if (summary.storage_mode === "transition") {
-    return "Archived transition-era local workspace";
-  }
-  return describeRuntime(summary.desktop_runtime);
+  return summary.storage_mode === "browser_local"
+    ? "Browser-local workspace"
+    : "Browser-local workspace";
 }
 
 function fileToBase64(file: File): Promise<string> {
@@ -235,7 +224,7 @@ export function DataManagementPanel() {
         </output>
       ) : null}
 
-      {!loading && summary && !summary.desktop_runtime ? (
+      {!loading && summary ? (
         <output aria-live="polite" className="alert alert-info">
           You are using the active browser-local MVP path. Legacy packaged desktop behavior is
           archived context, not the current default.
@@ -294,8 +283,8 @@ export function DataManagementPanel() {
           <div className="structured-message structured-message-info">
             <h4>What a backup includes</h4>
             <p>
-              The export contains your local workspace data as a portable zip archive with readable
-              JSON and durable artifacts. API keys are excluded from backups.
+              The export contains your local workspace data as a readable JSON archive with durable
+              artifacts. API keys are excluded from backups.
             </p>
             <p>
               Export after meaningful changes, before resetting local data, and before moving to a
@@ -335,7 +324,7 @@ export function DataManagementPanel() {
       </div>
 
       <input
-        accept=".zip,application/zip"
+        accept=".json,application/json"
         className="visually-hidden"
         onChange={handleImportSelection}
         ref={fileInputRef}

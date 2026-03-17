@@ -13,6 +13,11 @@ interface PortableWorkspaceSnapshot {
   metadata: WorkspaceMetadata;
   jobs: Record<string, unknown>[];
   skills: Record<string, unknown>[];
+  fitAnalyses: Record<string, unknown>[];
+  desirabilityScores: Record<string, unknown>[];
+  applicationMaterials: Record<string, unknown>[];
+  interviewPrepPacks: Record<string, unknown>[];
+  resumeTuning: Record<string, unknown>[];
   applicationOps: Record<string, unknown>[];
   interviewStages: Record<string, unknown>[];
   outcomes: Record<string, unknown>[];
@@ -84,12 +89,11 @@ export async function getLocalDataPortabilitySummary(): Promise<DataPortabilityS
   return {
     data_root: null,
     database_path: null,
-    desktop_runtime: false,
     storage_mode: "browser_local",
     backup_reminder_level: reminder.level,
     backup_reminder_message: reminder.message,
     has_resume: false,
-    jobs_count: jobs.length,
+    jobs_count: jobs.filter((record) => typeof record.roleId === "number").length,
     last_export_at: metadata.lastExportAt,
     last_import_at: metadata.lastImportAt,
     last_reset_at: metadata.lastResetAt,
@@ -105,6 +109,11 @@ export async function exportLocalDataArchive(): Promise<{ blob: Blob; filename: 
     metadata,
     jobs: await listStoreRecords<Record<string, unknown>>("jobs"),
     skills: await listStoreRecords<Record<string, unknown>>("skills"),
+    fitAnalyses: await listStoreRecords<Record<string, unknown>>("fitAnalyses"),
+    desirabilityScores: await listStoreRecords<Record<string, unknown>>("desirabilityScores"),
+    applicationMaterials: await listStoreRecords<Record<string, unknown>>("applicationMaterials"),
+    interviewPrepPacks: await listStoreRecords<Record<string, unknown>>("interviewPrepPacks"),
+    resumeTuning: await listStoreRecords<Record<string, unknown>>("resumeTuning"),
     applicationOps: await listStoreRecords<Record<string, unknown>>("applicationOps"),
     interviewStages: await listStoreRecords<Record<string, unknown>>("interviewStages"),
     outcomes: await listStoreRecords<Record<string, unknown>>("outcomes"),
@@ -129,7 +138,18 @@ export async function importLocalDataArchive(archiveBase64: string): Promise<Dat
   const completedAt = nowIso();
 
   try {
-    const storeNames = ["jobs", "skills", "applicationOps", "interviewStages", "outcomes"] as const;
+    const storeNames = [
+      "jobs",
+      "skills",
+      "fitAnalyses",
+      "desirabilityScores",
+      "applicationMaterials",
+      "interviewPrepPacks",
+      "resumeTuning",
+      "applicationOps",
+      "interviewStages",
+      "outcomes",
+    ] as const;
     const transaction = db.transaction(storeNames, "readwrite");
 
     for (const storeName of storeNames) {
@@ -158,7 +178,14 @@ export async function importLocalDataArchive(archiveBase64: string): Promise<Dat
   return {
     completed_at: completedAt,
     message: "Backup restored into the current browser-local workspace.",
-    added_count: snapshot.jobs.length + snapshot.skills.length,
+    added_count:
+      snapshot.jobs.length +
+      snapshot.skills.length +
+      snapshot.fitAnalyses.length +
+      snapshot.desirabilityScores.length +
+      snapshot.applicationMaterials.length +
+      snapshot.interviewPrepPacks.length +
+      snapshot.resumeTuning.length,
     updated_count:
       snapshot.applicationOps.length + snapshot.interviewStages.length + snapshot.outcomes.length,
     unchanged_count: 0,
@@ -170,7 +197,18 @@ export async function resetLocalWorkspace(): Promise<DataOperationResult> {
   const completedAt = nowIso();
 
   try {
-    const storeNames = ["jobs", "skills", "applicationOps", "interviewStages", "outcomes"] as const;
+    const storeNames = [
+      "jobs",
+      "skills",
+      "fitAnalyses",
+      "desirabilityScores",
+      "applicationMaterials",
+      "interviewPrepPacks",
+      "resumeTuning",
+      "applicationOps",
+      "interviewStages",
+      "outcomes",
+    ] as const;
     const transaction = db.transaction(storeNames, "readwrite");
 
     for (const storeName of storeNames) {
