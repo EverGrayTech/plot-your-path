@@ -1,6 +1,6 @@
 import React from "react";
 
-import type { JobListItem } from "../../lib/api";
+import type { JobListItem } from "../../lib/dataModels";
 import { interviewStageLabel, recommendationLabel } from "../../lib/jobsPageUtils";
 
 interface JobsListProps {

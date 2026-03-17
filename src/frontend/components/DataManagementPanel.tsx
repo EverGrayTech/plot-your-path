@@ -18,8 +18,8 @@ function describeResumePresence(hasResume: boolean): string {
   return hasResume ? "Available" : "Not added yet";
 }
 
-function describeRuntime(desktopRuntime: boolean): string {
-  return desktopRuntime ? "Packaged desktop runtime" : "Browser-connected development runtime";
+function describeRuntime(isDesktopMode: boolean): string {
+  return isDesktopMode ? "Archived desktop runtime" : "Browser-local web app";
 }
 
 function describeStorageMode(summary: DataPortabilitySummary): string {
@@ -27,10 +27,10 @@ function describeStorageMode(summary: DataPortabilitySummary): string {
     return "Browser-local workspace";
   }
   if (summary.storage_mode === "desktop_local") {
-    return "Desktop-local workspace";
+    return "Archived desktop-local workspace";
   }
   if (summary.storage_mode === "transition") {
-    return "Transition-era local workspace";
+    return "Archived transition-era local workspace";
   }
   return describeRuntime(summary.desktop_runtime);
 }

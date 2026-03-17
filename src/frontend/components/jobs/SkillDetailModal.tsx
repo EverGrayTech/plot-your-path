@@ -1,6 +1,6 @@
 import React from "react";
 
-import type { SkillDetail } from "../../lib/api";
+import type { SkillDetail } from "../../lib/dataModels";
 import { Modal } from "../Modal";
 
 interface SkillDetailModalProps {

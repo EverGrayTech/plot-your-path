@@ -34,6 +34,8 @@ describe("SettingsPage", () => {
     await waitFor(() => {
       expect(screen.getByRole("heading", { name: /Local data and backup/i })).toBeInTheDocument();
     });
-    expect(screen.getByRole("heading", { name: /Architecture status/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: /Product architecture status/i }),
+    ).toBeInTheDocument();
   });
 });

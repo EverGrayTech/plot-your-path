@@ -3,7 +3,7 @@ import React from "react";
 
 import { indexedDB } from "fake-indexeddb";
 import { DataManagementPanel } from "../../../src/frontend/components/DataManagementPanel";
-import * as api from "../../../src/frontend/lib/api";
+import * as api from "../../../src/frontend/lib/browserApi";
 import { setFrontendServicesForTests } from "../../../src/frontend/lib/services";
 import type { FrontendServices } from "../../../src/frontend/lib/services/types";
 
@@ -83,7 +83,7 @@ describe("DataManagementPanel", () => {
 
   afterEach(() => {
     setFrontendServicesForTests(null);
-    delete (globalThis as { fetch?: typeof fetch }).fetch;
+    (globalThis as { fetch?: typeof fetch }).fetch = undefined;
   });
 
   it("loads and renders local data summary details", async () => {

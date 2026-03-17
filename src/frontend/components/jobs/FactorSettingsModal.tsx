@@ -1,6 +1,6 @@
 import React from "react";
 
-import type { DesirabilityFactor } from "../../lib/api";
+import type { DesirabilityFactor } from "../../lib/dataModels";
 import { Modal } from "../Modal";
 
 interface FactorSettingsModalProps {

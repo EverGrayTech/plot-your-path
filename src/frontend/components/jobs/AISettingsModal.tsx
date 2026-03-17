@@ -1,6 +1,6 @@
 import React from "react";
 
-import type { AISetting, OperationFamily } from "../../lib/api";
+import type { AISetting, OperationFamily } from "../../lib/dataModels";
 import { Modal } from "../Modal";
 
 interface AISettingsModalProps {

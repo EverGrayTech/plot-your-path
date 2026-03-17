@@ -1,6 +1,6 @@
 import React from "react";
 
-import type { InterviewStage, PipelineCounters, PipelineItem } from "../../lib/api";
+import type { InterviewStage, PipelineCounters, PipelineItem } from "../../lib/dataModels";
 import { interviewStageLabel } from "../../lib/jobsPageUtils";
 import { Modal } from "../Modal";
 
