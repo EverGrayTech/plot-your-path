@@ -1,14 +1,14 @@
 # Plot Your Path — System Specification
 
-See also: [README](../README.md), [Product Overview](./product-overview.md#product-principles), [Concept Model](./concept-model.md#core-concepts), [Development Workflows](./development.md#documentation-use-during-development)
-
-## Purpose
-
 This document describes the system-level direction for Plot Your Path.
 
-It is not a step-by-step build plan and not a detailed schema reference. Its role is to preserve the architectural and product guardrails that should shape future phases.
+It is not a step-by-step build plan and not a detailed schema reference. Its role is to preserve the architectural and product guardrails that should shape ongoing implementation decisions.
 
-For product intent and scope boundaries, see [Product Overview → Product principles](./product-overview.md#product-principles) and [Product Overview → In scope](./product-overview.md#in-scope). For shared terminology, see [Concept Model → Core concepts](./concept-model.md#core-concepts).
+- [README](README.md) — high-level introduction for new users
+- [Product Overview](docs/product-overview.md) — product goals, design principles, user journey, and scope
+- [Concept Model](docs/concept-model.md) — shared domain language and how the core entities relate
+- [Development Workflows](docs/development.md) — local setup, test commands, and contributor workflow guidance
+
 
 ## System objective
 
@@ -79,19 +79,29 @@ As usage accumulates, the system should surface high-value patterns, especially 
 
 ## Architectural direction
 
-### MVP runtime direction
+### Runtime direction
 
-The current MVP direction is to simplify the system into a browser-hosted local-first web application.
+The system is centered on a browser-hosted local-first web application.
 
 That means the system should:
 
 - keep the application experience in the web UI layer
-- move core application logic toward TypeScript rather than a split Python-plus-frontend runtime
+- keep core application logic in TypeScript rather than a split multi-runtime architecture
 - prefer browser-local persistence for single-user workflows
 - make data portability explicit through export and import rather than app-owned desktop file roots
 - avoid packaged desktop runtime complexity unless a future product need clearly justifies it
 
-For MVP planning, local-first should be interpreted as **data staying on the user's device/browser by default**, not as a requirement for a native desktop shell.
+Local-first should be interpreted as **data staying on the user's device/browser by default**, not as a requirement for a native desktop shell.
+
+### Why this runtime direction fits the product
+
+This architecture matches the product for three reasons:
+
+1. the trust model is about user ownership and local control, not desktop packaging for its own sake
+2. a browser-hosted TypeScript application keeps the implementation simpler and easier to contribute to than a split backend-plus-desktop runtime
+3. the core workflows in this repository do not require native desktop capabilities to deliver product value
+
+This means architectural additions such as a dedicated backend service, native desktop shell, or deeper filesystem integration should be treated as explicit tradeoffs rather than default assumptions.
 
 ### Core data domains
 
@@ -106,7 +116,7 @@ Keeping those domains distinct helps the system stay understandable and easier t
 
 ### Persistence and portability
 
-For MVP, runtime persistence and portability should be treated as separate concerns.
+Runtime persistence and portability should be treated as separate concerns.
 
 - runtime persistence should favor browser-local storage suitable for structured single-user data
 - export and import should be first-class product workflows rather than hidden implementation details
@@ -134,7 +144,7 @@ The durable value of the system comes from:
 
 AI should strengthen those things, not replace them.
 
-For MVP, AI integrations may be user-configured and client-driven, but they should remain clearly separable from the application's core data model and workflows.
+AI integrations may be user-configured and client-driven, but they should remain clearly separable from the application's core data model and workflows.
 
 ### Persistence should preserve reuse
 
@@ -148,7 +158,7 @@ That is especially important for:
 - outcomes
 - historical changes over time
 
-For the current MVP direction, that persistence strategy should favor simple, explicit, browser-local storage and clear exportability over more complex multi-runtime infrastructure.
+That persistence strategy should favor simple, explicit, browser-local storage and clear exportability over more complex multi-runtime infrastructure.
 
 ## User experience expectations
 
@@ -177,7 +187,7 @@ Weak expansions are ones that turn the system into a generic productivity app or
 
 ## Roadmap framing
 
-Near- and mid-term planning should be evaluated against three questions:
+Planning should be evaluated against three questions:
 
 1. Does this make the core loop more useful?
 2. Does this improve trust, reuse, or decision quality?
