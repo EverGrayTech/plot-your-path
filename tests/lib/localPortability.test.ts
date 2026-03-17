@@ -1,10 +1,10 @@
-import { captureLocalJob } from "../../../src/frontend/lib/localJobs";
+import { captureLocalJob } from "../../src/lib/localJobs";
 import {
   exportLocalDataArchive,
   getLocalDataPortabilitySummary,
   importLocalDataArchive,
   resetLocalWorkspace,
-} from "../../../src/frontend/lib/localPortability";
+} from "../../src/lib/localPortability";
 
 import { indexedDB } from "fake-indexeddb";
 

@@ -52,9 +52,9 @@ Refactor direction:
 
 ## Affected Areas
 
-- `src/frontend/lib/useJobsBoard.ts`
-- `src/frontend/lib/useJobDetailState.ts`
-- `src/frontend/components/SkillsPageClient.tsx`
+- `src/lib/useJobsBoard.ts`
+- `src/lib/useJobDetailState.ts`
+- `src/components/SkillsPageClient.tsx`
 - data-management and other non-AI consumer flows
 
 ## Success Criteria

@@ -6,8 +6,8 @@ import {
   listLocalOutcomeEvents,
   listLocalPipeline,
   upsertLocalApplicationOps,
-} from "../../../src/frontend/lib/localApplicationWorkflows";
-import { captureLocalJob } from "../../../src/frontend/lib/localJobs";
+} from "../../src/lib/localApplicationWorkflows";
+import { captureLocalJob } from "../../src/lib/localJobs";
 
 import { indexedDB } from "fake-indexeddb";
 

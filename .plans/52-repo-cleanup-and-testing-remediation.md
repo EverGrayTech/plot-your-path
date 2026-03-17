@@ -67,7 +67,7 @@ Refactor direction:
 - [x] Remove transition-era runtime copy from active UI where it no longer serves a supported workflow.
 
 ### 4. Clean up naming and compatibility layers
-- [x] Audit and reduce imports that still depend on `src/frontend/lib/api.ts` as a compatibility alias.
+- [x] Audit and reduce imports that still depend on `src/lib/api.ts` as a compatibility alias.
 - [x] Rename or reframe `api_key_env` and similar backend-era terminology to match browser-local token storage behavior.
 - [x] Simplify service and type names that still reflect transport-era assumptions.
 

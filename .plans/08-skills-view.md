@@ -23,7 +23,7 @@ Provide a dedicated `/skills` view focused on exploring extracted skills and usa
 - [x] Validate stable ordering or document client-side sort ownership
 
 ### 3. Skills Page Foundation
-- [x] Create `src/frontend/app/skills/page.tsx`
+- [x] Create `src/app/skills/page.tsx`
 - [x] Add page heading and shared search input
 - [x] Add sort dropdown: `Most Used`, `Least Used`, `Name A→Z`
 - [x] Load skills from `GET /api/skills`

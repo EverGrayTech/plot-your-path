@@ -2,10 +2,10 @@ import { fireEvent, render, screen, within } from "@testing-library/react";
 import { indexedDB } from "fake-indexeddb";
 import React from "react";
 
-import { SkillsPageClient } from "../../../src/frontend/components/SkillsPageClient";
-import type * as dataModels from "../../../src/frontend/lib/dataModels";
-import { setFrontendServicesForTests } from "../../../src/frontend/lib/services";
-import type { FrontendServices } from "../../../src/frontend/lib/services/types";
+import { SkillsPageClient } from "../../src/components/SkillsPageClient";
+import type * as dataModels from "../../src/lib/dataModels";
+import { setFrontendServicesForTests } from "../../src/lib/services";
+import type { FrontendServices } from "../../src/lib/services/types";
 
 describe("SkillsPageClient", () => {
   const skills: dataModels.SkillListItem[] = [

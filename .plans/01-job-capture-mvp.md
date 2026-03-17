@@ -36,20 +36,20 @@ Phase 1 defines the MVP architecture and implementation backlog for job capture,
   - `tests/backend/test_jobs_api.py`
 
 **Frontend (New)**:
-- `src/frontend/app/layout.tsx` - Root layout
-- `src/frontend/app/page.tsx` - Home/Dashboard page
-- `src/frontend/app/jobs/page.tsx` - Job list page
-- `src/frontend/app/jobs/[id]/page.tsx` - Job detail page
-- `src/frontend/components/` - React components
-  - `src/frontend/components/JobUrlForm.tsx` - URL input form
-  - `src/frontend/components/JobList.tsx` - Job list display
-  - `src/frontend/components/JobCard.tsx` - Individual job card
-  - `src/frontend/components/SkillBadge.tsx` - Skill display badge
-- `src/frontend/lib/` - Frontend utilities
-  - `src/frontend/lib/api.ts` - API client functions
-- `tests/frontend/` - Frontend tests
-  - `tests/frontend/components/JobUrlForm.test.tsx`
-  - `tests/frontend/components/JobList.test.tsx`
+- `src/app/layout.tsx` - Root layout
+- `src/app/page.tsx` - Home/Dashboard page
+- `src/app/jobs/page.tsx` - Job list page
+- `src/app/jobs/[id]/page.tsx` - Job detail page
+- `src/components/` - React components
+  - `src/components/JobUrlForm.tsx` - URL input form
+  - `src/components/JobList.tsx` - Job list display
+  - `src/components/JobCard.tsx` - Individual job card
+  - `src/components/SkillBadge.tsx` - Skill display badge
+- `src/lib/` - Frontend utilities
+  - `src/lib/api.ts` - API client functions
+- `tests/` - Frontend tests
+  - `tests/components/JobUrlForm.test.tsx`
+  - `tests/components/JobList.test.tsx`
 
 **Configuration Files (New)**:
 - `config/llm.json` - LLM provider configuration
@@ -345,7 +345,7 @@ export interface JobScrapeResponse {
 - [x] Initialize frontend project structure with pnpm
   - [x] Create Next.js 15 app with TypeScript
   - [x] Set up `biome.json` configuration
-  - [x] Create `src/frontend/` directory structure
+  - [x] Create `src/` directory structure
 - [x] Create configuration files
   - [x] `config/llm.json`
   - [x] `config/scraping.json`
@@ -484,15 +484,15 @@ export interface JobScrapeResponse {
   - [x] Set up TypeScript configuration
   - [x] Configure Biome for linting/formatting
 - [x] Create base layout
-  - [x] `src/frontend/app/layout.tsx`
+  - [x] `src/app/layout.tsx`
   - [x] Basic styling (minimal CSS)
 - [x] Create type definitions
-  - [x] `src/frontend/lib/types.ts`
+  - [x] `src/lib/types.ts`
 - [x] Commit: `feat(frontend): initialize Next.js app structure`
 
 ### 11. Frontend - API Client
 - [x] Create API client module
-  - [x] `src/frontend/lib/api.ts`
+  - [x] `src/lib/api.ts`
 - [x] Implement API functions
   - [x] `scrapeJob(url: string)` - POST to /api/jobs/scrape
   - [x] `getJobs()` - GET from /api/jobs
@@ -500,60 +500,60 @@ export interface JobScrapeResponse {
   - [x] `updateJobStatus(id: number, status: RoleStatus)` - PATCH
 - [x] Add error handling
 - [x] Write unit tests for API client
-  - [x] `tests/frontend/lib/api.test.ts`
+  - [x] `tests/lib/api.test.ts`
   - [x] Mock fetch responses
-- [x] Run tests: `pnpm vitest run tests/frontend/lib/ --coverage`
+- [x] Run tests: `pnpm vitest run tests/lib/ --coverage`
 - [x] Commit: `feat(frontend): add API client functions`
 
 ### 12. Frontend - Components
 - [x] Create JobUrlForm component
-  - [x] `src/frontend/components/JobUrlForm.tsx`
+  - [x] `src/components/JobUrlForm.tsx`
   - [x] URL input field
   - [x] Submit button
   - [x] Loading state
   - [x] Error display
   - [x] Success message
 - [x] Create SkillBadge component
-  - [x] `src/frontend/components/SkillBadge.tsx`
+  - [x] `src/components/SkillBadge.tsx`
   - [x] Display skill name
   - [x] Visual distinction for required vs. preferred
 - [x] Create JobCard component
-  - [x] `src/frontend/components/JobCard.tsx`
+  - [x] `src/components/JobCard.tsx`
   - [x] Display job summary
   - [x] Link to detail page
 - [x] Create JobList component
-  - [x] `src/frontend/components/JobList.tsx`
+  - [x] `src/components/JobList.tsx`
   - [x] Render list of JobCard components
   - [x] Empty state
 - [x] Write component tests
-  - [x] `tests/frontend/components/JobUrlForm.test.tsx`
-  - [x] `tests/frontend/components/JobList.test.tsx`
-  - [x] `tests/frontend/components/JobCard.test.tsx`
-  - [x] `tests/frontend/components/SkillBadge.test.tsx`
-- [x] Run tests: `pnpm vitest run tests/frontend/components/ --coverage`
+  - [x] `tests/components/JobUrlForm.test.tsx`
+  - [x] `tests/components/JobList.test.tsx`
+  - [x] `tests/components/JobCard.test.tsx`
+  - [x] `tests/components/SkillBadge.test.tsx`
+- [x] Run tests: `pnpm vitest run tests/components/ --coverage`
 - [x] Commit: `feat(frontend): add reusable components`
 
 ### 13. Frontend - Pages
 - [x] Create home/dashboard page
-  - [x] `src/frontend/app/page.tsx`
+  - [x] `src/app/page.tsx`
   - [x] Integrate JobUrlForm
   - [x] Display recent jobs (last 10)
   - [x] Show simple stats
 - [x] Create job list page
-  - [x] `src/frontend/app/jobs/page.tsx`
+  - [x] `src/app/jobs/page.tsx`
   - [x] Integrate JobList component
   - [x] Fetch all jobs on load
 - [x] Create job detail page
-  - [x] `src/frontend/app/jobs/[id]/page.tsx`
+  - [x] `src/app/jobs/[id]/page.tsx`
   - [x] Fetch job details
   - [x] Render Markdown description
   - [x] Display skills with badges
   - [x] Status dropdown
   - [x] Link to original posting
 - [x] Write page tests
-  - [x] `tests/frontend/app/page.test.tsx`
-  - [x] `tests/frontend/app/jobs/page.test.tsx`
-- [x] Run tests: `pnpm vitest run tests/frontend/ --coverage`
+  - [x] `tests/app/page.test.tsx`
+  - [x] `tests/app/jobs/page.test.tsx`
+- [x] Run tests: `pnpm vitest run tests/ --coverage`
 - [x] Verify 90%+ coverage
 - [x] Commit: `feat(frontend): add pages for dashboard, job list, and job detail`
 

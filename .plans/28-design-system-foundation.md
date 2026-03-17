@@ -124,10 +124,10 @@ Refactor direction:
 ## Affected Areas
 
 - `package.json` (new `@evergraytech/design-system` dependency)
-- `src/frontend/app/layout.tsx` (CSS import, inline style removal)
+- `src/app/layout.tsx` (CSS import, inline style removal)
 - new `globals.css` or equivalent global frontend styles
-- shared frontend components under `src/frontend/components/`
-- frontend tests under `tests/frontend/`
+- shared frontend components under `src/components/`
+- frontend tests under `tests/`
 - `docs/development.md` (consumption reference)
 
 ## Success Criteria

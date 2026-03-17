@@ -1,5 +1,5 @@
 import { indexedDB } from "fake-indexeddb";
-import * as api from "../../../src/frontend/lib/browserApi";
+import * as api from "../../src/lib/browserApi";
 import {
   clearAISettingToken,
   createDesirabilityFactor,
@@ -22,7 +22,7 @@ import {
   updateAISettingToken,
   updateDesirabilityFactor,
   updateJobStatus,
-} from "../../../src/frontend/lib/browserApi";
+} from "../../src/lib/browserApi";
 
 beforeEach(() => {
   Object.defineProperty(window, "indexedDB", {
