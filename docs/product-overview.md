@@ -1,12 +1,14 @@
 # Plot Your Path — Product Overview
 
-See also: [README](../README.md), [Concept Model](./concept-model.md#core-concepts), [System Specification](./system-spec.md#product-guardrails)
+This document defines the product intent of Plot Your Path: what problem it solves, who it is for, how it should feel to use, and where the product boundary should stay.
 
-## Purpose
 
-This document defines the product intent of Plot Your Path: what problem it solves, who it is for, how it should feel to use, and where the product boundary should stay for now.
+- [README](README.md) — high-level introduction for new users
+- [Concept Model](docs/concept-model.md) — shared domain language and how the core entities relate
+- [System Specification](docs/system-spec.md) — architectural guardrails, capability boundaries, and system expectations
+- [Development Workflows](docs/development.md) — local setup, test commands, and contributor workflow guidance
 
-For the shared domain language behind the product, see [Concept Model → Core concepts](./concept-model.md#core-concepts). For system-level direction and constraints, see [System Specification → Product guardrails](./system-spec.md#product-guardrails).
+
 
 ## Product statement
 
@@ -166,7 +168,7 @@ The current product vision should stay focused on:
 - skill-gap discovery
 - outcome-informed reflection
 
-## Not in scope for now
+## Outside the product boundary
 
 To keep the vision manageable, the product should avoid expanding too quickly into:
 

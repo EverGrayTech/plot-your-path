@@ -1,8 +1,10 @@
 # Plot Your Path
 
-Plot Your Path is a local-first career intelligence workspace for people who want to approach job searching and career growth more deliberately.
+Plot Your Path is a local-first career intelligence workspace that helps you approach job searching and career growth with clarity and continuity.
 
-It helps turn scattered job postings, application work, interview prep, and career reflections into a structured system that supports better decisions over time.
+It transforms scattered roles, applications, interview prep, and career reflection into a single system; so you can make better decisions in the moment while building a coherent, reusable record of your experiences.
+
+Over time, it becomes a navigable map of your career, grounded in your actual experience, so you can see where you are, which opportunities truly fit, and puposefully chart your path forward.
 
 ## What it is
 
@@ -12,9 +14,9 @@ Plot Your Path is designed to help a user:
 - prepare stronger, more grounded applications
 - organize interview preparation around real experience
 - capture career evidence before it is forgotten
-- identify skill gaps that meaningfully change future options
+- identify skill gaps and recurring patterns that meaningfully affect future options
 
-The product is not meant to automate a career search end to end. It is meant to help a person think more clearly, prepare more effectively, and build better long-term career memory.
+The product is not meant to automate a career search end to end. It is meant to help a person think more clearly, prepare more effectively, and retain the professional context that usually gets lost between opportunities.
 
 ## Why it exists
 
@@ -28,7 +30,7 @@ Job searching is often handled as a series of disconnected tasks:
 
 That makes the process noisy, repetitive, and hard to learn from.
 
-Plot Your Path reframes job search activity as a feedback loop:
+Plot Your Path reframes job-search activity as a feedback loop:
 
 1. collect opportunities
 2. analyze them consistently
@@ -37,58 +39,23 @@ Plot Your Path reframes job search activity as a feedback loop:
 5. learn from outcomes
 6. use those patterns to guide future growth
 
-## Core value
+## Product values
 
-Plot Your Path creates value at two time horizons.
+The project is shaped by a small set of durable values:
 
-### Immediate value
-
-In the short term, it helps with active job search work:
-
-- role evaluation
-- application support
-- interview preparation
-- application tracking
-
-### Long-term value
-
-Over time, it becomes a structured record of:
-
-- career evidence
-- recurring strengths
-- missing capabilities
-- opportunity patterns
-- lessons from past searches
-
-That longer view is what turns a job search tool into a career intelligence system.
-
-## Product direction
-
-The project aims to be:
-
-- **local-first** so sensitive career data stays under the user's control
+- **local-first** so sensitive career data stays under YOUR control
 - **assistive** rather than autonomous
-- **progressive** so it gives value early and grows with deeper use
+- **evidence-based** so decisions and outputs stay grounded in real experience
+- **progressive** so the system is useful early and becomes more valuable with deeper use
 - **practical** in scope, favoring clear decisions over exhaustive analysis
 
-The current MVP direction is to deliver Plot Your Path as a browser-hosted local-first web application rather than a packaged desktop app. The product should keep user data on the user's device, store core workspace data in browser-local persistence, and make portability explicit through clear export and import workflows.
+## Application shape
 
-## Documentation map
+The repository is centered on a browser-hosted Next.js application with a TypeScript-first architecture.
 
-The documentation is intentionally split by purpose:
+The product keeps workspace data on the user's device, uses browser-local persistence for core workflows, and treats export/import as an explicit part of the user experience rather than a hidden implementation detail.
 
-- [Product Overview](docs/product-overview.md) — product goals, design principles, user journey, and scope
-- [Concept Model](docs/concept-model.md) — shared conceptual language and core entities
-- [System Spec](docs/system-spec.md) — system-level boundaries, architectural direction, and product guardrails
-- [Development](docs/development.md) — local development and testing workflows
-- [Web Local-First Architecture Pivot](docs/architecture-pivot-web-local-first.md) — architectural decision record and rationale for the browser-hosted local-first MVP direction
-- [Desktop Runtime Foundation](docs/desktop-runtime.md) — archived context for the earlier Tauri desktop runtime direction
-
-If you are new to the project, read them in that order.
-
-## Current emphasis
-
-The current documentation centers the product around five core capability areas:
+The app focuses on five capability areas:
 
 1. opportunity capture
 2. role fit evaluation
@@ -96,18 +63,15 @@ The current documentation centers the product around five core capability areas:
 4. career evidence capture
 5. skill-gap and pattern discovery
 
-That is a deliberate scope boundary. The vision is broader than a tracker, but narrower than a full life-planning system.
+That is a deliberate product boundary. The vision is broader than a tracker, but narrower than a general life-planning system.
 
-## Contributing
+## Documentation map
 
-Before proposing major product or architecture changes, review:
+These documents define the product purpose, shared language, and architectural expectations the codebase should reinforce.
 
-1. [Product Overview](docs/product-overview.md)
-2. [Concept Model](docs/concept-model.md)
-3. [System Spec](docs/system-spec.md)
+- [Product Overview](docs/product-overview.md) — product goals, user journey, principles, and scope boundaries
+- [Concept Model](docs/concept-model.md) — shared domain language and how the core entities relate
+- [System Specification](docs/system-spec.md) — architectural guardrails, capability boundaries, and system expectations
+- [Development Workflows](docs/development.md) — local setup, test commands, and contributor workflow guidance
 
-These documents are intended to guide future phases of the project.
-
-## Vision
-
-Plot Your Path should grow into a durable career companion: a system that helps someone understand where they are, what opportunities make sense, what evidence supports their story, and what development steps are most worth taking next.
+If you are new to the project, read them in that order.
