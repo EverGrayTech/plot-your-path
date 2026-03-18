@@ -1,9 +1,7 @@
 import { indexedDB } from "fake-indexeddb";
-import * as api from "../../src/lib/browserApi";
 import {
   clearAISettingToken,
   createDesirabilityFactor,
-  createOutcomeEvent,
   deleteDesirabilityFactor,
   generateCoverLetter,
   generateQuestionAnswers,
@@ -23,6 +21,8 @@ import {
   updateDesirabilityFactor,
   updateJobStatus,
 } from "../../src/lib/browserApi";
+import { addLocalOutcomeEvent } from "../../src/lib/localApplicationWorkflows";
+import { captureLocalJob } from "../../src/lib/localJobs";
 
 beforeEach(() => {
   Object.defineProperty(window, "indexedDB", {
@@ -32,7 +32,7 @@ beforeEach(() => {
   localStorage.clear();
 });
 
-describe("listSkills", () => {
+describe("browserApi", () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
@@ -41,31 +41,13 @@ describe("listSkills", () => {
     const result = await listSkills();
     expect(Array.isArray(result)).toBe(true);
   });
-});
-
-describe("getSkill", () => {
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
 
   it("throws when local skill does not exist", async () => {
     await expect(getSkill(1)).rejects.toThrow(/Skill not found/i);
   });
-});
-
-describe("updateJobStatus", () => {
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
 
   it("throws when updating a missing local job", async () => {
     await expect(updateJobStatus(2, "submitted")).rejects.toThrow(/Job not found/i);
-  });
-});
-
-describe("application materials endpoints", () => {
-  afterEach(() => {
-    vi.restoreAllMocks();
   });
 
   it("lists local materials and generates browser-local artifacts", async () => {
@@ -77,12 +59,6 @@ describe("application materials endpoints", () => {
   it("question generation creates browser-local artifacts", async () => {
     const created = await generateQuestionAnswers(2, ["Why this role?"]);
     expect(created.artifact_type).toBe("application_qa");
-  });
-});
-
-describe("ai settings endpoints", () => {
-  afterEach(() => {
-    vi.restoreAllMocks();
   });
 
   it("lists, updates, and validates local AI settings", async () => {
@@ -100,20 +76,53 @@ describe("ai settings endpoints", () => {
     const health = await healthcheckAISetting("job_parsing");
     expect(health.ok).toBe(false);
   });
-});
-
-describe("outcome feedback endpoints", () => {
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
 
   it("lists local outcomes", async () => {
     const listed = await listOutcomeEvents(2);
     expect(listed).toEqual([]);
   });
-});
 
-describe("retired transport-era abstractions", () => {
+  it("computes outcome insights and default tuning suggestions", async () => {
+    const capturedJob = await captureLocalJob({
+      url: "https://example.com/job-1",
+      fallback_text: "Platform Engineer\nTypeScript\nLeadership",
+    });
+
+    await addLocalOutcomeEvent(capturedJob.role_id, {
+      event_type: "offer",
+      occurred_at: "2026-03-18T13:00:00.000Z",
+      model_family: "openai",
+    });
+
+    const insights = await getOutcomeInsights();
+    expect(insights.total_events).toBe(1);
+    expect(insights.total_roles_with_outcomes).toBe(1);
+    expect(insights.conversion_by_model_family).toEqual([
+      expect.objectContaining({ segment: "openai", attempts: 1, hires: 1, conversion_rate: 1 }),
+    ]);
+
+    const suggestions = await getOutcomeTuningSuggestions();
+    expect(suggestions.suggestions).toHaveLength(1);
+    expect(suggestions.suggestions[0]?.recommendation).toMatch(/Prefer openai/i);
+  });
+
+  it("returns no tuning suggestions when non-openai outcomes exist", async () => {
+    const capturedJob = await captureLocalJob({
+      url: "https://example.com/job-2",
+      fallback_text: "Frontend Engineer\nReact\nTesting",
+    });
+
+    await addLocalOutcomeEvent(capturedJob.role_id, {
+      event_type: "interview",
+      occurred_at: "2026-03-18T14:00:00.000Z",
+      model_family: "anthropic",
+    });
+
+    const suggestions = await getOutcomeTuningSuggestions();
+    expect(suggestions.suggestions).toHaveLength(1);
+    expect(suggestions.suggestions[0]?.recommendation).toMatch(/Prefer openai/i);
+  });
+
   it("keeps factor listing local but blocks transport-era factor mutation helpers", async () => {
     expect(Array.isArray(await listDesirabilityFactors())).toBe(true);
     await expect(
