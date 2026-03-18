@@ -1,4 +1,4 @@
-import * as api from "../browserApi";
+import * as api from "../api";
 import type { FrontendServices } from "./types";
 
 export function createFrontendServices(): FrontendServices {

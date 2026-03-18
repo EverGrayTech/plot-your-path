@@ -3,7 +3,7 @@ import React from "react";
 
 import { indexedDB } from "fake-indexeddb";
 import { DataManagementPanel } from "../../src/components/DataManagementPanel";
-import * as api from "../../src/lib/browserApi";
+import * as api from "../../src/lib/api";
 import { setFrontendServicesForTests } from "../../src/lib/services";
 import type { FrontendServices } from "../../src/lib/services/types";
 
