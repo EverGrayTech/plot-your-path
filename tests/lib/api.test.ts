@@ -20,7 +20,7 @@ import {
   updateAISettingToken,
   updateDesirabilityFactor,
   updateJobStatus,
-} from "../../src/lib/browserApi";
+} from "../../src/lib/api";
 import { addLocalOutcomeEvent } from "../../src/lib/localApplicationWorkflows";
 import { captureLocalJob } from "../../src/lib/localJobs";
 
@@ -32,7 +32,7 @@ beforeEach(() => {
   localStorage.clear();
 });
 
-describe("browserApi", () => {
+describe("api", () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
