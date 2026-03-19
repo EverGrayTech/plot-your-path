@@ -4,6 +4,8 @@
 
 Prepare the App Router Next.js application for GitHub Pages deployment using a static export flow, while keeping local development behavior unchanged and preserving flexibility for a future custom subdomain cutover.
 
+This follow-up also fixes the Pages workflow after CI failures related to pnpm workspace detection and modernizes the workflow actions/runtime expectations for another deployment attempt.
+
 ## Prerequisites
 
 - `.plans/53-role-terminology-hard-cutover.md`
@@ -49,6 +51,15 @@ Refactor direction:
 - Record the assumed repository subpath and default branch expectations.
 - Note remaining GitHub Pages risks, especially around static export compatibility and any future subdomain transition.
 
+### 5. Workflow reliability hardening
+
+Refactor direction:
+
+- Make the repository's pnpm workspace metadata valid for a single-package setup so CI installation does not fail.
+- Add an explicit pnpm package manager version to `package.json`.
+- Upgrade workflow actions to current major versions that avoid the observed Node 20 deprecation warnings.
+- Configure package installation auth if GitHub Packages access is required for `@evergraytech/design-system`.
+
 ## Implementation Steps
 
 ### 1. Add the Pages build entrypoint
@@ -74,11 +85,20 @@ Refactor direction:
 - [x] Capture branch and repository path assumptions.
 - [x] Document remaining deployment risks.
 
+### 5. Fix workflow installation and auth issues
+
+- [ ] Update `pnpm-workspace.yaml` to a simplest-valid single-package configuration if required.
+- [ ] Add an explicit `packageManager` field to `package.json` using the current pnpm version.
+- [ ] Upgrade workflow actions and keep Pages deployment behavior unchanged.
+- [ ] Add GitHub Packages auth in the workflow if the design-system dependency requires it.
+- [ ] Reconfirm whether the repo is ready for another Pages deployment attempt.
+
 ## Affected Areas
 
 - `package.json`
 - `next.config.mjs`
 - `.github/workflows/deploy-pages.yml`
+- `pnpm-workspace.yaml`
 
 ## Success Criteria
 
@@ -87,3 +107,6 @@ Refactor direction:
 - [x] `.github/workflows/deploy-pages.yml` builds and deploys the exported static site using official GitHub Pages actions.
 - [x] The expected exported output directory and publish target are explicitly confirmed.
 - [x] Assumptions and remaining GitHub Pages risks are identified without unrelated refactors.
+- [ ] pnpm workspace metadata is valid for CI in a single-package repository.
+- [ ] `package.json` declares an explicit pnpm `packageManager` version.
+- [ ] The Pages workflow uses current action versions and any required package registry auth.

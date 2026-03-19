@@ -8,8 +8,9 @@ on:
 
 permissions:
   contents: read
-  pages: write
   id-token: write
+  packages: read  
+  pages: write
 
 concurrency:
   group: pages
@@ -18,21 +19,25 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 10.32.1
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: pnpm
+          registry-url: https://npm.pkg.github.com
+          scope: '@evergraytech'
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
