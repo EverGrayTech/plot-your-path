@@ -54,6 +54,41 @@ Run a single frontend test file:
 pnpm vitest run tests/app/page.test.tsx
 ```
 
+## GitHub Pages static deployment
+
+The app supports a dedicated static export flow for GitHub Pages while keeping normal local development unchanged.
+
+### Build the GitHub Pages export locally
+
+Run:
+
+```bash
+pnpm build:pages
+```
+
+This enables the static export build and writes the deployable site to `out/`.
+
+### Repository-path deployment behavior
+
+The GitHub Pages build currently targets the default project Pages URL for this repository, so it enables a repository subpath during the Pages build.
+
+- `PYP_STATIC_EXPORT=true` turns on Next.js `output: "export"`
+- `PYP_PAGES_ENABLE_REPO_PATH=true` enables repo-subpath URL generation
+- `PYP_PAGES_REPO_PATH=/plot-your-path` sets the current repository base path
+
+When the site later moves to a custom subdomain, disable the repo-path setting so the app serves from the domain root instead of the repository path.
+
+### GitHub Actions deployment
+
+The GitHub Pages workflow lives at `.github/workflows/deploy-pages.yml`.
+
+- it runs on pushes to `main`
+- it also supports manual dispatch
+- it builds the static export with `pnpm build:pages`
+- it uploads `out/` as the Pages artifact
+
+If the default branch changes, update the workflow trigger to match.
+
 ## Design system consumption
 
 The frontend uses the `@evergraytech/design-system` npm package as the source of truth for foundational visual values. The upstream consumption guide defines the full rules; here is a quick reference:
