@@ -1,5 +1,6 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+/* @jsxRuntime classic */
 import React from "react";
+import { fireEvent, render, screen } from "@testing-library/react";
 
 import { AppShell } from "../../../src/components/shell/AppShell";
 
@@ -10,7 +11,12 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("next/link", () => ({
-  default: ({ children, href, onClick, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }) => (
+  default: ({
+    children,
+    href,
+    onClick,
+    ...props
+  }: React.AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }) => (
     <a href={href} onClick={onClick} {...props}>
       {children}
     </a>
@@ -19,7 +25,7 @@ vi.mock("next/link", () => ({
 
 describe("AppShell", () => {
   beforeEach(() => {
-    mockUsePathname.mockReturnValue("/jobs/detail");
+    mockUsePathname.mockReturnValue("/roles/detail");
   });
 
   afterEach(() => {
@@ -34,7 +40,7 @@ describe("AppShell", () => {
     );
 
     expect(screen.getByText("Plot Your Path")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Jobs" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: "Roles" })).toHaveAttribute("aria-current", "page");
     expect(screen.getByText("Main content")).toBeInTheDocument();
   });
 

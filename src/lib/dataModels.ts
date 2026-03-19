@@ -1,4 +1,4 @@
-export interface JobScrapeRequest {
+export interface RoleCaptureRequest {
   url: string;
   fallback_text?: string;
 }
@@ -31,7 +31,7 @@ export type ApplicationArtifactType =
 export type InterviewPrepSectionKey = "likely_questions" | "talking_points" | "star_stories";
 export type DesirabilityScoreScope = "company";
 export type OperationFamily =
-  | "job_parsing"
+  | "role_parsing"
   | "desirability_scoring"
   | "application_generation"
   | "fit_analysis";
@@ -271,7 +271,7 @@ export interface DataPortabilitySummary {
   backup_reminder_level?: "none" | "recommended" | "overdue";
   backup_reminder_message?: string | null;
   has_resume: boolean;
-  jobs_count: number;
+  roles_count: number;
   last_export_at: string | null;
   last_import_at: string | null;
   last_reset_at: string | null;
@@ -371,7 +371,7 @@ export interface SalaryInfo {
   currency: string;
 }
 
-export interface JobListItem {
+export interface RoleListItem {
   id: number;
   company: string;
   title: string;
@@ -388,13 +388,13 @@ export interface JobListItem {
   needs_attention?: boolean;
 }
 
-export interface JobSkillItem {
+export interface RoleSkillItem {
   id: number;
   name: string;
   requirement_level: "required" | "preferred";
 }
 
-export interface JobDetail {
+export interface RoleDetail {
   id: number;
   company: CompanySummary;
   title: string;
@@ -402,8 +402,8 @@ export interface JobDetail {
   salary: SalaryInfo;
   url: string;
   skills: {
-    required: JobSkillItem[];
-    preferred: JobSkillItem[];
+    required: RoleSkillItem[];
+    preferred: RoleSkillItem[];
   };
   description_md: string;
   created_at: string;
@@ -422,7 +422,7 @@ export interface SkillListItem {
   usage_count: number;
 }
 
-export interface SkillJobReference {
+export interface SkillRoleReference {
   id: number;
   company: string;
   title: string;
@@ -435,10 +435,10 @@ export interface SkillDetail {
   name: string;
   category: string | null;
   usage_count: number;
-  jobs: SkillJobReference[];
+  roles: SkillRoleReference[];
 }
 
-export interface JobScrapeResponse {
+export interface RoleCaptureResponse {
   status: string;
   role_id: number;
   company: string;

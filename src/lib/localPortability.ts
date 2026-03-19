@@ -11,7 +11,7 @@ interface PortableWorkspaceSnapshot {
   version: number;
   exported_at: string;
   metadata: WorkspaceMetadata;
-  jobs: Record<string, unknown>[];
+  roles: Record<string, unknown>[];
   skills: Record<string, unknown>[];
   fitAnalyses: Record<string, unknown>[];
   desirabilityScores: Record<string, unknown>[];
@@ -82,7 +82,7 @@ function buildBackupReminder(lastExportAt: string | null): {
 
 export async function getLocalDataPortabilitySummary(): Promise<DataPortabilitySummary> {
   const metadata = await initializeLocalWorkspace();
-  const jobs = await listStoreRecords<Record<string, unknown>>("jobs");
+  const roles = await listStoreRecords<Record<string, unknown>>("roles");
   const skills = await listStoreRecords<Record<string, unknown>>("skills");
   const reminder = buildBackupReminder(metadata.lastExportAt);
 
@@ -93,7 +93,7 @@ export async function getLocalDataPortabilitySummary(): Promise<DataPortabilityS
     backup_reminder_level: reminder.level,
     backup_reminder_message: reminder.message,
     has_resume: false,
-    jobs_count: jobs.filter((record) => typeof record.roleId === "number").length,
+    roles_count: roles.filter((record) => typeof record.roleId === "number").length,
     last_export_at: metadata.lastExportAt,
     last_import_at: metadata.lastImportAt,
     last_reset_at: metadata.lastResetAt,
@@ -107,7 +107,7 @@ export async function exportLocalDataArchive(): Promise<{ blob: Blob; filename: 
     version: PORTABLE_WORKSPACE_VERSION,
     exported_at: nowIso(),
     metadata,
-    jobs: await listStoreRecords<Record<string, unknown>>("jobs"),
+    roles: await listStoreRecords<Record<string, unknown>>("roles"),
     skills: await listStoreRecords<Record<string, unknown>>("skills"),
     fitAnalyses: await listStoreRecords<Record<string, unknown>>("fitAnalyses"),
     desirabilityScores: await listStoreRecords<Record<string, unknown>>("desirabilityScores"),
@@ -139,7 +139,7 @@ export async function importLocalDataArchive(archiveBase64: string): Promise<Dat
 
   try {
     const storeNames = [
-      "jobs",
+      "roles",
       "skills",
       "fitAnalyses",
       "desirabilityScores",
@@ -179,7 +179,7 @@ export async function importLocalDataArchive(archiveBase64: string): Promise<Dat
     completed_at: completedAt,
     message: "Backup restored into the current browser-local workspace.",
     added_count:
-      snapshot.jobs.length +
+      snapshot.roles.length +
       snapshot.skills.length +
       snapshot.fitAnalyses.length +
       snapshot.desirabilityScores.length +
@@ -198,7 +198,7 @@ export async function resetLocalWorkspace(): Promise<DataOperationResult> {
 
   try {
     const storeNames = [
-      "jobs",
+      "roles",
       "skills",
       "fitAnalyses",
       "desirabilityScores",

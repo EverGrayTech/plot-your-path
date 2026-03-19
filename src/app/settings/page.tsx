@@ -26,7 +26,7 @@ export default function SettingsPage() {
         <h3>AI Model Configuration</h3>
         <p>
           Manage AI provider settings, runtime tokens, and model selection for each operation
-          family. These settings are also accessible from the Jobs page toolbar.
+          family. These settings are also accessible from the Roles page toolbar.
         </p>
       </section>
 
@@ -34,7 +34,7 @@ export default function SettingsPage() {
         <h3>Desirability Factor Settings</h3>
         <p>
           Configure the factors, prompts, and weights used to score role desirability. These
-          settings are also accessible from the Jobs page toolbar.
+          settings are also accessible from the Roles page toolbar.
         </p>
       </section>
 

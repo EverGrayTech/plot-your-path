@@ -11,7 +11,7 @@ interface NavItem {
 
 const primaryNav: NavItem[] = [
   { href: "/", label: "Home" },
-  { href: "/jobs", label: "Jobs" },
+  { href: "/roles", label: "Roles" },
   { href: "/skills", label: "Skills" },
 ];
 

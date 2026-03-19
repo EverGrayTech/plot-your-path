@@ -271,7 +271,7 @@ export function DataManagementPanel() {
             <span className="metadata-value">{describeStorageMode(summary)}</span>
 
             <span className="metadata-key">Roles captured</span>
-            <span className="metadata-value">{summary.jobs_count}</span>
+            <span className="metadata-value">{summary.roles_count}</span>
 
             <span className="metadata-key">Skills tracked</span>
             <span className="metadata-value">{summary.skills_count}</span>

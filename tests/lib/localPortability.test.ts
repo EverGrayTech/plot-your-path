@@ -1,10 +1,10 @@
-import { captureLocalJob } from "../../src/lib/localJobs";
 import {
   exportLocalDataArchive,
   getLocalDataPortabilitySummary,
   importLocalDataArchive,
   resetLocalWorkspace,
 } from "../../src/lib/localPortability";
+import { captureLocalRole } from "../../src/lib/localRoles";
 
 import { indexedDB } from "fake-indexeddb";
 
@@ -17,19 +17,19 @@ describe("local portability", () => {
   });
 
   it("builds a local summary from browser-local data", async () => {
-    await captureLocalJob({
-      url: "pasted-job-description",
+    await captureLocalRole({
+      url: "pasted-role-description",
       fallback_text: "Platform Engineer\nTypeScript",
     });
 
     const summary = await getLocalDataPortabilitySummary();
     expect(summary.storage_mode).toBe("browser_local");
-    expect(summary.jobs_count).toBeGreaterThan(0);
+    expect(summary.roles_count).toBeGreaterThan(0);
   });
 
   it("exports and re-imports local workspace data", async () => {
-    await captureLocalJob({
-      url: "pasted-job-description",
+    await captureLocalRole({
+      url: "pasted-role-description",
       fallback_text: "Frontend Engineer\nReact",
     });
 
@@ -47,6 +47,6 @@ describe("local portability", () => {
     const summary = await getLocalDataPortabilitySummary();
 
     expect(result.message).toMatch(/Local data reset successfully/i);
-    expect(summary.jobs_count).toBe(0);
+    expect(summary.roles_count).toBe(0);
   });
 });

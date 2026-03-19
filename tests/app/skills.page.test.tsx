@@ -27,11 +27,11 @@ describe("SkillsPageClient", () => {
     });
 
     const services = {
-      jobs: {
-        getJob: vi.fn(),
-        listJobs: vi.fn(),
-        scrapeJob: vi.fn(),
-        updateJobStatus: vi.fn(),
+      roles: {
+        getRole: vi.fn(),
+        listRoles: vi.fn(),
+        captureRole: vi.fn(),
+        updateRoleStatus: vi.fn(),
       },
       skills: {
         getSkill: vi.fn(),
@@ -57,7 +57,7 @@ describe("SkillsPageClient", () => {
         updateAISettingToken: vi.fn(),
       },
       aiGeneration: {
-        analyzeJobFit: vi.fn(),
+        analyzeRoleFit: vi.fn(),
         generateCoverLetter: vi.fn(),
         generateInterviewPrepPack: vi.fn(),
         generateQuestionAnswers: vi.fn(),
@@ -67,7 +67,7 @@ describe("SkillsPageClient", () => {
         listResumeTuning: vi.fn(),
         refreshDesirabilityScore: vi.fn(),
         regenerateInterviewPrepSection: vi.fn(),
-        scoreJobDesirability: vi.fn(),
+        scoreRoleDesirability: vi.fn(),
         syncResumeProfile: vi.fn(),
         updateInterviewPrepPack: vi.fn(),
       },
@@ -100,11 +100,11 @@ describe("SkillsPageClient", () => {
     const listSkills = vi.fn().mockResolvedValue(skills);
     setFrontendServicesForTests({
       ...(services as FrontendServices),
-      jobs: {
-        getJob: vi.fn(),
-        listJobs: vi.fn(),
-        scrapeJob: vi.fn(),
-        updateJobStatus: vi.fn(),
+      roles: {
+        getRole: vi.fn(),
+        listRoles: vi.fn(),
+        captureRole: vi.fn(),
+        updateRoleStatus: vi.fn(),
       },
       skills: {
         getSkill: vi.fn(),
@@ -130,7 +130,7 @@ describe("SkillsPageClient", () => {
         updateAISettingToken: vi.fn(),
       },
       aiGeneration: {
-        analyzeJobFit: vi.fn(),
+        analyzeRoleFit: vi.fn(),
         generateCoverLetter: vi.fn(),
         generateInterviewPrepPack: vi.fn(),
         generateQuestionAnswers: vi.fn(),
@@ -140,7 +140,7 @@ describe("SkillsPageClient", () => {
         listResumeTuning: vi.fn(),
         refreshDesirabilityScore: vi.fn(),
         regenerateInterviewPrepSection: vi.fn(),
-        scoreJobDesirability: vi.fn(),
+        scoreRoleDesirability: vi.fn(),
         syncResumeProfile: vi.fn(),
         updateInterviewPrepPack: vi.fn(),
       },
@@ -184,13 +184,13 @@ describe("SkillsPageClient", () => {
     expect(listItems[2]).toHaveTextContent("Python");
   });
 
-  it("opens skill detail modal and navigates to a referenced job", async () => {
+  it("opens skill detail modal and navigates to a referenced role", async () => {
     const getSkill = vi.fn().mockResolvedValue({
       id: 1,
       name: "Python",
       category: "language",
       usage_count: 3,
-      jobs: [
+      roles: [
         {
           id: 2,
           company: "Beta Co",
@@ -200,7 +200,7 @@ describe("SkillsPageClient", () => {
         },
       ],
     });
-    const getJob = vi.fn().mockResolvedValue({
+    const getRole = vi.fn().mockResolvedValue({
       id: 2,
       company: {
         id: 10,
@@ -212,7 +212,7 @@ describe("SkillsPageClient", () => {
       title: "Engineer",
       team_division: "Platform",
       salary: { min: 120000, max: 150000, currency: "USD" },
-      url: "https://example.com/jobs/2",
+      url: "https://example.com/roles/2",
       skills: {
         required: [{ id: 1, name: "Python", requirement_level: "required" }],
         preferred: [{ id: 2, name: "FastAPI", requirement_level: "preferred" }],
@@ -226,11 +226,11 @@ describe("SkillsPageClient", () => {
     });
 
     setFrontendServicesForTests({
-      jobs: {
-        getJob,
-        listJobs: vi.fn(),
-        scrapeJob: vi.fn(),
-        updateJobStatus: vi.fn(),
+      roles: {
+        getRole,
+        listRoles: vi.fn(),
+        captureRole: vi.fn(),
+        updateRoleStatus: vi.fn(),
       },
       skills: {
         getSkill,
@@ -256,7 +256,7 @@ describe("SkillsPageClient", () => {
         updateAISettingToken: vi.fn(),
       },
       aiGeneration: {
-        analyzeJobFit: vi.fn(),
+        analyzeRoleFit: vi.fn(),
         generateCoverLetter: vi.fn(),
         generateInterviewPrepPack: vi.fn(),
         generateQuestionAnswers: vi.fn(),
@@ -266,7 +266,7 @@ describe("SkillsPageClient", () => {
         listResumeTuning: vi.fn(),
         refreshDesirabilityScore: vi.fn(),
         regenerateInterviewPrepSection: vi.fn(),
-        scoreJobDesirability: vi.fn(),
+        scoreRoleDesirability: vi.fn(),
         syncResumeProfile: vi.fn(),
         updateInterviewPrepPack: vi.fn(),
       },
@@ -291,10 +291,10 @@ describe("SkillsPageClient", () => {
     fireEvent.click(screen.getByRole("button", { name: /Python/i }));
 
     expect(await screen.findByRole("heading", { name: "Skill Detail" })).toBeInTheDocument();
-    expect(await screen.findByText("Used in 3 captured jobs.")).toBeInTheDocument();
+    expect(await screen.findByText("Used in 3 captured roles.")).toBeInTheDocument();
 
     const skillModal = await screen.findByRole("dialog");
     fireEvent.click(within(skillModal).getByRole("button", { name: /Engineer — Beta Co/i }));
-    expect(await screen.findByRole("heading", { name: "Job Detail" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Role Detail" })).toBeInTheDocument();
   }, 30000);
 });

@@ -1,5 +1,5 @@
 export {
-  analyzeLocalJobFit as analyzeJobFit,
+  analyzeLocalRoleFit as analyzeRoleFit,
   clearLocalAISettingToken as clearAISettingToken,
   generateLocalCoverLetter as generateCoverLetter,
   generateLocalInterviewPrepPack as generateInterviewPrepPack,
@@ -11,9 +11,9 @@ export {
   listLocalDesirabilityFactors as listDesirabilityFactors,
   listLocalInterviewPrepPacks as listInterviewPrepPacks,
   listLocalResumeTuning as listResumeTuning,
-  refreshLocalJobDesirability as refreshDesirabilityScore,
+  refreshLocalRoleDesirability as refreshDesirabilityScore,
   regenerateLocalInterviewPrepSection as regenerateInterviewPrepSection,
-  scoreLocalJobDesirability as scoreJobDesirability,
+  scoreLocalRoleDesirability as scoreRoleDesirability,
   syncLocalResumeProfile as syncResumeProfile,
   updateLocalAISetting as updateAISetting,
   updateLocalAISettingToken as updateAISettingToken,
@@ -31,13 +31,13 @@ export {
   upsertLocalApplicationOps as upsertApplicationOps,
 } from "./localApplicationWorkflows";
 export {
-  captureLocalJob as scrapeJob,
-  getLocalJob as getJob,
+  captureLocalRole as captureRole,
+  getLocalRole as getRole,
   getLocalSkill as getSkill,
-  listLocalJobs as listJobs,
+  listLocalRoles as listRoles,
   listLocalSkills as listSkills,
-  updateLocalJobStatus as updateJobStatus,
-} from "./localJobs";
+  updateLocalRoleStatus as updateRoleStatus,
+} from "./localRoles";
 export {
   exportLocalDataArchive as exportDataArchive,
   getLocalDataPortabilitySummary as getDataPortabilitySummary,
@@ -67,11 +67,11 @@ export type {
   InterviewStage,
   InterviewStageEvent,
   InterviewStageEventCreate,
-  JobDetail,
-  JobListItem,
-  JobScrapeRequest,
-  JobScrapeResponse,
-  JobSkillItem,
+  RoleDetail,
+  RoleListItem,
+  RoleCaptureRequest,
+  RoleCaptureResponse,
+  RoleSkillItem,
   OperationFamily,
   OutcomeConversionRow,
   OutcomeEvent,
@@ -91,7 +91,7 @@ export type {
   SalaryInfo,
   SectionTraceability,
   SkillDetail,
-  SkillJobReference,
+  SkillRoleReference,
   SkillListItem,
   TuningSuggestion,
 } from "./dataModels";
@@ -106,20 +106,20 @@ import type {
   OutcomeTuningSuggestions,
 } from "./dataModels";
 import { listAllLocalOutcomeEvents } from "./localApplicationWorkflows";
-import { listLocalJobs } from "./localJobs";
+import { listLocalRoles } from "./localRoles";
 
 export async function getOutcomeInsights(): Promise<OutcomeInsights> {
   const outcomeEvents = await listAllLocalOutcomeEvents();
-  const jobs = await listLocalJobs();
+  const roles = await listLocalRoles();
 
-  const eventsWithJobs = outcomeEvents
+  const eventsWithRoles = outcomeEvents
     .map((event) => ({
       event,
-      job: jobs.find((job) => job.id === event.role_id) ?? null,
+      role: roles.find((role) => role.id === event.role_id) ?? null,
     }))
-    .filter((row) => row.job !== null);
+    .filter((row) => row.role !== null);
 
-  const rolesWithOutcomes = new Set(eventsWithJobs.map(({ event }) => event.role_id));
+  const rolesWithOutcomes = new Set(eventsWithRoles.map(({ event }) => event.role_id));
   const hires = new Set<OutcomeEventType>(["offer"]);
 
   const summarize = <T extends string | null>(
@@ -159,15 +159,15 @@ export async function getOutcomeInsights(): Promise<OutcomeInsights> {
     return "0.0-3.9";
   };
 
-  const conversionRows = eventsWithJobs.flatMap(({ event, job }) => {
-    if (!job) {
+  const conversionRows = eventsWithRoles.flatMap(({ event, role }) => {
+    if (!role) {
       return [];
     }
 
     return [
       {
         event,
-        job,
+        role,
       },
     ];
   });
@@ -176,15 +176,15 @@ export async function getOutcomeInsights(): Promise<OutcomeInsights> {
     confidence_message:
       conversionRows.length < 5 ? "Low confidence: early signal only." : "Moderate confidence.",
     conversion_by_fit_band: summarize(
-      conversionRows.map(({ event, job }) => ({
-        key: toFitBand(job.fit_score),
+      conversionRows.map(({ event, role }) => ({
+        key: toFitBand(role.fit_score),
         hired: hires.has(event.event_type),
       })),
       (key) => key ?? "Unknown",
     ),
     conversion_by_desirability_band: summarize(
-      conversionRows.map(({ event, job }) => ({
-        key: toDesirabilityBand(job.desirability_score),
+      conversionRows.map(({ event, role }) => ({
+        key: toDesirabilityBand(role.desirability_score),
         hired: hires.has(event.event_type),
       })),
       (key) => key ?? "Unknown",

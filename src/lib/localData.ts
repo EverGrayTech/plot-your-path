@@ -15,7 +15,7 @@ export interface WorkspaceMetadata extends LocalRecordBase {
 export type LocalStoreName =
   | "metadata"
   | "aiSettings"
-  | "jobs"
+  | "roles"
   | "skills"
   | "fitAnalyses"
   | "desirabilityScores"
@@ -39,7 +39,7 @@ const WORKSPACE_SCHEMA_VERSION = 1;
 const STORE_DEFINITIONS: Array<LocalStoreDefinition<Record<string, unknown>>> = [
   { name: "metadata", keyPath: "id" },
   { name: "aiSettings", keyPath: "id" },
-  { name: "jobs", keyPath: "id" },
+  { name: "roles", keyPath: "id" },
   { name: "skills", keyPath: "id" },
   { name: "fitAnalyses", keyPath: "id" },
   { name: "desirabilityScores", keyPath: "id" },

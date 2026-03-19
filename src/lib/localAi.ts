@@ -64,7 +64,7 @@ interface LocalResumeTuningRecord extends LocalGeneratedRecordBase {
 }
 
 const DEFAULT_AI_SETTINGS: AISetting[] = [
-  "job_parsing",
+  "role_parsing",
   "fit_analysis",
   "desirability_scoring",
   "application_generation",
@@ -215,7 +215,7 @@ function buildTraceability(sectionKey: string, roleId: number) {
   ];
 }
 
-export async function analyzeLocalJobFit(roleId: number): Promise<FitAnalysis> {
+export async function analyzeLocalRoleFit(roleId: number): Promise<FitAnalysis> {
   const createdAt = nowIso();
   const fit: FitAnalysis = {
     id: Date.now(),
@@ -257,7 +257,7 @@ export async function analyzeLocalJobFit(roleId: number): Promise<FitAnalysis> {
   return fit;
 }
 
-export async function scoreLocalJobDesirability(roleId: number): Promise<DesirabilityScore> {
+export async function scoreLocalRoleDesirability(roleId: number): Promise<DesirabilityScore> {
   const createdAt = nowIso();
   const score: DesirabilityScore = {
     id: Date.now(),
@@ -291,8 +291,8 @@ export async function scoreLocalJobDesirability(roleId: number): Promise<Desirab
   return score;
 }
 
-export async function refreshLocalJobDesirability(roleId: number): Promise<DesirabilityScore> {
-  return scoreLocalJobDesirability(roleId);
+export async function refreshLocalRoleDesirability(roleId: number): Promise<DesirabilityScore> {
+  return scoreLocalRoleDesirability(roleId);
 }
 
 export async function listLocalApplicationMaterials(

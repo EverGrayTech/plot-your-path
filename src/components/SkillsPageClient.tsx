@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 
-import type { JobDetail, SkillDetail, SkillListItem } from "../lib/dataModels";
+import type { RoleDetail, SkillDetail, SkillListItem } from "../lib/dataModels";
 import { getFrontendServices } from "../lib/services";
 import { Modal } from "./Modal";
 
@@ -20,9 +20,9 @@ export function SkillsPageClient() {
   const [loadingSkillDetail, setLoadingSkillDetail] = useState(false);
   const [skillDetailError, setSkillDetailError] = useState<string | null>(null);
   const [selectedRoleId, setSelectedRoleId] = useState<number | null>(null);
-  const [selectedJob, setSelectedJob] = useState<JobDetail | null>(null);
-  const [loadingJobDetail, setLoadingJobDetail] = useState(false);
-  const [jobDetailError, setJobDetailError] = useState<string | null>(null);
+  const [selectedRole, setSelectedRole] = useState<RoleDetail | null>(null);
+  const [loadingRoleDetail, setLoadingRoleDetail] = useState(false);
+  const [roleDetailError, setRoleDetailError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadSkills = async () => {
@@ -76,25 +76,25 @@ export function SkillsPageClient() {
       return;
     }
 
-    const loadJobDetail = async () => {
-      setLoadingJobDetail(true);
-      setSelectedJob(null);
-      setJobDetailError(null);
+    const loadRoleDetail = async () => {
+      setLoadingRoleDetail(true);
+      setSelectedRole(null);
+      setRoleDetailError(null);
       try {
-        const response = await services.jobs.getJob(selectedRoleId);
-        setSelectedJob(response);
+        const response = await services.roles.getRole(selectedRoleId);
+        setSelectedRole(response);
       } catch (error) {
         if (error instanceof Error) {
-          setJobDetailError(error.message);
+          setRoleDetailError(error.message);
         } else {
-          setJobDetailError("Failed to load job detail.");
+          setRoleDetailError("Failed to load role detail.");
         }
       } finally {
-        setLoadingJobDetail(false);
+        setLoadingRoleDetail(false);
       }
     };
 
-    loadJobDetail();
+    loadRoleDetail();
   }, [selectedRoleId, services]);
 
   const filteredSkills = skills.filter((skill) => {
@@ -166,7 +166,7 @@ export function SkillsPageClient() {
         <div className="empty-state">
           <p className="empty-state-title">No skills captured yet</p>
           <p className="empty-state-description">
-            Skills are extracted automatically when jobs are captured.
+            Skills are extracted automatically when roles are captured.
           </p>
         </div>
       ) : null}
@@ -183,7 +183,7 @@ export function SkillsPageClient() {
                 <strong>{skill.name}</strong>
                 <br />
                 <small>
-                  {skill.usage_count} jobs referenced
+                  {skill.usage_count} roles referenced
                   {skill.category ? ` • ${skill.category}` : ""}
                 </small>
               </button>
@@ -208,21 +208,21 @@ export function SkillsPageClient() {
             <article>
               <h3>{selectedSkill.name}</h3>
               <p>Category: {selectedSkill.category ?? "Uncategorized"}</p>
-              <p>Used in {selectedSkill.usage_count} captured jobs.</p>
+              <p>Used in {selectedSkill.usage_count} captured roles.</p>
 
-              <h4>Referenced jobs</h4>
+              <h4>Referenced roles</h4>
               <ul>
-                {selectedSkill.jobs.map((job) => (
-                  <li key={job.id}>
+                {selectedSkill.roles.map((role) => (
+                  <li key={role.id}>
                     <button
                       className="link-btn"
                       onClick={() => {
                         setSelectedSkillId(null);
-                        setSelectedRoleId(job.id);
+                        setSelectedRoleId(role.id);
                       }}
                       type="button"
                     >
-                      {job.title} — {job.company}
+                      {role.title} — {role.company}
                     </button>
                   </li>
                 ))}
@@ -236,25 +236,25 @@ export function SkillsPageClient() {
         <Modal
           onClose={() => {
             setSelectedRoleId(null);
-            setSelectedJob(null);
-            setJobDetailError(null);
+            setSelectedRole(null);
+            setRoleDetailError(null);
           }}
-          title="Job Detail"
+          title="Role Detail"
         >
-          {loadingJobDetail ? <p>Loading job details...</p> : null}
-          {jobDetailError ? <p role="alert">{jobDetailError}</p> : null}
+          {loadingRoleDetail ? <p>Loading role details...</p> : null}
+          {roleDetailError ? <p role="alert">{roleDetailError}</p> : null}
 
-          {selectedJob ? (
+          {selectedRole ? (
             <article>
-              <h3>{selectedJob.title}</h3>
+              <h3>{selectedRole.title}</h3>
               <p>
-                <strong>{selectedJob.company.name}</strong>
+                <strong>{selectedRole.company.name}</strong>
               </p>
-              <p>Status: {selectedJob.status}</p>
+              <p>Status: {selectedRole.status}</p>
 
               <h4>Required skills</h4>
               <ul>
-                {selectedJob.skills.required.map((skill) => (
+                {selectedRole.skills.required.map((skill) => (
                   <li key={`required-${skill.id}`}>
                     <button
                       className="link-btn"
@@ -272,7 +272,7 @@ export function SkillsPageClient() {
 
               <h4>Preferred skills</h4>
               <ul>
-                {selectedJob.skills.preferred.map((skill) => (
+                {selectedRole.skills.preferred.map((skill) => (
                   <li key={`preferred-${skill.id}`}>
                     <button
                       className="link-btn"

@@ -1,5 +1,6 @@
 import { indexedDB } from "fake-indexeddb";
 import {
+  captureRole,
   clearAISettingToken,
   createDesirabilityFactor,
   deleteDesirabilityFactor,
@@ -15,14 +16,13 @@ import {
   listOutcomeEvents,
   listSkills,
   reorderDesirabilityFactors,
-  scrapeJob,
   updateAISetting,
   updateAISettingToken,
   updateDesirabilityFactor,
-  updateJobStatus,
+  updateRoleStatus,
 } from "../../src/lib/api";
 import { addLocalOutcomeEvent } from "../../src/lib/localApplicationWorkflows";
-import { captureLocalJob } from "../../src/lib/localJobs";
+import { captureLocalRole } from "../../src/lib/localRoles";
 
 beforeEach(() => {
   Object.defineProperty(window, "indexedDB", {
@@ -46,8 +46,8 @@ describe("api", () => {
     await expect(getSkill(1)).rejects.toThrow(/Skill not found/i);
   });
 
-  it("throws when updating a missing local job", async () => {
-    await expect(updateJobStatus(2, "submitted")).rejects.toThrow(/Job not found/i);
+  it("throws when updating a missing local role", async () => {
+    await expect(updateRoleStatus(2, "submitted")).rejects.toThrow(/Role not found/i);
   });
 
   it("lists local materials and generates browser-local artifacts", async () => {
@@ -65,15 +65,15 @@ describe("api", () => {
     const listed = await listAISettings();
     expect(listed.length).toBeGreaterThanOrEqual(1);
 
-    const updated = await updateAISetting("job_parsing", { model: "gpt-4o-mini" });
+    const updated = await updateAISetting("role_parsing", { model: "gpt-4o-mini" });
     expect(updated.model).toBe("gpt-4o-mini");
 
-    const tokenUpdated = await updateAISettingToken("job_parsing", "sk-test-1234567890");
+    const tokenUpdated = await updateAISettingToken("role_parsing", "sk-test-1234567890");
     expect(tokenUpdated.token_masked).toContain("7890");
 
-    await clearAISettingToken("job_parsing");
+    await clearAISettingToken("role_parsing");
 
-    const health = await healthcheckAISetting("job_parsing");
+    const health = await healthcheckAISetting("role_parsing");
     expect(health.ok).toBe(false);
   });
 
@@ -83,12 +83,12 @@ describe("api", () => {
   });
 
   it("computes outcome insights and default tuning suggestions", async () => {
-    const capturedJob = await captureLocalJob({
-      url: "https://example.com/job-1",
+    const capturedRole = await captureLocalRole({
+      url: "https://example.com/role-1",
       fallback_text: "Platform Engineer\nTypeScript\nLeadership",
     });
 
-    await addLocalOutcomeEvent(capturedJob.role_id, {
+    await addLocalOutcomeEvent(capturedRole.role_id, {
       event_type: "offer",
       occurred_at: "2026-03-18T13:00:00.000Z",
       model_family: "openai",
@@ -107,12 +107,12 @@ describe("api", () => {
   });
 
   it("returns no tuning suggestions when non-openai outcomes exist", async () => {
-    const capturedJob = await captureLocalJob({
-      url: "https://example.com/job-2",
+    const capturedRole = await captureLocalRole({
+      url: "https://example.com/role-2",
       fallback_text: "Frontend Engineer\nReact\nTesting",
     });
 
-    await addLocalOutcomeEvent(capturedJob.role_id, {
+    await addLocalOutcomeEvent(capturedRole.role_id, {
       event_type: "interview",
       occurred_at: "2026-03-18T14:00:00.000Z",
       model_family: "anthropic",
@@ -139,9 +139,9 @@ describe("api", () => {
     await expect(updateDesirabilityFactor(1, { weight: 0.3 })).rejects.toThrow(/not available/i);
   });
 
-  it("scrapes jobs through the local browser workflow", async () => {
-    const result = await scrapeJob({
-      url: "pasted-job-description",
+  it("scrapes roles through the local browser workflow", async () => {
+    const result = await captureRole({
+      url: "pasted-role-description",
       fallback_text: "Backend Engineer\nTypeScript, React, Testing",
     });
 

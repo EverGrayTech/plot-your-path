@@ -12,7 +12,7 @@ import type {
   PipelineResponse,
 } from "./dataModels";
 import { createLocalId, listStoreRecords, nowIso, saveStoreRecord } from "./localData";
-import { listLocalJobs } from "./localJobs";
+import { listLocalRoles } from "./localRoles";
 
 interface LocalApplicationOpsRecord {
   id: string;
@@ -237,16 +237,16 @@ export async function listLocalPipeline(options?: {
   thisWeekDeadlines?: boolean;
   recentlyUpdated?: boolean;
 }): Promise<PipelineResponse> {
-  const jobs = await listLocalJobs();
+  const roles = await listLocalRoles();
   const opsRecords = await listStoreRecords<LocalApplicationOpsRecord>("applicationOps");
   const stageRecords = await listStoreRecords<LocalInterviewStageRecord>("interviewStages");
   const now = Date.now();
   const weekFromNow = now + 7 * 24 * 60 * 60 * 1000;
 
-  let items: PipelineItem[] = jobs.map((job) => {
-    const ops = opsRecords.find((item) => item.roleId === job.id);
+  let items: PipelineItem[] = roles.map((role) => {
+    const ops = opsRecords.find((item) => item.roleId === role.id);
     const stages = stageRecords
-      .filter((item) => item.roleId === job.id)
+      .filter((item) => item.roleId === role.id)
       .sort(
         (left, right) => new Date(right.occurredAt).getTime() - new Date(left.occurredAt).getTime(),
       );
@@ -260,16 +260,16 @@ export async function listLocalPipeline(options?: {
     }
 
     return {
-      role_id: job.id,
-      company: job.company,
-      title: job.title,
-      status: job.status,
+      role_id: role.id,
+      company: role.company,
+      title: role.title,
+      status: role.status,
       interview_stage: stages[0]?.stage ?? null,
       next_action_at: ops?.nextActionAt ?? null,
       deadline_at: ops?.deadlineAt ?? null,
       needs_attention: attentionReasons.length > 0,
       attention_reasons: attentionReasons,
-      updated_at: ops?.updatedAt ?? job.created_at,
+      updated_at: ops?.updatedAt ?? role.created_at,
     };
   });
 

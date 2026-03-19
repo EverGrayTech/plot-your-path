@@ -12,16 +12,16 @@ This document defines the product intent of Plot Your Path: what problem it solv
 
 ## Product statement
 
-Plot Your Path is a career intelligence workspace that helps people make better career decisions by connecting job opportunities, personal experience, application work, interview preparation, and skill development.
+Plot Your Path is a career intelligence workspace that helps people make better career decisions by connecting role opportunities, personal experience, application work, interview preparation, and skill development.
 
 Its value comes from two things happening together:
 
-- it helps with immediate job search tasks
+- it helps with immediate role search tasks
 - it accumulates structured knowledge that improves future decisions
 
 ## Problem
 
-Most job search activity is fragmented.
+Most role search activity is fragmented.
 
 People often have to:
 
@@ -93,7 +93,7 @@ The product supports a repeating cycle.
 
 ### Phase 1: Capture opportunities
 
-The user brings opportunities into the system from job boards, company sites, recruiter messages, or pasted text.
+The user brings opportunities into the system from role boards, company sites, recruiter messages, or pasted text.
 
 The goal of this phase is simple: turn a messy opportunity into something structured enough to reason about.
 
@@ -141,7 +141,7 @@ As more roles and evidence accumulate, the system should help the user notice:
 - outcome patterns
 - development moves with high leverage
 
-This is where the product becomes a career intelligence system rather than only a job search assistant.
+This is where the product becomes a career intelligence system rather than only a role search assistant.
 
 ## Primary user
 
@@ -172,7 +172,7 @@ The current product vision should stay focused on:
 
 To keep the vision manageable, the product should avoid expanding too quickly into:
 
-- automated job application submission
+- automated role application submission
 - social networking features
 - multi-user collaboration
 - exhaustive career-path simulation

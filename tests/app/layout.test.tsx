@@ -1,10 +1,13 @@
-import { render, screen } from "@testing-library/react";
+/* @jsxRuntime classic */
 import React from "react";
+import { render, screen } from "@testing-library/react";
 
 import RootLayout from "../../src/app/layout";
 
 vi.mock("../../src/components/shell/AppShell", () => ({
-  AppShell: ({ children }: { children: React.ReactNode }) => <div data-testid="app-shell">{children}</div>,
+  AppShell: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="app-shell">{children}</div>
+  ),
 }));
 
 describe("RootLayout", () => {

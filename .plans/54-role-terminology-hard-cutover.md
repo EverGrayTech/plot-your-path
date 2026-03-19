@@ -51,27 +51,27 @@ Refactor direction:
 
 ### 1. Align product and documentation language
 
-- [ ] Update `README.md` and `docs/` to describe finding and evaluating roles rather than jobs.
-- [ ] Update app copy, labels, headings, and navigation to use `role` terminology consistently.
-- [ ] Rephrase any remaining user-facing strings so they read naturally after the terminology shift.
+- [x] Update `README.md` and `docs/` to describe finding and evaluating roles rather than jobs.
+- [x] Update app copy, labels, headings, and navigation to use `role` terminology consistently.
+- [x] Rephrase any remaining user-facing strings so they read naturally after the terminology shift.
 
 ### 2. Rename active source symbols and module boundaries
 
-- [ ] Rename `job`/`jobs` types, interfaces, functions, variables, hooks, and services to `role`/`roles` equivalents.
-- [ ] Rename files and directories whose names encode `job` terminology.
-- [ ] Change the primary route from `/jobs` to `/roles` and update internal navigation accordingly.
+- [x] Rename `job`/`jobs` types, interfaces, functions, variables, hooks, and services to `role`/`roles` equivalents.
+- [x] Rename files and directories whose names encode `job` terminology.
+- [x] Change the primary route from `/jobs` to `/roles` and update internal navigation accordingly.
 
 ### 3. Cut over browser-local storage and config identifiers
 
-- [ ] Rename browser-local store names and serialized field names that use `job` terminology.
-- [ ] Rename counters, record references, and ID prefixes such as `jobs_count` or `job_` to role-based equivalents.
-- [ ] Rename AI/config identifiers such as `job_parsing` where they are part of the active browser-local system.
+- [x] Rename browser-local store names and serialized field names that use `job` terminology.
+- [x] Rename counters, record references, and ID prefixes such as `jobs_count` or `job_` to role-based equivalents.
+- [x] Rename AI/config identifiers such as `job_parsing` where they are part of the active browser-local system.
 
 ### 4. Update and verify tests
 
-- [ ] Rename and update tests that mirror renamed modules, components, and routes.
-- [ ] Update fixtures, service mocks, and expectations to use `role` terminology.
-- [ ] Run formatting, the full test suite, and a final repository search to confirm the hard cutover is complete.
+- [x] Rename and update tests that mirror renamed modules, components, and routes.
+- [x] Update fixtures, service mocks, and expectations to use `role` terminology.
+- [x] Run formatting, the full test suite, and a final repository search to confirm the hard cutover is complete.
 
 ## Affected Areas
 
@@ -85,8 +85,8 @@ Refactor direction:
 
 ## Success Criteria
 
-- [ ] User-facing product copy consistently uses `role` terminology across docs and UI.
-- [ ] Source code names, module boundaries, and routes reflect `role`/`roles` rather than `job`/`jobs`.
-- [ ] Browser-local persistence and config identifiers no longer use active `job` terminology.
-- [ ] Tests, mocks, and fixtures pass with the renamed terminology and routes.
-- [ ] A final repository search confirms no unintended active `job` terminology remains.
+- [x] User-facing product copy consistently uses `role` terminology across docs and UI.
+- [x] Source code names, module boundaries, and routes reflect `role`/`roles` rather than `job`/`jobs`.
+- [x] Browser-local persistence and config identifiers no longer use active `job` terminology.
+- [x] Tests, mocks, and fixtures pass with the renamed terminology and routes.
+- [x] A final repository search confirms no unintended active `job` terminology remains.

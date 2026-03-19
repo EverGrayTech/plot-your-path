@@ -13,7 +13,7 @@ describe("SettingsPage", () => {
           database_path: "/tmp/plot-your-path/plot_your_path.db",
           storage_mode: "browser_local",
           has_resume: false,
-          jobs_count: 0,
+          roles_count: 0,
           last_export_at: null,
           last_import_at: null,
           last_reset_at: null,
