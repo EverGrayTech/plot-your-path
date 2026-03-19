@@ -28,21 +28,21 @@ describe("localData foundation", () => {
   });
 
   it("creates ids with stable prefixes", () => {
-    const id = createLocalId("job");
-    expect(id.startsWith("job_")).toBe(true);
+    const id = createLocalId("role");
+    expect(id.startsWith("role_")).toBe(true);
   });
 
   it("saves and loads records from a local store", async () => {
     const record = {
-      id: createLocalId("job"),
+      id: createLocalId("role"),
       createdAt: nowIso(),
       updatedAt: nowIso(),
       title: "Engineer",
     };
 
-    await saveStoreRecord("jobs", record);
-    const loaded = await getStoreRecord<typeof record>("jobs", record.id);
-    const all = await listStoreRecords<typeof record>("jobs");
+    await saveStoreRecord("roles", record);
+    const loaded = await getStoreRecord<typeof record>("roles", record.id);
+    const all = await listStoreRecords<typeof record>("roles");
 
     expect(loaded?.title).toBe("Engineer");
     expect(all.some((item) => item.id === record.id)).toBe(true);

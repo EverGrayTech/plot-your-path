@@ -3,11 +3,11 @@ import type { FrontendServices } from "./types";
 
 export function createFrontendServices(): FrontendServices {
   return {
-    jobs: {
-      getJob: api.getJob,
-      listJobs: api.listJobs,
-      scrapeJob: api.scrapeJob,
-      updateJobStatus: api.updateJobStatus,
+    roles: {
+      getRole: api.getRole,
+      listRoles: api.listRoles,
+      captureRole: api.captureRole,
+      updateRoleStatus: api.updateRoleStatus,
     },
     skills: {
       getSkill: api.getSkill,
@@ -33,7 +33,7 @@ export function createFrontendServices(): FrontendServices {
       updateAISettingToken: api.updateAISettingToken,
     },
     aiGeneration: {
-      analyzeJobFit: api.analyzeJobFit,
+      analyzeRoleFit: api.analyzeRoleFit,
       generateCoverLetter: api.generateCoverLetter,
       generateInterviewPrepPack: api.generateInterviewPrepPack,
       generateQuestionAnswers: api.generateQuestionAnswers,
@@ -43,7 +43,7 @@ export function createFrontendServices(): FrontendServices {
       listResumeTuning: api.listResumeTuning,
       refreshDesirabilityScore: api.refreshDesirabilityScore,
       regenerateInterviewPrepSection: api.regenerateInterviewPrepSection,
-      scoreJobDesirability: api.scoreJobDesirability,
+      scoreRoleDesirability: api.scoreRoleDesirability,
       syncResumeProfile: api.syncResumeProfile,
       updateInterviewPrepPack: api.updateInterviewPrepPack,
     },

@@ -16,11 +16,11 @@ describe("DataManagementPanel", () => {
     });
 
     const services = {
-      jobs: {
-        getJob: api.getJob,
-        listJobs: api.listJobs,
-        scrapeJob: api.scrapeJob,
-        updateJobStatus: api.updateJobStatus,
+      roles: {
+        getRole: api.getRole,
+        listRoles: api.listRoles,
+        captureRole: api.captureRole,
+        updateRoleStatus: api.updateRoleStatus,
       },
       skills: {
         getSkill: api.getSkill,
@@ -46,7 +46,7 @@ describe("DataManagementPanel", () => {
         updateAISettingToken: api.updateAISettingToken,
       },
       aiGeneration: {
-        analyzeJobFit: api.analyzeJobFit,
+        analyzeRoleFit: api.analyzeRoleFit,
         generateCoverLetter: api.generateCoverLetter,
         generateInterviewPrepPack: api.generateInterviewPrepPack,
         generateQuestionAnswers: api.generateQuestionAnswers,
@@ -56,7 +56,7 @@ describe("DataManagementPanel", () => {
         listResumeTuning: api.listResumeTuning,
         refreshDesirabilityScore: api.refreshDesirabilityScore,
         regenerateInterviewPrepSection: api.regenerateInterviewPrepSection,
-        scoreJobDesirability: api.scoreJobDesirability,
+        scoreRoleDesirability: api.scoreRoleDesirability,
         syncResumeProfile: api.syncResumeProfile,
         updateInterviewPrepPack: api.updateInterviewPrepPack,
       },

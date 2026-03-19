@@ -50,7 +50,7 @@ The goal is not to model every possible career variable. The goal is to preserve
 
 The system should accept opportunities from practical sources such as links, pasted descriptions, or manually entered notes.
 
-Its job is to normalize raw opportunity input into a durable internal representation.
+Its role is to normalize raw opportunity input into a durable internal representation.
 
 ### 2. Opportunity evaluation
 

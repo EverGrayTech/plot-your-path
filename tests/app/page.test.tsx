@@ -10,8 +10,8 @@ describe("HomePage", () => {
     expect(screen.getByRole("heading", { name: "Home" })).toBeInTheDocument();
     expect(screen.getByText(/Capture opportunities/)).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /Start here/i })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Start here/i })).toHaveAttribute("href", "/jobs");
-    expect(screen.getAllByRole("link", { name: /Jobs/ })[0]).toHaveAttribute("href", "/jobs");
+    expect(screen.getByRole("link", { name: /Start here/i })).toHaveAttribute("href", "/roles");
+    expect(screen.getAllByRole("link", { name: /Roles/ })[0]).toHaveAttribute("href", "/roles");
     expect(screen.getByRole("link", { name: /Skills/ })).toHaveAttribute("href", "/skills");
     expect(
       screen.getByRole("heading", { name: /Product architecture status/i }),

@@ -17,10 +17,6 @@ import type {
   InterviewPrepSectionKey,
   InterviewStageEvent,
   InterviewStageEventCreate,
-  JobDetail,
-  JobListItem,
-  JobScrapeRequest,
-  JobScrapeResponse,
   OperationFamily,
   OutcomeEvent,
   OutcomeEventCreate,
@@ -29,16 +25,20 @@ import type {
   PipelineResponse,
   ResumeProfileSyncResult,
   ResumeTuningSuggestion,
+  RoleCaptureRequest,
+  RoleCaptureResponse,
+  RoleDetail,
+  RoleListItem,
   RoleStatus,
   SkillDetail,
   SkillListItem,
 } from "../dataModels";
 
-export interface JobsDataService {
-  listJobs(): Promise<JobListItem[]>;
-  getJob(roleId: number): Promise<JobDetail>;
-  scrapeJob(request: JobScrapeRequest): Promise<JobScrapeResponse>;
-  updateJobStatus(roleId: number, status: RoleStatus): Promise<JobListItem>;
+export interface RolesDataService {
+  listRoles(): Promise<RoleListItem[]>;
+  getRole(roleId: number): Promise<RoleDetail>;
+  captureRole(request: RoleCaptureRequest): Promise<RoleCaptureResponse>;
+  updateRoleStatus(roleId: number, status: RoleStatus): Promise<RoleListItem>;
 }
 
 export interface SkillsDataService {
@@ -75,8 +75,8 @@ export interface AISettingsService {
 }
 
 export interface AIGenerationService {
-  analyzeJobFit(roleId: number): Promise<FitAnalysis>;
-  scoreJobDesirability(roleId: number): Promise<DesirabilityScore>;
+  analyzeRoleFit(roleId: number): Promise<FitAnalysis>;
+  scoreRoleDesirability(roleId: number): Promise<DesirabilityScore>;
   refreshDesirabilityScore(roleId: number): Promise<DesirabilityScore>;
   generateCoverLetter(roleId: number): Promise<ApplicationMaterial>;
   generateQuestionAnswers(roleId: number, questions: string[]): Promise<ApplicationMaterial>;
@@ -119,7 +119,7 @@ export interface DataPortabilityService {
 }
 
 export interface FrontendServices {
-  jobs: JobsDataService;
+  roles: RolesDataService;
   skills: SkillsDataService;
   workflows: WorkflowDataService;
   aiSettings: AISettingsService;

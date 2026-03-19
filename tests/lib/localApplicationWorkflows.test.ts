@@ -7,7 +7,7 @@ import {
   listLocalPipeline,
   upsertLocalApplicationOps,
 } from "../../src/lib/localApplicationWorkflows";
-import { captureLocalJob } from "../../src/lib/localJobs";
+import { captureLocalRole } from "../../src/lib/localRoles";
 
 import { indexedDB } from "fake-indexeddb";
 
@@ -20,8 +20,8 @@ describe("local application workflows", () => {
   });
 
   it("creates and updates local application ops", async () => {
-    const captured = await captureLocalJob({
-      url: "pasted-job-description",
+    const captured = await captureLocalRole({
+      url: "pasted-role-description",
       fallback_text: "Ops Engineer\nIncident response",
     });
 
@@ -36,8 +36,8 @@ describe("local application workflows", () => {
   });
 
   it("stores and lists interview stages and outcomes", async () => {
-    const captured = await captureLocalJob({
-      url: "pasted-job-description",
+    const captured = await captureLocalRole({
+      url: "pasted-role-description",
       fallback_text: "Backend Engineer\nNode.js",
     });
 
@@ -61,8 +61,8 @@ describe("local application workflows", () => {
   });
 
   it("builds pipeline data from local workflow records", async () => {
-    const captured = await captureLocalJob({
-      url: "pasted-job-description",
+    const captured = await captureLocalRole({
+      url: "pasted-role-description",
       fallback_text: "Product Engineer\nReact",
     });
 

@@ -1,6 +1,6 @@
 # Plot Your Path
 
-Plot Your Path is a local-first career intelligence workspace that helps you approach job searching and career growth with clarity and continuity.
+Plot Your Path is a local-first career intelligence workspace that helps you approach role searching and career growth with clarity and continuity.
 
 It transforms scattered roles, applications, interview prep, and career reflection into a single system; so you can make better decisions in the moment while building a coherent, reusable record of your experiences.
 
@@ -20,17 +20,17 @@ The product is not meant to automate a career search end to end. It is meant to 
 
 ## Why it exists
 
-Job searching is often handled as a series of disconnected tasks:
+Role searching is often handled as a series of disconnected tasks:
 
 - saving links in too many places
-- re-reading the same job descriptions
+- re-reading the same role descriptions
 - rewriting the same stories from memory
 - guessing which roles are realistic
 - guessing which skills matter most next
 
 That makes the process noisy, repetitive, and hard to learn from.
 
-Plot Your Path reframes job-search activity as a feedback loop:
+Plot Your Path reframes role-search activity as a feedback loop:
 
 1. collect opportunities
 2. analyze them consistently
