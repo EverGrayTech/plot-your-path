@@ -60,6 +60,14 @@ Refactor direction:
 - Upgrade workflow actions to current major versions that avoid the observed Node 20 deprecation warnings.
 - Configure package installation auth if GitHub Packages access is required for `@evergraytech/design-system`.
 
+### 6. Production build TypeScript hardening
+
+Refactor direction:
+
+- Inspect nullable role/job joins in `src/lib/api.ts` that only surface during production type-checking.
+- Handle nullable records explicitly in a way that preserves outcome insight semantics instead of suppressing the error.
+- Check nearby conversion-summary code for similar nullable access risks before re-running the Pages build.
+
 ## Implementation Steps
 
 ### 1. Add the Pages build entrypoint
@@ -87,11 +95,19 @@ Refactor direction:
 
 ### 5. Fix workflow installation and auth issues
 
-- [ ] Update `pnpm-workspace.yaml` to a simplest-valid single-package configuration if required.
-- [ ] Add an explicit `packageManager` field to `package.json` using the current pnpm version.
-- [ ] Upgrade workflow actions and keep Pages deployment behavior unchanged.
-- [ ] Add GitHub Packages auth in the workflow if the design-system dependency requires it.
-- [ ] Reconfirm whether the repo is ready for another Pages deployment attempt.
+- [x] Update `pnpm-workspace.yaml` to a simplest-valid single-package configuration if required.
+- [x] Add an explicit `packageManager` field to `package.json` using the current pnpm version.
+- [x] Upgrade workflow actions and keep Pages deployment behavior unchanged.
+- [x] Add GitHub Packages auth in the workflow if the design-system dependency requires it.
+- [x] Reconfirm whether the repo is ready for another Pages deployment attempt.
+
+### 6. Fix production build TypeScript failures
+
+- [ ] Inspect `src/lib/api.ts` around the nullable role/job join and identify why `job` can be null.
+- [ ] Implement explicit null handling that preserves the intended outcome-insight logic.
+- [ ] Check nearby code for similar nullable access patterns that could fail the build next.
+- [ ] Run `pnpm build:pages` and capture whether the full Pages build now succeeds.
+- [ ] Document the exact fix, reasoning, and any further build errors.
 
 ## Affected Areas
 
@@ -99,6 +115,7 @@ Refactor direction:
 - `next.config.mjs`
 - `.github/workflows/deploy-pages.yml`
 - `pnpm-workspace.yaml`
+- `src/lib/api.ts`
 
 ## Success Criteria
 
@@ -107,6 +124,7 @@ Refactor direction:
 - [x] `.github/workflows/deploy-pages.yml` builds and deploys the exported static site using official GitHub Pages actions.
 - [x] The expected exported output directory and publish target are explicitly confirmed.
 - [x] Assumptions and remaining GitHub Pages risks are identified without unrelated refactors.
-- [ ] pnpm workspace metadata is valid for CI in a single-package repository.
-- [ ] `package.json` declares an explicit pnpm `packageManager` version.
-- [ ] The Pages workflow uses current action versions and any required package registry auth.
+- [x] pnpm workspace metadata is valid for CI in a single-package repository.
+- [x] `package.json` declares an explicit pnpm `packageManager` version.
+- [x] The Pages workflow uses current action versions and any required package registry auth.
+- [ ] The production Pages build passes TypeScript checks after explicit nullable handling in outcome insights.

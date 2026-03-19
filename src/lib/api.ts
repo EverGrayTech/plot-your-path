@@ -159,31 +159,44 @@ export async function getOutcomeInsights(): Promise<OutcomeInsights> {
     return "0.0-3.9";
   };
 
+  const conversionRows = eventsWithJobs.flatMap(({ event, job }) => {
+    if (!job) {
+      return [];
+    }
+
+    return [
+      {
+        event,
+        job,
+      },
+    ];
+  });
+
   return {
     confidence_message:
-      eventsWithJobs.length < 5 ? "Low confidence: early signal only." : "Moderate confidence.",
+      conversionRows.length < 5 ? "Low confidence: early signal only." : "Moderate confidence.",
     conversion_by_fit_band: summarize(
-      eventsWithJobs.map(({ event, job }) => ({
+      conversionRows.map(({ event, job }) => ({
         key: toFitBand(job.fit_score),
         hired: hires.has(event.event_type),
       })),
       (key) => key ?? "Unknown",
     ),
     conversion_by_desirability_band: summarize(
-      eventsWithJobs.map(({ event, job }) => ({
+      conversionRows.map(({ event, job }) => ({
         key: toDesirabilityBand(job.desirability_score),
         hired: hires.has(event.event_type),
       })),
       (key) => key ?? "Unknown",
     ),
     conversion_by_model_family: summarize(
-      eventsWithJobs.map(({ event }) => ({
+      conversionRows.map(({ event }) => ({
         key: event.model_family ?? "unknown",
         hired: hires.has(event.event_type),
       })),
       (key) => key ?? "unknown",
     ),
-    total_events: eventsWithJobs.length,
+    total_events: conversionRows.length,
     total_roles_with_outcomes: rolesWithOutcomes.size,
   };
 }
