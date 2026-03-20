@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "build:pages": "cross-env PYP_STATIC_EXPORT=true PYP_PAGES_ENABLE_REPO_PATH=true PYP_PAGES_REPO_PATH=/plot-your-path next build",
+    "build:pages": "cross-env PYP_STATIC_EXPORT=true PYP_PAGES_ENABLE_REPO_PATH=false next build",
     "dev": "next dev",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",

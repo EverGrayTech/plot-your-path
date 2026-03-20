@@ -109,6 +109,14 @@ Refactor direction:
 - [ ] Run `pnpm build:pages` and capture whether the full Pages build now succeeds.
 - [ ] Document the exact fix, reasoning, and any further build errors.
 
+### 7. Custom domain GitHub Pages asset-path cutover
+
+- [x] Update `build:pages` so static export stays enabled while repo-subpath mode is disabled for the custom domain.
+- [x] Reconfirm `next.config.mjs` leaves `basePath` and `assetPrefix` undefined when repo-path mode is disabled.
+- [x] Search the codebase for hardcoded `/plot-your-path` references that could still break assets or metadata.
+- [x] Keep the Pages workflow unchanged unless the build script name changes.
+- [x] Report exact config changes and redeploy readiness for `https://plot.evergraytech.com`.
+
 ## Affected Areas
 
 - `package.json`
@@ -116,6 +124,8 @@ Refactor direction:
 - `.github/workflows/deploy-pages.yml`
 - `pnpm-workspace.yaml`
 - `src/lib/api.ts`
+- `src/app-metadata.ts`
+- `docs/development.md`
 
 ## Success Criteria
 
@@ -128,3 +138,4 @@ Refactor direction:
 - [x] `package.json` declares an explicit pnpm `packageManager` version.
 - [x] The Pages workflow uses current action versions and any required package registry auth.
 - [ ] The production Pages build passes TypeScript checks after explicit nullable handling in outcome insights.
+- [x] The Pages build configuration no longer forces repo-subpath asset URLs for the custom domain deployment.
