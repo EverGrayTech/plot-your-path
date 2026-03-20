@@ -1,5 +1,6 @@
 import {
   createLocalId,
+  deleteLocalWorkspaceDbForTests,
   getStoreRecord,
   initializeLocalWorkspace,
   listStoreRecords,
@@ -15,6 +16,10 @@ describe("localData foundation", () => {
       configurable: true,
       value: indexedDB,
     });
+  });
+
+  beforeEach(async () => {
+    await deleteLocalWorkspaceDbForTests();
   });
 
   it("initializes workspace metadata once", async () => {
@@ -46,5 +51,36 @@ describe("localData foundation", () => {
 
     expect(loaded?.title).toBe("Engineer");
     expect(all.some((item) => item.id === record.id)).toBe(true);
+  });
+
+  it("creates missing stores when opening an older database", async () => {
+    await new Promise<void>((resolve, reject) => {
+      const request = indexedDB.open("plot-your-path-local", 1);
+
+      request.onupgradeneeded = () => {
+        const db = request.result;
+        if (!db.objectStoreNames.contains("metadata")) {
+          db.createObjectStore("metadata", { keyPath: "id" });
+        }
+      };
+
+      request.onsuccess = () => {
+        request.result.close();
+        resolve();
+      };
+      request.onerror = () => reject(request.error ?? new Error("Failed to seed old database."));
+    });
+
+    const record = {
+      id: createLocalId("role"),
+      createdAt: nowIso(),
+      updatedAt: nowIso(),
+      title: "Created after upgrade",
+    };
+
+    await saveStoreRecord("roles", record);
+    const loaded = await getStoreRecord<typeof record>("roles", record.id);
+
+    expect(loaded?.title).toBe("Created after upgrade");
   });
 });

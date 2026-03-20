@@ -32,7 +32,7 @@ export interface LocalStoreDefinition<TRecord> {
 }
 
 const DB_NAME = "plot-your-path-local";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const WORKSPACE_METADATA_ID = "workspace";
 const WORKSPACE_SCHEMA_VERSION = 1;
 
@@ -105,6 +105,17 @@ export async function openLocalWorkspaceDb(): Promise<IDBDatabase> {
 
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error ?? new Error("Unable to open IndexedDB."));
+  });
+}
+
+export async function deleteLocalWorkspaceDbForTests(): Promise<void> {
+  const indexedDb = ensureIndexedDbAvailable();
+
+  await new Promise<void>((resolve, reject) => {
+    const request = indexedDb.deleteDatabase(DB_NAME);
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error ?? new Error("Unable to delete IndexedDB."));
+    request.onblocked = () => reject(new Error("IndexedDB deletion was blocked."));
   });
 }
 
