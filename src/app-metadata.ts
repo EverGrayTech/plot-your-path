@@ -8,7 +8,7 @@ export const appMetadata = {
   status: "MVP",
   launchStage: "public-preview",
   urls: {
-    app: "https://path.evergraytech.com",
+    app: "https://plot.evergraytech.com",
     repo: "https://github.com/EverGrayTech/plot-your-path",
     docs: "https://evergraytech.com/apps/plot-your-path",
   },
