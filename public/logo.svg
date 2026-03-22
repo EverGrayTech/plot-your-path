@@ -1,0 +1,55 @@
+<svg
+  width="800"
+  height="800"
+  viewBox="0 0 1000 1000"
+  xmlns="http://www.w3.org/2000/svg">
+  <title id="logo-title">Plot Your Path Logo</title>
+  <desc id="logo-desc">A precision-engineered "Career Navigation Lens" featuring an upwwards, blue-gradient trajectory that connects historical nodes to a high-contrast, crosshair-stabilized target node, all set within a machined charcoal shell.</desc>
+  <metadata>
+   <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+            xmlns:dc="http://purl.org/dc/elements/1.1/">
+      <rdf:Description rdf:about="">
+         <dc:title>Plot Your Path Logo</dc:title>
+         <dc:creator>Allen Rose</dc:creator>
+         <dc:rights>Copyright © 2026 EverGray Tech. All rights reserved.</dc:rights>
+         <dc:date>2026</dc:date>
+         <dc:format>image/svg+xml</dc:format>
+      </rdf:Description>
+   </rdf:RDF>
+  </metadata>
+
+  <defs>
+    <linearGradient id="pathGradient" x1="300" y1="700" x2="750" y2="250" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1B365D" />
+      <stop offset="100%" stop-color="#4A90E2" />
+    </linearGradient>
+  </defs>
+
+  <circle id="background" cx="500" cy="500" r="450" fill="#161616" stroke="#222222" stroke-width="4"/>
+  
+  <g id="ticks" stroke-linecap="butt">
+    <circle cx="500" cy="500" r="425" fill="none" stroke="#444444" stroke-width="24" 
+            stroke-dasharray="4, 218.45" transform="rotate(-90 500 500)"/>
+    <circle cx="500" cy="500" r="430" fill="none" stroke="#333333" stroke-width="12" 
+            stroke-dasharray="1, 74" transform="rotate(-90 500 500)"/>
+  </g>
+
+  <g stroke="#252525" stroke-width="8" stroke-linecap="round">
+    <line x1="300" y1="700" x2="320" y2="450" />
+    <circle cx="320" cy="450" r="20" fill="#252525"/>
+    <line x1="500" y1="550" x2="740" y2="600" />
+    <circle cx="740" cy="600" r="20" fill="#252525"/>
+  </g>
+
+  <path d="M300 700 L500 550" fill="none" stroke="#1B365D" stroke-width="16" stroke-linecap="round" />
+  <circle cx="300" cy="700" r="52" fill="#1B365D" stroke="#1B365D" stroke-width="5"/>
+  
+  <path d="M500 550 L750 250" fill="none" stroke="url(#pathGradient)" stroke-width="16" stroke-linecap="round" />
+  <circle cx="500" cy="550" r="60" fill="#3263A0" stroke="#3263A0" stroke-width="6"/>
+
+  <g>
+    <circle cx="750" cy="250" r="68" fill="#4A90E2" stroke="#FFFFFF" stroke-width="8"/>
+    <line x1="705" y1="250" x2="795" y2="250" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round"/>
+    <line x1="750" y1="205" x2="750" y2="295" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round"/>
+  </g>
+</svg>

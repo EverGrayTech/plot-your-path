@@ -1,6 +1,6 @@
 /* @jsxRuntime classic */
-import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
+import React from "react";
 
 import { AppShell } from "../../../src/components/shell/AppShell";
 
@@ -8,6 +8,10 @@ const mockUsePathname = vi.fn();
 
 vi.mock("next/navigation", () => ({
   usePathname: () => mockUsePathname(),
+}));
+
+vi.mock("@evergraytech/design-system/dist/logo.svg", () => ({
+  default: "/mock-evergray-logo.svg",
 }));
 
 vi.mock("next/link", () => ({
@@ -39,7 +43,11 @@ describe("AppShell", () => {
       </AppShell>,
     );
 
-    expect(screen.getByText("Plot Your Path")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Plot Your Path home" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "EverGray Tech company site" })).toHaveAttribute(
+      "href",
+      "https://evergraytech.com",
+    );
     expect(screen.getByRole("link", { name: "Roles" })).toHaveAttribute("aria-current", "page");
     expect(screen.getByText("Main content")).toBeInTheDocument();
   });

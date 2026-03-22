@@ -135,6 +135,40 @@ ol {
   z-index: 100;
 }
 
+.topbar-branding {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  min-width: 0;
+}
+
+.topbar-company-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xs);
+  border-radius: var(--radii-md);
+  color: var(--color-text-tertiary);
+}
+
+.topbar-company-link:hover {
+  color: var(--color-text-secondary);
+  background-color: var(--color-neutral-surface);
+  text-decoration: none;
+}
+
+.topbar-company-logo {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+.topbar-brand-separator {
+  width: 1px;
+  height: 20px;
+  background-color: var(--color-border-divider);
+}
+
 .topbar-identity {
   display: flex;
   align-items: center;
@@ -154,6 +188,16 @@ ol {
 .topbar-identity img {
   height: 24px;
   width: auto;
+}
+
+.topbar-app-logo {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.topbar-app-name {
+  white-space: nowrap;
 }
 
 .topbar-actions {
@@ -314,6 +358,27 @@ ol {
 
   .topbar-toggle {
     display: flex;
+  }
+
+  .topbar {
+    padding: 0 var(--spacing-md);
+  }
+
+  .topbar-branding {
+    gap: var(--spacing-xs);
+  }
+
+  .topbar-brand-separator {
+    height: 16px;
+  }
+
+  .topbar-company-logo {
+    width: 16px;
+    height: 16px;
+  }
+
+  .topbar-app-name {
+    font-size: var(--typography-size-xs);
   }
 
   .sidenav {

@@ -1,8 +1,9 @@
 "use client";
 
+import evergrayTechLogo from "@evergraytech/design-system/dist/logo.svg";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React, { type ReactNode, useCallback, useState } from "react";
+import React, { type ReactNode, useState } from "react";
 
 interface NavItem {
   href: string;
@@ -28,14 +29,14 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [sidenavOpen, setSidenavOpen] = useState(false);
 
-  const closeSidenav = useCallback(() => setSidenavOpen(false), []);
-  const toggleSidenav = useCallback(() => setSidenavOpen((prev) => !prev), []);
+  const closeSidenav = () => setSidenavOpen(false);
+  const toggleSidenav = () => setSidenavOpen((prev) => !prev);
 
   return (
     <div className="shell">
       {/* Top App Bar */}
       <header className="topbar">
-        <div style={{ display: "flex", alignItems: "center", gap: "var(--spacing-sm)" }}>
+        <div className="topbar-branding">
           <button
             aria-label={sidenavOpen ? "Close navigation" : "Open navigation"}
             className="topbar-toggle"
@@ -44,8 +45,18 @@ export function AppShell({ children }: { children: ReactNode }) {
           >
             ☰
           </button>
-          <Link className="topbar-identity" href="/">
-            Plot Your Path
+          <a
+            aria-label="EverGray Tech company site"
+            className="topbar-company-link"
+            href="https://evergraytech.com"
+          >
+            <img alt="EverGray Tech" className="topbar-company-logo" src={evergrayTechLogo} />
+            <span className="visually-hidden">EverGray Tech</span>
+          </a>
+          <span aria-hidden="true" className="topbar-brand-separator" />
+          <Link aria-label="Plot Your Path home" className="topbar-identity" href="/">
+            <img alt="" aria-hidden="true" className="topbar-app-logo" src="/logo.svg" />
+            <span className="topbar-app-name">Plot Your Path</span>
           </Link>
         </div>
         <div className="topbar-actions">{/* Tier 2 utility controls can go here */}</div>

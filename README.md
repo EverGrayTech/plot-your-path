@@ -4,7 +4,7 @@ Plot Your Path is a local-first career intelligence workspace that helps you app
 
 It transforms scattered roles, applications, interview prep, and career reflection into a single system; so you can make better decisions in the moment while building a coherent, reusable record of your experiences.
 
-Over time, it becomes a navigable map of your career, grounded in your actual experience, so you can see where you are, which opportunities truly fit, and puposefully chart your path forward.
+Over time, it becomes a navigable map of your career, grounded in your actual experience, so you can see where you are, which opportunities truly fit, and purposefully chart your path forward.
 
 ## What it is
 
