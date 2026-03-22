@@ -32,6 +32,28 @@ If localhost forwarding is unavailable in your environment, determine the machin
 hostname -I
 ```
 
+## Lint and format
+
+### Check the repository with Biome
+
+Run:
+
+```bash
+pnpm lint
+```
+
+This runs `biome check .` and reports lint and formatting issues without modifying files.
+
+### Apply Biome fixes
+
+Run:
+
+```bash
+pnpm lint:fix
+```
+
+This runs `biome check --write .` and applies Biome's safe fixes across the repository.
+
 ## Run tests
 
 ### Frontend tests

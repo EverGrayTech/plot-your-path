@@ -204,9 +204,7 @@ const role = {
 
 describe("RoleDetailModal", () => {
   it("renders loading and error states", () => {
-    render(
-      <RoleDetailModal {...baseProps} detailError="Failed detail" loadingDetail role={null} />,
-    );
+    render(<RoleDetailModal {...baseProps} detailError="Failed detail" loadingDetail />);
 
     expect(screen.getByText(/Loading role details/i)).toBeInTheDocument();
     expect(screen.getByRole("alert")).toHaveTextContent("Failed detail");

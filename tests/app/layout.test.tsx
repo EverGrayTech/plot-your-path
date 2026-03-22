@@ -1,6 +1,5 @@
-/* @jsxRuntime classic */
 import { render, screen } from "@testing-library/react";
-import React from "react";
+import type React from "react";
 
 import RootLayout from "../../src/app/layout";
 
