@@ -14,7 +14,7 @@ Introduce Plot Your Path application identity into the app shell while preservin
 The following upstream guidance should be treated as authoritative for this phase:
 
 - **Application Logo Usage Guidance** (`C:/Users/RoseA/Repos/design-system/docs/application-logo-usage.md`) defines the product-vs-company identity hierarchy, preferred shell placement, responsive simplification, and interaction posture for company/app logo coexistence.
-- **Consumption Guide / dist assets** (`@evergraytech/design-system` package output) the EverGray Tech company logo must come from the design-system asset instead of a local recreation.
+- **Consumption Guide / component export** (`C:/Users/RoseA/Repos/design-system/docs/consumption-guide.md`) the EverGray Tech logo component exported from the package root is the canonical product-facing integration for React and Next.js applications.
 
 Key upstream patterns to adopt:
 - **App identity leads**: Plot Your Path remains the primary product identifier in the shell.
@@ -34,7 +34,7 @@ Key upstream patterns to adopt:
 ### 1. Stabilize asset sourcing
 
 - Plot Your Path logo is in `public/` so it can be loaded predictably by the Next.js app shell.
-- Source the EverGray Tech mark from the published design-system asset shape.
+- Source the EverGray Tech mark from the published design-system component export.
 - Preserve accessible alt text and predictable labeling for both identities.
 
 ### 2. Clarify shell identity hierarchy

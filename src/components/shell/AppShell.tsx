@@ -1,6 +1,6 @@
 "use client";
 
-import evergrayTechLogo from "@evergraytech/design-system/dist/logo.svg";
+import { EverGrayTechLogo } from "@evergraytech/design-system";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { type ReactNode, useState } from "react";
@@ -50,7 +50,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             className="topbar-company-link"
             href="https://evergraytech.com"
           >
-            <img alt="EverGray Tech" className="topbar-company-logo" src={evergrayTechLogo} />
+            <EverGrayTechLogo aria-hidden className="topbar-company-logo" height={18} width={18} />
             <span className="visually-hidden">EverGray Tech</span>
           </a>
           <span aria-hidden="true" className="topbar-brand-separator" />

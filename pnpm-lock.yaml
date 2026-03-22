@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@evergraytech/design-system':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.2.0
+        version: 0.2.0
       next:
         specifier: ^15.0.0
         version: 15.5.12(@babel/core@7.29.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -156,6 +156,10 @@ packages:
 
   '@babel/runtime@7.28.6':
     resolution: {integrity: sha512-05WQkdpL9COIMz4LjTxGpPNCdlpyimKppYNoJ5Di5EUObifl8t4tuLuUBBZEpoLYOmfvIWrsp9fCl0HoPRVTdA==}
+    engines: {node: '>=6.9.0'}
+
+  '@babel/runtime@7.29.2':
+    resolution: {integrity: sha512-JiDShH45zKHWyGe4ZNVRrCjBz8Nh9TMmZG1kh4QTK8hCBTWBi8Da+i7s1fJw7/lYpM4ccepSNfqzZ/QvABBi5g==}
     engines: {node: '>=6.9.0'}
 
   '@babel/template@7.28.6':
@@ -406,8 +410,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@evergraytech/design-system@0.1.0':
-    resolution: {integrity: sha512-pMEmLtKDUS7HznrQAsGF0rrMTnYXevR323tyTWbssGQyYR4N/H8SRQgCS1rdcMb2SmHH83IRvjnPus1Qb0cZ/w==, tarball: https://npm.pkg.github.com/download/@evergraytech/design-system/0.1.0/821b4e96381595d36bb35b7fc0fe419437af6d09}
+  '@evergraytech/design-system@0.2.0':
+    resolution: {integrity: sha512-ncYluMST8o61wm+ZQnHC/xCC2OmrHOgWeC73reoRNx9Sk1iEjCNek7VYTRFS9O/m/nDcFwSzjnyIwoz6oy2I/Q==, tarball: https://npm.pkg.github.com/download/@evergraytech/design-system/0.2.0/8d7fd8bc34f8183a76db93aff74b018321bf6b70}
 
   '@exodus/bytes@1.15.0':
     resolution: {integrity: sha512-UY0nlA+feH81UGSHv92sLEPLCeZFjXOuHhrIo0HQydScuQc8s0A7kL/UdgwgDq8g8ilksmuoF35YVTNphV2aBQ==}
@@ -1681,6 +1685,8 @@ snapshots:
 
   '@babel/runtime@7.28.6': {}
 
+  '@babel/runtime@7.29.2': {}
+
   '@babel/template@7.28.6':
     dependencies:
       '@babel/code-frame': 7.29.0
@@ -1841,7 +1847,7 @@ snapshots:
   '@esbuild/win32-x64@0.21.5':
     optional: true
 
-  '@evergraytech/design-system@0.1.0': {}
+  '@evergraytech/design-system@0.2.0': {}
 
   '@exodus/bytes@1.15.0': {}
 
@@ -2085,7 +2091,7 @@ snapshots:
   '@testing-library/dom@10.4.1':
     dependencies:
       '@babel/code-frame': 7.29.0
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.2
       '@types/aria-query': 5.0.4
       aria-query: 5.3.0
       dom-accessibility-api: 0.5.16

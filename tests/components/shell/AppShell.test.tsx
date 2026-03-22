@@ -9,8 +9,8 @@ vi.mock("next/navigation", () => ({
   usePathname: () => mockUsePathname(),
 }));
 
-vi.mock("@evergraytech/design-system/dist/logo.svg", () => ({
-  default: "/mock-evergray-logo.svg",
+vi.mock("@evergraytech/design-system", () => ({
+  EverGrayTechLogo: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="evergray-tech-logo" {...props} />,
 }));
 
 vi.mock("next/link", () => ({
@@ -47,6 +47,7 @@ describe("AppShell", () => {
       "href",
       "https://evergraytech.com",
     );
+    expect(screen.getByTestId("evergray-tech-logo")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Roles" })).toHaveAttribute("aria-current", "page");
     expect(screen.getByText("Main content")).toBeInTheDocument();
   });
