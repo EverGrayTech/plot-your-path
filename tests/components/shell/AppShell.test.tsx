@@ -10,7 +10,9 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("@evergraytech/design-system", () => ({
-  EverGrayTechLogo: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="evergray-tech-logo" {...props} />,
+  EverGrayTechLogo: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="evergray-tech-logo" {...props} />
+  ),
 }));
 
 vi.mock("next/link", () => ({
@@ -48,7 +50,19 @@ describe("AppShell", () => {
       "https://evergraytech.com",
     );
     expect(screen.getByTestId("evergray-tech-logo")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Introduction" })).toHaveAttribute(
+      "href",
+      "/introduction",
+    );
     expect(screen.getByRole("link", { name: "Roles" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: "Help" })).toHaveAttribute(
+      "href",
+      "mailto:support@EverGrayTech.com",
+    );
+    expect(screen.getByLabelText("App version 0.3.0 release notes")).toHaveAttribute(
+      "href",
+      "https://github.com/EverGrayTech/plot-your-path/releases/tag/v0.3.0",
+    );
     expect(screen.getByText("Main content")).toBeInTheDocument();
   });
 

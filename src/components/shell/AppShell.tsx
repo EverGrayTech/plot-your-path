@@ -5,18 +5,22 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { type ReactNode, useState } from "react";
 
+import packageJson from "../../../package.json";
+
 interface NavItem {
   href: string;
   label: string;
 }
 
 const primaryNav: NavItem[] = [
-  { href: "/", label: "Home" },
+  { href: "/introduction", label: "Introduction" },
   { href: "/roles", label: "Roles" },
   { href: "/skills", label: "Skills" },
 ];
 
 const utilityNav: NavItem[] = [{ href: "/settings", label: "Settings" }];
+const appVersion = packageJson.version;
+const releaseUrl = `https://github.com/EverGrayTech/plot-your-path/releases/tag/v${appVersion}`;
 
 function isActive(pathname: string, href: string): boolean {
   if (href === "/") {
@@ -59,7 +63,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <span className="topbar-app-name">Plot Your Path</span>
           </Link>
         </div>
-        <div className="topbar-actions">{/* Tier 2 utility controls can go here */}</div>
+        <div className="topbar-actions" />
       </header>
 
       {/* Mobile overlay */}
@@ -98,6 +102,18 @@ export function AppShell({ children }: { children: ReactNode }) {
               {item.label}
             </Link>
           ))}
+          <a className="sidenav-link sidenav-link--utility" href="mailto:support@EverGrayTech.com">
+            Help
+          </a>
+          <a
+            aria-label={`App version ${appVersion} release notes`}
+            className="sidenav-version-label"
+            href={releaseUrl}
+            rel="noreferrer"
+            target="_blank"
+          >
+            v{appVersion}
+          </a>
         </div>
       </nav>
 

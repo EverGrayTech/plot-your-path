@@ -1,45 +1,7 @@
-import Link from "next/link";
 import React from "react";
 
-import { DesktopStatusCard } from "../components/DesktopStatusCard";
+import { RootEntryRedirect } from "../components/RootEntryRedirect";
 
 export default function HomePage() {
-  return (
-    <>
-      <header className="page-header">
-        <h1>Home</h1>
-      </header>
-      <p className="page-description">
-        Capture opportunities, evaluate fit, pursue deliberately, and learn over time.
-      </p>
-
-      <div className="form-grid-2col">
-        <Link className="card" href="/roles">
-          <h3>Start here</h3>
-          <p>
-            Begin with Roles. Capture one role or paste a description so the app has a concrete
-            opportunity to analyze.
-          </p>
-        </Link>
-
-        <Link className="card" href="/roles">
-          <h3>Roles</h3>
-          <p>
-            Capture and review roles from your role search. Analyze fit, score desirability, and
-            track applications through every stage.
-          </p>
-        </Link>
-
-        <Link className="card" href="/skills">
-          <h3>Skills</h3>
-          <p>
-            Browse captured skills across all roles. See which skills appear most often and where
-            they are referenced.
-          </p>
-        </Link>
-
-        <DesktopStatusCard />
-      </div>
-    </>
-  );
+  return <RootEntryRedirect />;
 }

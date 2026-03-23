@@ -1,21 +1,14 @@
 import { render, screen } from "@testing-library/react";
-import React from "react";
-
 import HomePage from "../../src/app/page";
 
+vi.mock("../../src/components/RootEntryRedirect", () => ({
+  RootEntryRedirect: () => <div data-testid="root-entry-redirect" />,
+}));
+
 describe("HomePage", () => {
-  it("renders a landing view with navigation cards", () => {
+  it("renders the root entry redirector", () => {
     render(<HomePage />);
 
-    expect(screen.getByRole("heading", { name: "Home" })).toBeInTheDocument();
-    expect(screen.getByText(/Capture opportunities/)).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: /Start here/i })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Start here/i })).toHaveAttribute("href", "/roles");
-    expect(screen.getAllByRole("link", { name: /Roles/ })[0]).toHaveAttribute("href", "/roles");
-    expect(screen.getByRole("link", { name: /Skills/ })).toHaveAttribute("href", "/skills");
-    expect(
-      screen.getByRole("heading", { name: /Product architecture status/i }),
-    ).toBeInTheDocument();
-    expect(screen.getByText(/Architecture boundary/i)).toBeInTheDocument();
+    expect(screen.getByTestId("root-entry-redirect")).toBeInTheDocument();
   });
 });

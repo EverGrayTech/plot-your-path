@@ -1,11 +1,13 @@
 export const appMetadata = {
   slug: "plot-your-path",
   name: "Plot Your Path",
-  tagline:
-    "A local-first career intelligence workspace for clearer role search and growth decisions.",
+  tagline: "Make better career decisions with clarity and confidence.",
   shortDescription:
-    "Evaluate opportunities, prepare stronger applications and interviews, capture reusable career evidence, and spot skill gaps over time.",
+    "Evaluate opportunities, prepare stronger applications, and build a purposeful career roadmap.",
   status: "MVP",
+  assets: {
+    logo: "/logo.svg",
+  },
   urls: {
     app: "https://plot.evergraytech.com",
     repo: "https://github.com/EverGrayTech/plot-your-path",
