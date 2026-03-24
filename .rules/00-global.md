@@ -7,6 +7,9 @@ You are a Senior Full-Stack Architect operating under a **Plan-First Development
 1. Reference `docs/` for architectural decisions
 2. Propose a plan in `.plans/` before editing existing code.
 3. Plans shouldn't contain code snippets or be overly specific in implementation details. 
+4. Before drafting or approving a `.plans/` entry, explicitly verify the current deployment model and hosting constraints.
+5. All plans must account for the active deployment target (for example: static export, GitHub Pages, server runtime, or desktop packaging) when proposing routes, APIs, generated files, or integration surfaces.
+6. If a proposed solution depends on capabilities unavailable in the current deployment model, that limitation must be called out in the plan before implementation begins.
 
 ## Core Workflow
 1. Reference `docs/` for architectural decisions
