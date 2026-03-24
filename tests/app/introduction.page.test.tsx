@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
 
+import { appMetadata } from "../../src/app-metadata";
 import IntroductionPage from "../../src/app/introduction/page";
 
 vi.mock("../../src/components/HomePageClient", () => ({
@@ -11,26 +12,28 @@ describe("IntroductionPage", () => {
   it("renders the introduction view with intro content and app entry points", () => {
     render(<IntroductionPage />);
 
+    const { overview } = appMetadata;
+
     expect(screen.getByTestId("home-page-client")).toBeInTheDocument();
     expect(
       screen.getByRole("heading", {
-        name: /Make better career decisions with clarity and confidence\./i,
+        name: overview.hero.title,
       }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/Start with the decision, not the busywork\./i)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Start evaluating Roles/i })).toHaveAttribute(
+    expect(screen.getByText(overview.outcomes.title)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: overview.outcomes.primaryCtaLabel })).toHaveAttribute(
       "href",
-      "/roles",
+      overview.outcomes.primaryCtaHref,
     );
-    expect(screen.getByRole("link", { name: /Start with Roles/i })).toHaveAttribute(
-      "href",
-      "/roles",
-    );
-    expect(screen.getByRole("link", { name: /Explore Skills/i })).toHaveAttribute(
-      "href",
-      "/skills",
-    );
-    expect(screen.getByLabelText(/Reinforcing career decision loop/i)).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: /MVP \/ public preview/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: overview.gettingStarted.primaryCtaLabel }),
+    ).toHaveAttribute("href", overview.gettingStarted.primaryCtaHref);
+    expect(
+      screen.getByRole("link", { name: overview.gettingStarted.secondaryCtaLabel }),
+    ).toHaveAttribute("href", overview.gettingStarted.secondaryCtaHref);
+    expect(screen.getByLabelText(overview.loop.ariaLabel)).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: overview.currentStatus.heading }),
+    ).toBeInTheDocument();
   });
 });
