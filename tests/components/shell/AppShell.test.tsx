@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import type React from "react";
 
+import packageJson from "../../../package.json";
 import { AppShell } from "../../../src/components/shell/AppShell";
 
 const mockUsePathname = vi.fn();
@@ -59,9 +60,11 @@ describe("AppShell", () => {
       "href",
       "mailto:support@EverGrayTech.com",
     );
-    expect(screen.getByLabelText("App version 0.3.0 release notes")).toHaveAttribute(
+    expect(
+      screen.getByLabelText(`App version ${packageJson.version} release notes`),
+    ).toHaveAttribute(
       "href",
-      "https://github.com/EverGrayTech/plot-your-path/releases/tag/v0.3.0",
+      `https://github.com/EverGrayTech/plot-your-path/releases/tag/v${packageJson.version}`,
     );
     expect(screen.getByText("Main content")).toBeInTheDocument();
   });

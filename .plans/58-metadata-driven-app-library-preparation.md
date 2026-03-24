@@ -2,7 +2,7 @@
 
 ## Overview
 
-Prepare Plot Your Path for company website app-library integration by making `src/app-metadata.ts` the single structured source of truth for both public app-library consumption and the in-app introduction experience. This phase should move overview content out of `src/app/introduction/page.tsx` page-local constants and into reusable metadata, and expose that metadata through a stable public JSON endpoint so downstream consumers can generate an intro card and overview page without directly consuming JSX or copying values into another repo.
+Prepare Plot Your Path for company website app-library integration by making `src/app-metadata.ts` the single structured source of truth for both public app-library consumption and the in-app introduction experience. This phase should move overview content out of `src/app/introduction/page.tsx` page-local constants and into reusable metadata, and expose that metadata through a stable public JSON delivery surface that is compatible with the current GitHub Pages static export deployment so downstream consumers can generate an intro card and overview page without directly consuming JSX or copying values into another repo.
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ Prepare Plot Your Path for company website app-library integration by making `sr
 2. Move public-facing overview content into structured metadata rather than leaving it embedded in page-local constants.
 3. Refactor `src/app/introduction/page.tsx` so it renders from metadata instead of maintaining a separate copy of overview content.
 4. Keep the rendered introduction page functionally and visually aligned with the current user experience.
-5. Expose the metadata through a stable public JSON surface so the company website can consume it dynamically from the running Plot Your Path instance.
+5. Expose the metadata through a stable public JSON surface that works with the current GitHub Pages static export deployment.
 6. Establish a metadata shape and delivery pattern that can be reused by other apps in the company app library over time.
 
 ## Technical Design
@@ -56,9 +56,10 @@ Refactor direction:
 ### 4. Expose metadata through a stable public JSON endpoint
 
 Refactor direction:
-- Add a public metadata endpoint such as `/app-metadata.json` backed by `src/app-metadata.ts`.
+- Generate a public `app-metadata.json` artifact from `src/app-metadata.ts` as part of the static export/build flow.
+- Ensure the production metadata surface is served as a real static file in the exported site output so it works on GitHub Pages.
 - Return structured JSON rather than rendered HTML or page-derived content.
-- Make this endpoint the preferred company-website integration surface so app-library content can update when Plot Your Path ships.
+- Do not ship a conflicting route handler for the same path while static-file delivery is the active production mechanism.
 - Preserve a stable response shape so future apps can follow the same pattern.
 
 ### 5. Preserve current homepage behavior while improving portability
@@ -91,21 +92,25 @@ Refactor direction:
 - [x] Confirm the resulting shape is sufficient for a company-site intro card and overview page without needing direct page imports.
 
 ### 5. Expose metadata publicly for dynamic consumption
-- [x] Add a stable public JSON metadata endpoint backed by `src/app-metadata.ts`.
-- [x] Ensure the endpoint returns structured metadata without presentation-specific shaping.
-- [x] Confirm the endpoint is suitable for dynamic company-website consumption without scraping rendered pages.
+- [x] Add a stable exported `app-metadata.json` artifact backed by `src/app-metadata.ts`.
+- [x] Ensure the production metadata surface is a static exported file rather than relying on a Next route handler.
+- [x] Ensure the metadata returns structured data without presentation-specific shaping.
+- [x] Confirm the exported artifact is suitable for GitHub Pages and production company-website consumption without scraping rendered pages.
+- [x] Avoid conflicting app-route and public-file delivery for the same `app-metadata.json` path while GitHub Pages remains the active deployment target.
 
 ### 6. Validate behavior and regression safety
 - [x] Update or add tests covering metadata-driven rendering of the introduction page.
 - [x] Add or update tests covering the public metadata endpoint.
 - [x] Run repository formatting.
 - [x] Run focused tests for metadata, endpoint, and introduction-page behavior.
+- [x] Validate that the static export output contains the expected `app-metadata.json` artifact.
+- [x] Validate that the static export build completes successfully with the current metadata delivery approach.
 
 ## Affected Areas
 
 - `.plans/58-metadata-driven-app-library-preparation.md`
 - `src/app-metadata.ts`
-- `src/app/app-metadata.json/route.ts` or equivalent public metadata endpoint location
+- static export generation for `app-metadata.json`
 - `src/app/introduction/page.tsx`
 - introduction-page related tests
 - metadata-related tests if introduced
@@ -116,6 +121,6 @@ Refactor direction:
 - [x] `src/app/introduction/page.tsx` renders from metadata rather than page-local duplicate content.
 - [x] The current introduction page remains functionally consistent after the refactor.
 - [x] The metadata shape is structured enough for external consumption without direct JSX/page imports.
-- [x] Plot Your Path exposes the same metadata through a stable public JSON endpoint suitable for dynamic consumption.
+- [x] Plot Your Path exposes the same metadata through a stable exported `app-metadata.json` artifact suitable for GitHub Pages production use.
 - [x] The contract is reusable enough to inform future company app-library integrations.
-- [x] Relevant tests, formatting, and focused validation pass.
+- [x] Relevant tests, formatting, and export validation pass.

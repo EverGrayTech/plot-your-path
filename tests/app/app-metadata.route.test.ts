@@ -1,19 +1,20 @@
-import { appMetadata } from "../../src/app-metadata";
-import { GET } from "../../src/app/app-metadata.json/route";
+import { readFileSync } from "node:fs";
+import path from "node:path";
 
 import packageJson from "../../package.json";
+import { appMetadata } from "../../src/app-metadata";
 
-describe("app metadata route", () => {
-  it("returns the structured app metadata as json", async () => {
-    const response = GET();
+describe("generated app metadata artifact", () => {
+  it("matches the structured app metadata json payload", () => {
+    const artifactPath = path.join(process.cwd(), "public", "app-metadata.json");
+    const artifact = JSON.parse(readFileSync(artifactPath, "utf8"));
 
-    expect(response.headers.get("content-type")).toContain("application/json");
-    await expect(response.json()).resolves.toEqual(appMetadata);
+    expect(artifact).toEqual(appMetadata);
   });
 
-  it("includes the package version in the payload", async () => {
-    const response = GET();
-    const payload = await response.json();
+  it("includes the package version in the payload", () => {
+    const artifactPath = path.join(process.cwd(), "public", "app-metadata.json");
+    const payload = JSON.parse(readFileSync(artifactPath, "utf8"));
 
     expect(payload.version).toBe(packageJson.version);
   });
