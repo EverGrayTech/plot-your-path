@@ -1,0 +1,11 @@
+# Style & Design System Guidance
+- **Source of Truth**: The [EverGray Tech Design System](https://github.com/EverGrayTech/design-system) owns all foundational visual tokens — colors, typography, spacing, radii, and motion values must come from it rather than local duplication.
+- **Product Expression**: This repo is an application workspace, not a marketing site. Favor clarity, continuity, and task support over spectacle or brand theatrics.
+- **Interface Tone**: Surfaces should feel calm, structured, and trustworthy. Use visual hierarchy to support comprehension of role analysis, applications, interviews, and career evidence rather than to create drama.
+- **Layout**: Prioritize dense-but-readable information design, predictable alignment, and consistent spacing. Product-specific layout decisions can be local, but should still be built from design-system tokens.
+- **Interaction States**: Use semantic states and accent intentionally to guide decisions, confirm outcomes, and surface risk. Accent should highlight primary actions or important focus, not become the default treatment for everything.
+- **Motion**: Keep motion subtle and functional — quick transitions that clarify state changes, reveals, or modal flows are appropriate. Avoid decorative ambient animation, scroll-linked effects, or motion that competes with reading and decision-making.
+- **Accessibility & Readability**: Maintain strong contrast, obvious focus states, and readable type at every step. Data-heavy and decision-heavy views must optimize for scanability before visual flourish.
+- **Local Exceptions**: If a needed visual value does not exist in the design system, prefer requesting it upstream. If a temporary local override is unavoidable, document it clearly so it can be removed later.
+- **Prohibited**: Hardcoded design-system token values, glassmorphism, neon glow, gradient text, decorative brand effects, colored shadows, scroll-jacking, parallax, and purely cinematic motion treatments.
+- **Reference Docs**: [Consumption Guide](https://github.com/EverGrayTech/design-system/blob/main/docs/consumption-guide.md) · `docs/product-overview.md`
