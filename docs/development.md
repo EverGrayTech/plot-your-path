@@ -54,6 +54,14 @@ pnpm lint:fix
 
 This runs `biome check --write .` and applies Biome's safe fixes across the repository.
 
+### Typechecking
+
+Run:
+
+```bash
+pnpm typecheck
+```
+
 ## Run tests
 
 ### Frontend tests
@@ -62,13 +70,6 @@ Run all frontend tests:
 
 ```bash
 pnpm test
-```
-
-Run frontend tests with coverage:
-
-```bash
-pnpm test:coverage
-```
 
 Run a single frontend test file:
 
