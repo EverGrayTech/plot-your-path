@@ -58,7 +58,6 @@ Refactor direction:
 ## Implementation Steps
 
 ### 1. Add the plan and lock messaging direction
-- [x] Create this plan file in `.plans/` using current repository conventions.
 - [x] Keep the content direction aligned with the product overview and system specification.
 
 ### 2. Replace the homepage content structure

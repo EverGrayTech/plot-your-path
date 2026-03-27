@@ -72,7 +72,6 @@ Refactor direction:
 ## Implementation Steps
 
 ### 1. Add the plan and define the target metadata shape
-- [x] Create this plan file in `.plans/` using current repository conventions.
 - [x] Define the target `appMetadata` structure, including a reusable `overview` section.
 - [x] Decide whether to export supporting metadata types from `src/app-metadata.ts` or a nearby shared type location.
 
