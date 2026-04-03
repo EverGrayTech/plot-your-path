@@ -14,7 +14,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@evergraytech/ai-config": "^0.2.0",
+    "@evergraytech/ai-config": "^0.2.1",
     "@evergraytech/design-system": "^0.2.0",
     "next": "^15.0.0",
     "react": "^19.0.0",

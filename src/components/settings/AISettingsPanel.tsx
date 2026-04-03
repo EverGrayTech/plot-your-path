@@ -5,6 +5,7 @@ import "@evergraytech/ai-config/styles/base.css";
 import { AIConfigPanel, AIConfigProvider } from "@evergraytech/ai-config/react";
 
 import { aiConfigAppDefinition } from "../../lib/aiConfig";
+import { getAIConfigManager } from "../../lib/aiGatewayClient";
 
 export function AISettingsPanel() {
   return (
@@ -21,7 +22,7 @@ export function AISettingsPanel() {
         fallback output.
       </p>
 
-      <AIConfigProvider appDefinition={aiConfigAppDefinition}>
+      <AIConfigProvider appDefinition={aiConfigAppDefinition} manager={getAIConfigManager()}>
         <AIConfigPanel />
       </AIConfigProvider>
     </section>
