@@ -51,28 +51,28 @@ Refactor direction:
 ## Implementation Steps
 
 ### 1. Add the plan and define the ai-config integration boundary
-- [ ] Add an app-local ai-config integration module that owns Plot Your Path's package setup.
-- [ ] Define the initial `AIConfigAppDefinition` for this app, including aligned operation categories.
-- [ ] Decide whether provider-aware advisory model discovery should be enabled for any supported providers in the initial integration phase.
+- [x] Add an app-local ai-config integration module that owns Plot Your Path's package setup.
+- [x] Define the initial `AIConfigAppDefinition` for this app, including aligned operation categories.
+- [x] Decide whether provider-aware advisory model discovery should be enabled for any supported providers in the initial integration phase.
 
 ### 2. Add package consumption to the frontend
-- [ ] Add `@evergraytech/ai-config` to the repo dependencies.
-- [ ] Import the package base stylesheet through the appropriate client-rendered app boundary.
-- [ ] Ensure the new dependency posture remains consistent with current frontend architecture and static export constraints.
-- [ ] Ensure the initial integration assumptions match ai-config's current gateway-mediated hosted and BYOK execution posture.
+- [x] Add `@evergraytech/ai-config` to the repo dependencies.
+- [x] Import the package base stylesheet through the appropriate client-rendered app boundary.
+- [x] Ensure the new dependency posture remains consistent with current frontend architecture and static export constraints.
+- [x] Ensure the initial integration assumptions match ai-config's current gateway-mediated hosted and BYOK execution posture.
 
 ### 3. Replace the Settings-page placeholder AI section
-- [ ] Add a client-owned Settings-page integration component for ai-config.
-- [ ] Render `AIConfigProvider` and `AIConfigPanel` on the Settings page.
-- [ ] Preserve local-first trust-model and credential-storage copy around the packaged panel.
-- [ ] Remove obsolete placeholder-only Settings-page AI configuration text once the shared panel is in place.
-- [ ] Avoid reimplementing piecemeal settings controls locally when the packaged panel already provides the validated UI/UX.
+- [x] Add a client-owned Settings-page integration component for ai-config.
+- [x] Render `AIConfigProvider` and `AIConfigPanel` on the Settings page.
+- [x] Preserve local-first trust-model and credential-storage copy around the packaged panel.
+- [x] Remove obsolete placeholder-only Settings-page AI configuration text once the shared panel is in place.
+- [x] Avoid reimplementing piecemeal settings controls locally when the packaged panel already provides the validated UI/UX.
 
 ### 4. Validate baseline integration behavior
-- [ ] Add or update tests covering Settings-page ai-config rendering.
-- [ ] Validate that the Settings page still renders correctly in the app's current browser-hosted model.
-- [ ] Run repository formatting.
-- [ ] Run focused tests for the Settings page and surrounding shell behavior.
+- [x] Add or update tests covering Settings-page ai-config rendering.
+- [x] Validate that the Settings page still renders correctly in the app's current browser-hosted model.
+- [x] Run repository formatting.
+- [x] Run focused tests for the Settings page and surrounding shell behavior.
 
 ## Affected Areas
 
@@ -84,11 +84,11 @@ Refactor direction:
 
 ## Success Criteria
 
-- [ ] Plot Your Path defines a single app-local ai-config integration boundary.
-- [ ] The Settings page uses `@evergraytech/ai-config/react` for AI configuration.
-- [ ] Plot Your Path uses the packaged `AIConfigPanel` as the supported settings UI rather than rebuilding equivalent controls locally.
-- [ ] Operation categories are defined with keys aligned to current workflow families.
-- [ ] Trust-model and browser-local credential messaging remain present around the packaged UI.
-- [ ] The initial plan assumptions match ai-config's current gateway-mediated execution model.
-- [ ] The integration remains client-rendered and static-export-safe.
-- [ ] Relevant tests and formatting checks pass.
+- [x] Plot Your Path defines a single app-local ai-config integration boundary.
+- [x] The Settings page uses `@evergraytech/ai-config/react` for AI configuration.
+- [x] Plot Your Path uses the packaged `AIConfigPanel` as the supported settings UI rather than rebuilding equivalent controls locally.
+- [x] Operation categories are defined with keys aligned to current workflow families.
+- [x] Trust-model and browser-local credential messaging remain present around the packaged UI.
+- [x] The initial plan assumptions match ai-config's current gateway-mediated execution model.
+- [x] The integration remains client-rendered and static-export-safe.
+- [x] Relevant tests and formatting checks pass.

@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@evergraytech/ai-config':
+        specifier: ^0.2.0
+        version: 0.2.0
       '@evergraytech/design-system':
         specifier: ^0.2.0
         version: 0.2.0
@@ -409,6 +412,9 @@ packages:
     engines: {node: '>=12'}
     cpu: [x64]
     os: [win32]
+
+  '@evergraytech/ai-config@0.2.0':
+    resolution: {integrity: sha512-HWV/eNp/HCMILosScduiEsL3NMmd/S9EstOE/ULVvzuDd3PGcCgS89ngtT/VxfSxHY3Uhl2hCmgib8m9xGZrUQ==, tarball: https://npm.pkg.github.com/download/@evergraytech/ai-config/0.2.0/5b8a15238a3b8f19dda37c2259d9e98c968819e2}
 
   '@evergraytech/design-system@0.2.0':
     resolution: {integrity: sha512-ncYluMST8o61wm+ZQnHC/xCC2OmrHOgWeC73reoRNx9Sk1iEjCNek7VYTRFS9O/m/nDcFwSzjnyIwoz6oy2I/Q==, tarball: https://npm.pkg.github.com/download/@evergraytech/design-system/0.2.0/8d7fd8bc34f8183a76db93aff74b018321bf6b70}
@@ -1846,6 +1852,8 @@ snapshots:
 
   '@esbuild/win32-x64@0.21.5':
     optional: true
+
+  '@evergraytech/ai-config@0.2.0': {}
 
   '@evergraytech/design-system@0.2.0': {}
 

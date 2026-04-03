@@ -2,6 +2,7 @@ import React from "react";
 
 import { DataManagementPanel } from "../../components/DataManagementPanel";
 import { DesktopStatusCard } from "../../components/DesktopStatusCard";
+import { AISettingsPanel } from "../../components/settings/AISettingsPanel";
 
 export default function SettingsPage() {
   return (
@@ -22,19 +23,14 @@ export default function SettingsPage() {
         </p>
       </section>
 
-      <section>
-        <h3>AI Model Configuration</h3>
-        <p>
-          Manage AI provider settings, runtime tokens, and model selection for each operation
-          family. These settings are also accessible from the Roles page toolbar.
-        </p>
-      </section>
+      <AISettingsPanel />
 
       <section>
         <h3>Desirability Factor Settings</h3>
         <p>
           Configure the factors, prompts, and weights used to score role desirability. These
-          settings are also accessible from the Roles page toolbar.
+          settings are part of the current browser-local MVP workflow and remain separate from the
+          shared AI configuration panel.
         </p>
       </section>
 
