@@ -7,7 +7,6 @@ import { useRolesBoard } from "../lib/useRolesBoard";
 import { useRolesFeatureModals } from "../lib/useRolesFeatureModals";
 import { CaptureRoleForm } from "./CaptureRoleForm";
 import { Modal } from "./Modal";
-import { AISettingsModal } from "./roles/AISettingsModal";
 import { FactorSettingsModal } from "./roles/FactorSettingsModal";
 import { OutcomeInsightsModal } from "./roles/OutcomeInsightsModal";
 import { PipelineModal } from "./roles/PipelineModal";
@@ -139,10 +138,6 @@ export function RolesPageClient() {
   } = useRoleDetailState({ loadRoles });
 
   const {
-    aiSettings,
-    aiSettingsError,
-    aiSettingsLoading,
-    closeAISettings,
     closeFactorSettings,
     closeOutcomeInsights,
     closePipeline,
@@ -150,18 +145,12 @@ export function RolesPageClient() {
     factorsError,
     factorsLoading,
     handleAddFactor,
-    handleClearToken,
     handleDeleteFactor,
-    handleHealthcheck,
     handleMoveFactor,
-    handleUpdateAIConfig,
     handleUpdateFactor,
-    handleUpdateToken,
-    healthByFamily,
     newFactorName,
     newFactorPrompt,
     newFactorWeight,
-    openAISettings,
     openFactorSettings,
     openOutcomeInsights,
     openPipeline,
@@ -183,12 +172,9 @@ export function RolesPageClient() {
     setPipelineRecentlyUpdated,
     setPipelineStageFilter,
     setPipelineWeekDeadlines,
-    setTokenInputs,
-    showAISettings,
     showFactorSettings,
     showOutcomeInsights,
     showPipeline,
-    tokenInputs,
     tuningSuggestions,
   } = useRolesFeatureModals();
 
@@ -196,7 +182,6 @@ export function RolesPageClient() {
     <section>
       <RolesToolbar
         desirabilityFilter={desirabilityFilter}
-        onOpenAISettings={openAISettings}
         onOpenCapture={() => setShowCaptureModal(true)}
         onOpenFactorSettings={openFactorSettings}
         onOpenOutcomeInsights={openOutcomeInsights}
@@ -345,27 +330,6 @@ export function RolesPageClient() {
           onSetNewFactorPrompt={setNewFactorPrompt}
           onSetNewFactorWeight={setNewFactorWeight}
           onUpdateFactor={handleUpdateFactor}
-        />
-      ) : null}
-
-      {showAISettings ? (
-        <AISettingsModal
-          aiSettings={aiSettings}
-          error={aiSettingsError}
-          healthByFamily={healthByFamily}
-          loading={aiSettingsLoading}
-          onClearToken={handleClearToken}
-          onClose={closeAISettings}
-          onHealthcheck={handleHealthcheck}
-          onTokenInputChange={(family, value) =>
-            setTokenInputs((previous) => ({
-              ...previous,
-              [family]: value,
-            }))
-          }
-          onUpdateConfig={handleUpdateAIConfig}
-          onUpdateToken={handleUpdateToken}
-          tokenInputs={tokenInputs}
         />
       ) : null}
 

@@ -3,10 +3,8 @@
 import { useEffect, useState } from "react";
 
 import type {
-  AISetting,
   DesirabilityFactor,
   InterviewStage,
-  OperationFamily,
   OutcomeInsights,
   OutcomeTuningSuggestions,
   PipelineCounters,
@@ -24,7 +22,6 @@ const EMPTY_PIPELINE_COUNTERS: PipelineCounters = {
 
 export function useRolesFeatureModals() {
   const [showFactorSettings, setShowFactorSettings] = useState(false);
-  const [showAISettings, setShowAISettings] = useState(false);
   const [showPipeline, setShowPipeline] = useState(false);
   const [showOutcomeInsights, setShowOutcomeInsights] = useState(false);
 
@@ -34,19 +31,6 @@ export function useRolesFeatureModals() {
   const [newFactorName, setNewFactorName] = useState("");
   const [newFactorPrompt, setNewFactorPrompt] = useState("");
   const [newFactorWeight, setNewFactorWeight] = useState("0.10");
-
-  const [aiSettings, setAISettings] = useState<AISetting[]>([]);
-  const [aiSettingsLoading, setAISettingsLoading] = useState(false);
-  const [aiSettingsError, setAISettingsError] = useState<string | null>(null);
-  const [tokenInputs, setTokenInputs] = useState<Record<OperationFamily, string>>({
-    application_generation: "",
-    desirability_scoring: "",
-    fit_analysis: "",
-    role_parsing: "",
-  });
-  const [healthByFamily, setHealthByFamily] = useState<Partial<Record<OperationFamily, string>>>(
-    {},
-  );
 
   const [pipelineItems, setPipelineItems] = useState<PipelineItem[]>([]);
   const [pipelineLoading, setPipelineLoading] = useState(false);
@@ -100,18 +84,6 @@ export function useRolesFeatureModals() {
     }
   };
 
-  const loadAISettings = async () => {
-    setAISettingsLoading(true);
-    setAISettingsError(null);
-    try {
-      setAISettings(await getFrontendServices().aiSettings.listAISettings());
-    } catch (error) {
-      setAISettingsError(error instanceof Error ? error.message : "Failed to load AI settings.");
-    } finally {
-      setAISettingsLoading(false);
-    }
-  };
-
   const fetchOutcomeInsights = async () => {
     setOutcomeInsightsLoading(true);
     setOutcomeInsightsError(null);
@@ -141,17 +113,6 @@ export function useRolesFeatureModals() {
     setFactorsError(null);
   };
 
-  const openAISettings = () => {
-    setShowAISettings(true);
-    void loadAISettings();
-  };
-
-  const closeAISettings = () => {
-    setShowAISettings(false);
-    setAISettingsError(null);
-    setHealthByFamily({});
-  };
-
   const openPipeline = () => {
     setShowPipeline(true);
   };
@@ -169,72 +130,6 @@ export function useRolesFeatureModals() {
   const closeOutcomeInsights = () => {
     setShowOutcomeInsights(false);
     setOutcomeInsightsError(null);
-  };
-
-  const handleUpdateAIConfig = async (
-    family: OperationFamily,
-    payload: { token_label?: string; model?: string; provider?: string },
-  ) => {
-    try {
-      await getFrontendServices().aiSettings.updateAISetting(family, payload);
-      await loadAISettings();
-      setAISettingsError(null);
-    } catch (error) {
-      setAISettingsError(error instanceof Error ? error.message : "Failed to update AI setting.");
-    }
-  };
-
-  const handleUpdateToken = async (family: OperationFamily) => {
-    const token = tokenInputs[family]?.trim() ?? "";
-    if (!token) {
-      setAISettingsError("Token cannot be empty.");
-      return;
-    }
-
-    try {
-      await getFrontendServices().aiSettings.updateAISettingToken(family, token);
-      setTokenInputs((previous) => ({
-        ...previous,
-        [family]: "",
-      }));
-      await loadAISettings();
-      setHealthByFamily((previous) => ({
-        ...previous,
-        [family]: "Local API key saved for this browser.",
-      }));
-    } catch (error) {
-      setAISettingsError(error instanceof Error ? error.message : "Failed to update token.");
-    }
-  };
-
-  const handleClearToken = async (family: OperationFamily) => {
-    try {
-      await getFrontendServices().aiSettings.clearAISettingToken(family);
-      await loadAISettings();
-      setHealthByFamily((previous) => ({
-        ...previous,
-        [family]: "Local API key removed from this browser.",
-      }));
-    } catch (error) {
-      setAISettingsError(error instanceof Error ? error.message : "Failed to clear token.");
-    }
-  };
-
-  const handleHealthcheck = async (family: OperationFamily) => {
-    try {
-      const response = await getFrontendServices().aiSettings.healthcheckAISetting(family);
-      setHealthByFamily((previous) => ({
-        ...previous,
-        [family]: response.ok
-          ? "OK — configuration is ready for browser-based AI workflows."
-          : `Error: ${response.detail}`,
-      }));
-    } catch (error) {
-      setHealthByFamily((previous) => ({
-        ...previous,
-        [family]: error instanceof Error ? `Error: ${error.message}` : "Error: health check failed",
-      }));
-    }
   };
 
   const handleAddFactor = async () => {
@@ -324,10 +219,6 @@ export function useRolesFeatureModals() {
   };
 
   return {
-    aiSettings,
-    aiSettingsError,
-    aiSettingsLoading,
-    closeAISettings,
     closeFactorSettings,
     closeOutcomeInsights,
     closePipeline,
@@ -335,18 +226,12 @@ export function useRolesFeatureModals() {
     factorsError,
     factorsLoading,
     handleAddFactor,
-    handleClearToken,
     handleDeleteFactor,
-    handleHealthcheck,
     handleMoveFactor,
-    handleUpdateAIConfig,
     handleUpdateFactor,
-    handleUpdateToken,
-    healthByFamily,
     newFactorName,
     newFactorPrompt,
     newFactorWeight,
-    openAISettings,
     openFactorSettings,
     openOutcomeInsights,
     openPipeline,
@@ -368,12 +253,9 @@ export function useRolesFeatureModals() {
     setPipelineRecentlyUpdated,
     setPipelineStageFilter,
     setPipelineWeekDeadlines,
-    setTokenInputs,
-    showAISettings,
     showFactorSettings,
     showOutcomeInsights,
     showPipeline,
-    tokenInputs,
     tuningSuggestions,
   };
 }

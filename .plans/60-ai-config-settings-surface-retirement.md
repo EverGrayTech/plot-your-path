@@ -40,22 +40,22 @@ Refactor direction:
 ## Implementation Steps
 
 ### 1. Add the plan and identify obsolete settings entry points
-- [ ] Identify the Roles-page toolbar, modal, and hook/state surfaces that exist only for the retired AI settings flow.
+- [x] Identify the Roles-page toolbar, modal, and hook/state surfaces that exist only for the retired AI settings flow.
 
 ### 2. Remove the retired Roles-page settings UX
-- [ ] Remove the Roles toolbar AI settings action.
-- [ ] Remove `AISettingsModal` from the rendered Roles experience.
-- [ ] Remove associated props, open/close handlers, and token-input wiring from Roles-related components and hooks.
+- [x] Remove the Roles toolbar AI settings action.
+- [x] Remove `AISettingsModal` from the rendered Roles experience.
+- [x] Remove associated props, open/close handlers, and token-input wiring from Roles-related components and hooks.
 
 ### 3. Align copy and navigation expectations
-- [ ] Update relevant copy so users are directed to the Settings page for AI configuration.
-- [ ] Ensure no stale explanatory text references the removed modal path.
+- [x] Update relevant copy so users are directed to the Settings page for AI configuration.
+- [x] Ensure no stale explanatory text references the removed modal path.
 
 ### 4. Validate frontend regression safety
-- [ ] Update or remove tests tied exclusively to the retired modal-based settings flow.
-- [ ] Add or update tests covering the absence of the old Roles-page settings affordance where appropriate.
-- [ ] Run repository formatting.
-- [ ] Run focused tests for Roles-page and Settings-page behavior.
+- [x] Update or remove tests tied exclusively to the retired modal-based settings flow.
+- [x] Add or update tests covering the absence of the old Roles-page settings affordance where appropriate.
+- [x] Run repository formatting.
+- [x] Run focused tests for Roles-page and Settings-page behavior.
 
 ## Affected Areas
 
@@ -66,7 +66,7 @@ Refactor direction:
 
 ## Success Criteria
 
-- [ ] The Roles experience no longer exposes the old AI settings entry point.
-- [ ] `AISettingsModal` and its supporting state plumbing are removed.
-- [ ] AI configuration is clearly presented as a Settings-page concern.
-- [ ] Related tests and formatting checks pass.
+- [x] The Roles experience no longer exposes the old AI settings entry point.
+- [x] `AISettingsModal` and its supporting state plumbing are removed.
+- [x] AI configuration is clearly presented as a Settings-page concern.
+- [x] Related tests and formatting checks pass.

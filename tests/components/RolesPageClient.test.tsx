@@ -25,9 +25,6 @@ vi.mock("../../src/components/roles/RolesToolbar", () => ({
       <button onClick={() => (props.onOpenCapture as () => void)()} type="button">
         Open Capture
       </button>
-      <button onClick={() => (props.onOpenAISettings as () => void)()} type="button">
-        Open AI
-      </button>
       <button onClick={() => (props.onOpenFactorSettings as () => void)()} type="button">
         Open Factors
       </button>
@@ -37,6 +34,10 @@ vi.mock("../../src/components/roles/RolesToolbar", () => ({
       <button onClick={() => (props.onOpenOutcomeInsights as () => void)()} type="button">
         Open Insights
       </button>
+      <p>
+        AI configuration now lives on the Settings page through the shared EverGray configuration
+        panel.
+      </p>
     </div>
   ),
 }));
@@ -89,28 +90,6 @@ vi.mock("../../src/components/roles/FactorSettingsModal", () => ({
       <div>Factor Settings Modal</div>
       <button onClick={() => (props.onClose as () => void)()} type="button">
         Close Factors
-      </button>
-    </div>
-  ),
-}));
-
-vi.mock("../../src/components/roles/AISettingsModal", () => ({
-  AISettingsModal: (props: Record<string, unknown>) => (
-    <div>
-      <div>AI Settings Modal</div>
-      <button
-        onClick={() =>
-          (props.onTokenInputChange as (family: string, value: string) => void)(
-            "role_parsing",
-            "abc",
-          )
-        }
-        type="button"
-      >
-        Change Token
-      </button>
-      <button onClick={() => (props.onClose as () => void)()} type="button">
-        Close AI
       </button>
     </div>
   ),
@@ -277,10 +256,6 @@ describe("RolesPageClient", () => {
     });
 
     useRolesFeatureModalsMock.mockReturnValue({
-      aiSettings: [],
-      aiSettingsError: null,
-      aiSettingsLoading: false,
-      closeAISettings: vi.fn(),
       closeFactorSettings: vi.fn(),
       closeOutcomeInsights: vi.fn(),
       closePipeline: vi.fn(),
@@ -288,18 +263,12 @@ describe("RolesPageClient", () => {
       factorsError: null,
       factorsLoading: false,
       handleAddFactor: vi.fn(),
-      handleClearToken: vi.fn(),
       handleDeleteFactor: vi.fn(),
-      handleHealthcheck: vi.fn(),
       handleMoveFactor: vi.fn(),
-      handleUpdateAIConfig: vi.fn(),
       handleUpdateFactor: vi.fn(),
-      handleUpdateToken: vi.fn(),
-      healthByFamily: {},
       newFactorName: "",
       newFactorPrompt: "",
       newFactorWeight: "0.10",
-      openAISettings: vi.fn(),
       openFactorSettings: vi.fn(),
       openOutcomeInsights: vi.fn(),
       openPipeline: vi.fn(),
@@ -321,17 +290,9 @@ describe("RolesPageClient", () => {
       setPipelineRecentlyUpdated: vi.fn(),
       setPipelineStageFilter: vi.fn(),
       setPipelineWeekDeadlines: vi.fn(),
-      setTokenInputs: vi.fn(),
-      showAISettings: false,
       showFactorSettings: false,
       showOutcomeInsights: false,
       showPipeline: false,
-      tokenInputs: {
-        application_generation: "",
-        desirability_scoring: "",
-        fit_analysis: "",
-        role_parsing: "",
-      },
       tuningSuggestions: null,
     });
   });
@@ -360,7 +321,6 @@ describe("RolesPageClient", () => {
     });
     useRolesFeatureModalsMock.mockReturnValueOnce({
       ...useRolesFeatureModalsMock(),
-      showAISettings: true,
       showFactorSettings: true,
       showPipeline: true,
       showOutcomeInsights: true,
@@ -370,7 +330,6 @@ describe("RolesPageClient", () => {
 
     expect(screen.getByText("Role Detail Modal")).toBeInTheDocument();
     expect(screen.getByText("Skill Detail Modal")).toBeInTheDocument();
-    expect(screen.getByText("AI Settings Modal")).toBeInTheDocument();
     expect(screen.getByText("Factor Settings Modal")).toBeInTheDocument();
     expect(screen.getByText("Pipeline Modal")).toBeInTheDocument();
     expect(screen.getByText("Outcome Insights Modal")).toBeInTheDocument();
@@ -387,12 +346,9 @@ describe("RolesPageClient", () => {
     };
     const featureState = {
       ...useRolesFeatureModalsMock(),
-      closeAISettings: vi.fn(),
       closeFactorSettings: vi.fn(),
       closeOutcomeInsights: vi.fn(),
       closePipeline: vi.fn(),
-      setTokenInputs: vi.fn(),
-      showAISettings: true,
       showFactorSettings: true,
       showOutcomeInsights: true,
       showPipeline: true,
@@ -405,8 +361,6 @@ describe("RolesPageClient", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /Close Role Detail/i }));
     fireEvent.click(screen.getByRole("button", { name: /Close Factors/i }));
-    fireEvent.click(screen.getByRole("button", { name: /Change Token/i }));
-    fireEvent.click(screen.getByRole("button", { name: /Close AI/i }));
     fireEvent.click(screen.getByRole("button", { name: /Open Pipeline Role/i }));
     fireEvent.click(screen.getByRole("button", { name: /Close Pipeline/i }));
     fireEvent.click(screen.getByRole("button", { name: /Close Insights/i }));
@@ -415,12 +369,19 @@ describe("RolesPageClient", () => {
 
     expect(detailState.closeRoleDetail).toHaveBeenCalled();
     expect(featureState.closeFactorSettings).toHaveBeenCalled();
-    expect(featureState.setTokenInputs).toHaveBeenCalled();
-    expect(featureState.closeAISettings).toHaveBeenCalled();
     expect(featureState.closePipeline).toHaveBeenCalledTimes(2);
     expect(detailState.openRoleDetail).toHaveBeenCalledWith(9);
     expect(featureState.closeOutcomeInsights).toHaveBeenCalled();
     expect(detailState.closeSkillDetail).toHaveBeenCalledTimes(2);
     expect(detailState.openRoleDetail).toHaveBeenCalledWith(13);
+  });
+
+  it("directs users to Settings for AI configuration", () => {
+    render(<RolesPageClient />);
+
+    expect(
+      screen.getByText(/AI configuration now lives on the Settings page through the shared/i),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Open AI/i })).not.toBeInTheDocument();
   });
 });

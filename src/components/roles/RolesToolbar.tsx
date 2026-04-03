@@ -4,7 +4,6 @@ import type { DesirabilityFilter, RecommendationFilter, SortMode } from "../../l
 
 interface RolesToolbarProps {
   desirabilityFilter: DesirabilityFilter;
-  onOpenAISettings: () => void;
   onOpenCapture: () => void;
   onOpenFactorSettings: () => void;
   onOpenOutcomeInsights: () => void;
@@ -21,7 +20,6 @@ interface RolesToolbarProps {
 
 export function RolesToolbar({
   desirabilityFilter,
-  onOpenAISettings,
   onOpenCapture,
   onOpenFactorSettings,
   onOpenOutcomeInsights,
@@ -56,14 +54,15 @@ export function RolesToolbar({
           >
             Factor Settings
           </button>
-          <button className="btn btn-tertiary btn-compact" onClick={onOpenAISettings} type="button">
-            AI Settings
-          </button>
         </div>
       </header>
 
       <p className="page-description">Capture and review roles from your role search.</p>
       <p className="page-description">{smartSortDescription}</p>
+      <p className="page-description">
+        AI configuration now lives on the Settings page through the shared EverGray configuration
+        panel.
+      </p>
 
       <div className="form-grid-4col">
         <label className="form-label">
