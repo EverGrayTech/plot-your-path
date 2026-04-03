@@ -10,13 +10,6 @@ const services = {
     reorderDesirabilityFactors: vi.fn(),
     updateDesirabilityFactor: vi.fn(),
   },
-  aiSettings: {
-    listAISettings: vi.fn(),
-    updateAISetting: vi.fn(),
-    updateAISettingToken: vi.fn(),
-    clearAISettingToken: vi.fn(),
-    healthcheckAISetting: vi.fn(),
-  },
   workflows: {
     listPipeline: vi.fn(),
     getOutcomeInsights: vi.fn(),
@@ -38,21 +31,6 @@ describe("useRolesFeatureModals", () => {
         weight: 0.4,
         is_active: true,
         display_order: 0,
-        created_at: "2026-03-18T00:00:00.000Z",
-        updated_at: "2026-03-18T00:00:00.000Z",
-      },
-    ]);
-    services.aiSettings.listAISettings.mockResolvedValue([
-      {
-        operation_family: "role_parsing",
-        provider: "openai",
-        model: "gpt-4o-mini",
-        token_label: "Local token",
-        base_url: null,
-        temperature: 0.2,
-        max_tokens: 4000,
-        has_runtime_token: false,
-        token_masked: null,
         created_at: "2026-03-18T00:00:00.000Z",
         updated_at: "2026-03-18T00:00:00.000Z",
       },
@@ -79,42 +57,20 @@ describe("useRolesFeatureModals", () => {
     vi.clearAllMocks();
   });
 
-  it("opens modals, loads data, and handles AI token/config actions", async () => {
+  it("opens modals and loads factor, pipeline, and outcome data", async () => {
     const { result } = renderHook(() => useRolesFeatureModals());
 
     act(() => {
       result.current.openFactorSettings();
-      result.current.openAISettings();
       result.current.openPipeline();
       result.current.openOutcomeInsights();
     });
 
     await waitFor(() => expect(result.current.factors).toHaveLength(1));
-    await waitFor(() => expect(result.current.aiSettings).toHaveLength(1));
     await waitFor(() => expect(result.current.pipelineCounters.needs_follow_up).toBe(1));
     await waitFor(() =>
       expect(result.current.outcomeInsights?.confidence_message).toBe("Moderate"),
     );
-
-    await act(async () => {
-      await result.current.handleUpdateAIConfig("role_parsing", { provider: "anthropic" });
-      result.current.setTokenInputs((previous) => ({ ...previous, role_parsing: "secret" }));
-    });
-
-    services.aiSettings.updateAISettingToken.mockResolvedValue(undefined);
-    services.aiSettings.clearAISettingToken.mockResolvedValue(undefined);
-    services.aiSettings.healthcheckAISetting.mockResolvedValue({ ok: true, detail: "Ready" });
-
-    await act(async () => {
-      await result.current.handleUpdateToken("role_parsing");
-      await result.current.handleClearToken("role_parsing");
-      await result.current.handleHealthcheck("role_parsing");
-    });
-
-    expect(services.aiSettings.updateAISetting).toHaveBeenCalled();
-    expect(services.aiSettings.updateAISettingToken).toHaveBeenCalledWith("role_parsing", "secret");
-    expect(services.aiSettings.clearAISettingToken).toHaveBeenCalledWith("role_parsing");
-    expect(result.current.healthByFamily.role_parsing).toMatch(/OK/i);
   });
 
   it("handles factor create, update, move, delete, validation, and modal close paths", async () => {
@@ -191,13 +147,11 @@ describe("useRolesFeatureModals", () => {
 
     act(() => {
       result.current.closeFactorSettings();
-      result.current.closeAISettings();
       result.current.closePipeline();
       result.current.closeOutcomeInsights();
     });
 
     expect(result.current.showFactorSettings).toBe(false);
-    expect(result.current.showAISettings).toBe(false);
     expect(result.current.showPipeline).toBe(false);
     expect(result.current.showOutcomeInsights).toBe(false);
   });

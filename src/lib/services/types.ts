@@ -1,7 +1,4 @@
 import type {
-  AISetting,
-  AISettingHealth,
-  AISettingUpdate,
   ApplicationMaterial,
   ApplicationOps,
   ApplicationOpsUpdate,
@@ -17,7 +14,6 @@ import type {
   InterviewPrepSectionKey,
   InterviewStageEvent,
   InterviewStageEventCreate,
-  OperationFamily,
   OutcomeEvent,
   OutcomeEventCreate,
   OutcomeInsights,
@@ -64,14 +60,6 @@ export interface WorkflowDataService {
   }): Promise<PipelineResponse>;
   getOutcomeInsights(): Promise<OutcomeInsights>;
   getOutcomeTuningSuggestions(): Promise<OutcomeTuningSuggestions>;
-}
-
-export interface AISettingsService {
-  listAISettings(): Promise<AISetting[]>;
-  updateAISetting(operationFamily: OperationFamily, payload: AISettingUpdate): Promise<AISetting>;
-  updateAISettingToken(operationFamily: OperationFamily, token: string): Promise<AISetting>;
-  clearAISettingToken(operationFamily: OperationFamily): Promise<void>;
-  healthcheckAISetting(operationFamily: OperationFamily): Promise<AISettingHealth>;
 }
 
 export interface AIGenerationService {
@@ -122,7 +110,6 @@ export interface FrontendServices {
   roles: RolesDataService;
   skills: SkillsDataService;
   workflows: WorkflowDataService;
-  aiSettings: AISettingsService;
   aiGeneration: AIGenerationService;
   desirabilityFactors: DesirabilityFactorsService;
   portability: DataPortabilityService;

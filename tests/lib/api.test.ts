@@ -1,7 +1,6 @@
 import { indexedDB } from "fake-indexeddb";
 import {
   captureRole,
-  clearAISettingToken,
   createDesirabilityFactor,
   deleteDesirabilityFactor,
   generateCoverLetter,
@@ -9,15 +8,11 @@ import {
   getOutcomeInsights,
   getOutcomeTuningSuggestions,
   getSkill,
-  healthcheckAISetting,
-  listAISettings,
   listApplicationMaterials,
   listDesirabilityFactors,
   listOutcomeEvents,
   listSkills,
   reorderDesirabilityFactors,
-  updateAISetting,
-  updateAISettingToken,
   updateDesirabilityFactor,
   updateRoleStatus,
 } from "../../src/lib/api";
@@ -59,22 +54,6 @@ describe("api", () => {
   it("question generation creates browser-local artifacts", async () => {
     const created = await generateQuestionAnswers(2, ["Why this role?"]);
     expect(created.artifact_type).toBe("application_qa");
-  });
-
-  it("lists, updates, and validates local AI settings", async () => {
-    const listed = await listAISettings();
-    expect(listed.length).toBeGreaterThanOrEqual(1);
-
-    const updated = await updateAISetting("role_parsing", { model: "gpt-4o-mini" });
-    expect(updated.model).toBe("gpt-4o-mini");
-
-    const tokenUpdated = await updateAISettingToken("role_parsing", "sk-test-1234567890");
-    expect(tokenUpdated.token_masked).toContain("7890");
-
-    await clearAISettingToken("role_parsing");
-
-    const health = await healthcheckAISetting("role_parsing");
-    expect(health.ok).toBe(false);
   });
 
   it("lists local outcomes", async () => {

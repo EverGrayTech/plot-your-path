@@ -1,7 +1,4 @@
 import type {
-  AISetting,
-  AISettingHealth,
-  AISettingUpdate,
   ApplicationMaterial,
   DesirabilityFactor,
   DesirabilityScore,
@@ -9,16 +6,10 @@ import type {
   InterviewPrepPack,
   InterviewPrepPackSections,
   InterviewPrepSectionKey,
-  OperationFamily,
   ResumeProfileSyncResult,
   ResumeTuningSuggestion,
 } from "./dataModels";
 import { createLocalId, listStoreRecords, nowIso, saveStoreRecord } from "./localData";
-
-interface LocalAISettingRecord extends AISetting {
-  id: string;
-  token: string | null;
-}
 
 interface LocalGeneratedRecordBase {
   id: string;
@@ -61,139 +52,6 @@ interface LocalInterviewPrepRecord extends LocalGeneratedRecordBase {
 
 interface LocalResumeTuningRecord extends LocalGeneratedRecordBase {
   suggestion: ResumeTuningSuggestion;
-}
-
-const DEFAULT_AI_SETTINGS: AISetting[] = [
-  "role_parsing",
-  "fit_analysis",
-  "desirability_scoring",
-  "application_generation",
-].map((family) => ({
-  operation_family: family as OperationFamily,
-  provider: "openai",
-  model: "gpt-4o-mini",
-  token_label: "Local browser token",
-  base_url: null,
-  temperature: 0.2,
-  max_tokens: 4000,
-  has_runtime_token: false,
-  token_masked: null,
-  created_at: nowIso(),
-  updated_at: nowIso(),
-}));
-
-function maskToken(token: string | null): string | null {
-  if (!token) return null;
-  return `••••••••${token.slice(-4)}`;
-}
-
-async function ensureLocalAISettings(): Promise<LocalAISettingRecord[]> {
-  const existing = await listStoreRecords<LocalAISettingRecord>("aiSettings");
-  if (existing.length > 0) {
-    return existing;
-  }
-
-  const created = DEFAULT_AI_SETTINGS.map((setting) => ({
-    ...setting,
-    id: createLocalId(`ai_${setting.operation_family}`),
-    token: null,
-  }));
-
-  for (const record of created) {
-    await saveStoreRecord("aiSettings", record);
-  }
-
-  return created;
-}
-
-export async function listLocalAISettings(): Promise<AISetting[]> {
-  const settings = await ensureLocalAISettings();
-  return settings.map(({ id: _id, token, ...setting }) => ({
-    ...setting,
-    has_runtime_token: Boolean(token),
-    token_masked: maskToken(token),
-  }));
-}
-
-export async function updateLocalAISetting(
-  family: OperationFamily,
-  payload: AISettingUpdate,
-): Promise<AISetting> {
-  const settings = await ensureLocalAISettings();
-  const existing = settings.find((setting) => setting.operation_family === family);
-  if (!existing) {
-    throw new Error("AI setting not found.");
-  }
-
-  const updated: LocalAISettingRecord = {
-    ...existing,
-    ...payload,
-    updated_at: nowIso(),
-  };
-
-  await saveStoreRecord("aiSettings", updated);
-  const { id: _id, token, ...setting } = updated;
-  return {
-    ...setting,
-    has_runtime_token: Boolean(token),
-    token_masked: maskToken(token),
-  };
-}
-
-export async function updateLocalAISettingToken(
-  family: OperationFamily,
-  token: string,
-): Promise<AISetting> {
-  const settings = await ensureLocalAISettings();
-  const existing = settings.find((setting) => setting.operation_family === family);
-  if (!existing) {
-    throw new Error("AI setting not found.");
-  }
-
-  const updated: LocalAISettingRecord = {
-    ...existing,
-    token,
-    has_runtime_token: true,
-    token_masked: maskToken(token),
-    updated_at: nowIso(),
-  };
-
-  await saveStoreRecord("aiSettings", updated);
-  const { id: _id, token: storedToken, ...setting } = updated;
-  return {
-    ...setting,
-    has_runtime_token: Boolean(storedToken),
-    token_masked: maskToken(storedToken),
-  };
-}
-
-export async function clearLocalAISettingToken(family: OperationFamily): Promise<void> {
-  const settings = await ensureLocalAISettings();
-  const existing = settings.find((setting) => setting.operation_family === family);
-  if (!existing) {
-    throw new Error("AI setting not found.");
-  }
-
-  await saveStoreRecord("aiSettings", {
-    ...existing,
-    token: null,
-    has_runtime_token: false,
-    token_masked: null,
-    updated_at: nowIso(),
-  });
-}
-
-export async function healthcheckLocalAISetting(family: OperationFamily): Promise<AISettingHealth> {
-  const settings = await ensureLocalAISettings();
-  const existing = settings.find((setting) => setting.operation_family === family);
-  const ok = Boolean(existing?.token);
-  return {
-    operation_family: family,
-    ok,
-    detail: ok
-      ? "Local browser AI configuration is ready."
-      : "No local API token saved yet for this workflow.",
-  };
 }
 
 function buildTraceability(sectionKey: string, roleId: number) {

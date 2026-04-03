@@ -44,26 +44,26 @@ Refactor direction:
 ## Implementation Steps
 
 ### 1. Add the plan and inventory obsolete settings persistence code
-- [ ] Identify app-owned AI settings persistence, token CRUD, and healthcheck surfaces that are superseded by ai-config.
+- [x] Identify app-owned AI settings persistence, token CRUD, and healthcheck surfaces that are superseded by ai-config.
 
 ### 2. Remove prototype persistence and service code
-- [ ] Remove AI settings persistence fields and flows from `src/lib/localAi.ts`.
-- [ ] Remove prototype token update, token clear, and healthcheck logic.
-- [ ] Simplify or remove the `AISettingsService` interface and related service wiring as appropriate.
-- [ ] Remove obsolete API exports that only exist for the retired settings implementation.
-- [ ] Remove stale service assumptions about host-owned direct BYOK provider routing if any still exist in the codebase.
+- [x] Remove AI settings persistence fields and flows from `src/lib/localAi.ts`.
+- [x] Remove prototype token update, token clear, and healthcheck logic.
+- [x] Simplify or remove the `AISettingsService` interface and related service wiring as appropriate.
+- [x] Remove obsolete API exports that only exist for the retired settings implementation.
+- [x] Remove stale service assumptions about host-owned direct BYOK provider routing if any still exist in the codebase.
 
 ### 3. Preserve only legitimate host integration boundaries
-- [ ] Add or refine a narrow app-local ai-config access seam if downstream feature code still needs one.
-- [ ] Ensure remaining integrations do not recreate package-owned settings CRUD behavior.
-- [ ] If advisory model discovery is used, ensure it is exposed through the same narrow integration seam rather than bespoke feature-specific helpers.
-- [ ] Ensure any remaining seam is limited to non-UI integration concerns rather than piecemeal settings-panel reimplementation.
+- [x] Add or refine a narrow app-local ai-config access seam if downstream feature code still needs one.
+- [x] Ensure remaining integrations do not recreate package-owned settings CRUD behavior.
+- [x] If advisory model discovery is used, ensure it is exposed through the same narrow integration seam rather than bespoke feature-specific helpers.
+- [x] Ensure any remaining seam is limited to non-UI integration concerns rather than piecemeal settings-panel reimplementation.
 
 ### 4. Validate service-boundary regression safety
-- [ ] Update or remove tests tied exclusively to the old settings persistence and healthcheck implementation.
-- [ ] Add or update tests for any remaining integration seam introduced in this phase.
-- [ ] Run repository formatting.
-- [ ] Run focused tests for affected service and settings behavior.
+- [x] Update or remove tests tied exclusively to the old settings persistence and healthcheck implementation.
+- [x] Add or update tests for any remaining integration seam introduced in this phase.
+- [x] Run repository formatting.
+- [x] Run focused tests for affected service and settings behavior.
 
 ## Affected Areas
 
@@ -76,9 +76,9 @@ Refactor direction:
 
 ## Success Criteria
 
-- [ ] Plot Your Path no longer persists AI settings through app-owned prototype storage code.
-- [ ] Prototype token CRUD and healthcheck flows are removed.
-- [ ] Obsolete settings service abstractions are simplified or removed.
-- [ ] Any remaining ai-config integration seam is narrow and intentional.
-- [ ] Any remaining ai-config integration seam is limited to non-UI concerns and does not duplicate packaged settings controls.
-- [ ] Related tests and formatting checks pass.
+- [x] Plot Your Path no longer persists AI settings through app-owned prototype storage code.
+- [x] Prototype token CRUD and healthcheck flows are removed.
+- [x] Obsolete settings service abstractions are simplified or removed.
+- [x] Any remaining ai-config integration seam is narrow and intentional.
+- [x] Any remaining ai-config integration seam is limited to non-UI concerns and does not duplicate packaged settings controls.
+- [x] Related tests and formatting checks pass.

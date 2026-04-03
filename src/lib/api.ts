@@ -1,12 +1,9 @@
 export {
   analyzeLocalRoleFit as analyzeRoleFit,
-  clearLocalAISettingToken as clearAISettingToken,
   generateLocalCoverLetter as generateCoverLetter,
   generateLocalInterviewPrepPack as generateInterviewPrepPack,
   generateLocalQuestionAnswers as generateQuestionAnswers,
   generateLocalResumeTuning as generateResumeTuning,
-  healthcheckLocalAISetting as healthcheckAISetting,
-  listLocalAISettings as listAISettings,
   listLocalApplicationMaterials as listApplicationMaterials,
   listLocalDesirabilityFactors as listDesirabilityFactors,
   listLocalInterviewPrepPacks as listInterviewPrepPacks,
@@ -15,8 +12,6 @@ export {
   regenerateLocalInterviewPrepSection as regenerateInterviewPrepSection,
   scoreLocalRoleDesirability as scoreRoleDesirability,
   syncLocalResumeProfile as syncResumeProfile,
-  updateLocalAISetting as updateAISetting,
-  updateLocalAISettingToken as updateAISettingToken,
   updateLocalInterviewPrepPack as updateInterviewPrepPack,
 } from "./localAi";
 export {
@@ -46,9 +41,6 @@ export {
 } from "./localPortability";
 
 export type {
-  AISetting,
-  AISettingHealth,
-  AISettingUpdate,
   ApplicationMaterial,
   ApplicationOps,
   ApplicationOpsUpdate,
@@ -72,7 +64,6 @@ export type {
   RoleCaptureRequest,
   RoleCaptureResponse,
   RoleSkillItem,
-  OperationFamily,
   OutcomeConversionRow,
   OutcomeEvent,
   OutcomeEventCreate,

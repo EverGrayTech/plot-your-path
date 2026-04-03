@@ -25,13 +25,6 @@ export function createFrontendServices(): FrontendServices {
       updateNextAction: api.updateNextAction,
       upsertApplicationOps: api.upsertApplicationOps,
     },
-    aiSettings: {
-      clearAISettingToken: api.clearAISettingToken,
-      healthcheckAISetting: api.healthcheckAISetting,
-      listAISettings: api.listAISettings,
-      updateAISetting: api.updateAISetting,
-      updateAISettingToken: api.updateAISettingToken,
-    },
     aiGeneration: {
       analyzeRoleFit: api.analyzeRoleFit,
       generateCoverLetter: api.generateCoverLetter,
