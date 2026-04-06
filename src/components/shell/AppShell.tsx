@@ -18,7 +18,11 @@ const primaryNav: NavItem[] = [
   { href: "/skills", label: "Skills" },
 ];
 
-const utilityNav: NavItem[] = [{ href: "/settings", label: "Settings" }];
+const utilityNav: NavItem[] = [
+  { href: "/settings/ai", label: "AI Configuration" },
+  { href: "/settings/desirability", label: "Desirability Factors" },
+  { href: "/settings/data", label: "Your Data" },
+];
 const appVersion = packageJson.version;
 const releaseUrl = `https://github.com/EverGrayTech/plot-your-path/releases/tag/v${appVersion}`;
 
@@ -90,7 +94,10 @@ export function AppShell({ children }: { children: ReactNode }) {
             </Link>
           ))}
         </div>
-        <div className="sidenav-utility">
+        <div className="sidenav-utility" aria-label="Settings and support">
+          <div className="sidenav-link sidenav-link--utility sidenav-link--section-label">
+            Settings
+          </div>
           {utilityNav.map((item) => (
             <Link
               aria-current={isActive(pathname, item.href) ? "page" : undefined}
@@ -102,6 +109,8 @@ export function AppShell({ children }: { children: ReactNode }) {
               {item.label}
             </Link>
           ))}
+        </div>
+        <div className="sidenav-utility" aria-label="Support and release links">
           <a className="sidenav-link sidenav-link--utility" href="mailto:support@EverGrayTech.com">
             Help
           </a>

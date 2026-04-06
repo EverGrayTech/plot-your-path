@@ -321,6 +321,18 @@ ol {
   color: var(--color-text-secondary);
 }
 
+.sidenav-link--section-label {
+  color: var(--color-text-secondary);
+  font-weight: var(--typography-weight-semibold);
+  cursor: default;
+  background-color: transparent;
+}
+
+.sidenav-link--section-label:hover {
+  color: var(--color-text-secondary);
+  background-color: transparent;
+}
+
 /* ---- Workspace Container ---- */
 
 .workspace {

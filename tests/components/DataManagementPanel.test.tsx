@@ -91,11 +91,15 @@ describe("DataManagementPanel", () => {
       expect(screen.queryByLabelText(/Loading local data summary/i)).not.toBeInTheDocument();
     });
 
-    expect(screen.getByText(/No backup exported yet/i)).toBeInTheDocument();
-    expect(screen.getByText(/Browser-managed local storage/i)).toBeInTheDocument();
-    expect(screen.getByText(/readable JSON archive with durable artifacts/i)).toBeInTheDocument();
-    expect(screen.getByText(/active browser-local MVP path/i)).toBeInTheDocument();
-    expect(screen.getByText(/Export after meaningful changes/i)).toBeInTheDocument();
+    expect(screen.getByText(/Last export: Not yet/i)).toBeInTheDocument();
+    expect(screen.getByText(/Last restore: Not yet/i)).toBeInTheDocument();
+    expect(screen.getByText(/What to know/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Backups export your workspace as a readable JSON archive/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Reset permanently removes local roles, skills, and generated materials/i),
+    ).toBeInTheDocument();
     expect(screen.getAllByText("0")).toHaveLength(2);
     expect(screen.getByText(/Download backup/i)).toBeInTheDocument();
     expect(screen.getByText(/Restore backup/i)).toBeInTheDocument();

@@ -34,10 +34,6 @@ vi.mock("../../src/components/roles/RolesToolbar", () => ({
       <button onClick={() => (props.onOpenOutcomeInsights as () => void)()} type="button">
         Open Insights
       </button>
-      <p>
-        AI configuration now lives on the Settings page through the shared EverGray configuration
-        panel.
-      </p>
     </div>
   ),
 }));
@@ -376,12 +372,9 @@ describe("RolesPageClient", () => {
     expect(detailState.openRoleDetail).toHaveBeenCalledWith(13);
   });
 
-  it("directs users to Settings for AI configuration", () => {
+  it("does not expose any in-page AI settings action", () => {
     render(<RolesPageClient />);
 
-    expect(
-      screen.getByText(/AI configuration now lives on the Settings page through the shared/i),
-    ).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Open AI/i })).not.toBeInTheDocument();
   });
 });

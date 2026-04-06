@@ -56,6 +56,19 @@ describe("AppShell", () => {
       "/introduction",
     );
     expect(screen.getByRole("link", { name: "Roles" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByText("Settings")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "AI Configuration" })).toHaveAttribute(
+      "href",
+      "/settings/ai",
+    );
+    expect(screen.getByRole("link", { name: "Desirability Factors" })).toHaveAttribute(
+      "href",
+      "/settings/desirability",
+    );
+    expect(screen.getByRole("link", { name: "Your Data" })).toHaveAttribute(
+      "href",
+      "/settings/data",
+    );
     expect(screen.getByRole("link", { name: "Help" })).toHaveAttribute(
       "href",
       "mailto:support@EverGrayTech.com",

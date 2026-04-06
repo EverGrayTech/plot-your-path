@@ -18,12 +18,6 @@ function describeResumePresence(hasResume: boolean): string {
   return hasResume ? "Available" : "Not added yet";
 }
 
-function describeStorageMode(summary: DataPortabilitySummary): string {
-  return summary.storage_mode === "browser_local"
-    ? "Browser-local workspace"
-    : "Browser-local workspace";
-}
-
 function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -185,8 +179,8 @@ export function DataManagementPanel() {
       </div>
 
       <p>
-        Plot Your Path stores your workspace on this device by default. Use backups before major
-        cleanup, test installs, or moving to another machine.
+        Your workspace stays in this browser by default. Export a backup before major cleanup,
+        device changes, or experimental testing.
       </p>
 
       {notice ? (
@@ -215,22 +209,6 @@ export function DataManagementPanel() {
         </div>
       ) : null}
 
-      {!loading && summary?.backup_reminder_message ? (
-        <output
-          aria-live="polite"
-          className={`alert ${summary.backup_reminder_level === "overdue" ? "alert-warning" : "alert-info"}`}
-        >
-          {summary.backup_reminder_message}
-        </output>
-      ) : null}
-
-      {!loading && summary ? (
-        <output aria-live="polite" className="alert alert-info">
-          You are using the active browser-local MVP path. Legacy packaged desktop behavior is
-          archived context, not the current default.
-        </output>
-      ) : null}
-
       {error ? (
         <div className="alert alert-error" role="alert">
           {error}
@@ -255,46 +233,19 @@ export function DataManagementPanel() {
       ) : null}
 
       {!loading && summary ? (
-        <div className="form-grid">
-          <div className="metadata-block">
-            <span className="metadata-key">Workspace location</span>
-            <span className="metadata-value">
-              <code>{summary.data_root ?? "Browser-managed local storage"}</code>
-            </span>
+        <div className="metadata-block mb-md">
+          <span className="metadata-key">Roles captured</span>
+          <span className="metadata-value">{summary.roles_count}</span>
 
-            <span className="metadata-key">Database file</span>
-            <span className="metadata-value">
-              <code>{summary.database_path ?? "Not applicable in browser-local mode"}</code>
-            </span>
+          <span className="metadata-key">Skills tracked</span>
+          <span className="metadata-value">{summary.skills_count}</span>
 
-            <span className="metadata-key">Runtime</span>
-            <span className="metadata-value">{describeStorageMode(summary)}</span>
-
-            <span className="metadata-key">Roles captured</span>
-            <span className="metadata-value">{summary.roles_count}</span>
-
-            <span className="metadata-key">Skills tracked</span>
-            <span className="metadata-value">{summary.skills_count}</span>
-
-            <span className="metadata-key">Resume profile</span>
-            <span className="metadata-value">{describeResumePresence(summary.has_resume)}</span>
-          </div>
-
-          <div className="structured-message structured-message-info">
-            <h4>What a backup includes</h4>
-            <p>
-              The export contains your local workspace data as a readable JSON archive with durable
-              artifacts. API keys are excluded from backups.
-            </p>
-            <p>
-              Export after meaningful changes, before resetting local data, and before moving to a
-              different browser profile or device.
-            </p>
-          </div>
+          <span className="metadata-key">Resume profile</span>
+          <span className="metadata-value">{describeResumePresence(summary.has_resume)}</span>
         </div>
       ) : null}
 
-      <div className="flex-row mt-md">
+      <div className="flex-row">
         <button
           className={`btn btn-primary${exporting ? " btn-loading" : ""}`}
           disabled={exporting || importing || resetting}
@@ -322,6 +273,20 @@ export function DataManagementPanel() {
           Reset local data
         </button>
       </div>
+
+      {!loading && summary ? (
+        <section className="structured-message structured-message-info mt-md">
+          <h4>What to know</h4>
+          <p>
+            Backups export your workspace as a readable JSON archive. Provider credentials and API
+            keys are not included.
+          </p>
+          <p>
+            Restore merges a backup into the current browser workspace. Reset permanently removes
+            local roles, skills, and generated materials from this browser profile.
+          </p>
+        </section>
+      ) : null}
 
       <input
         accept=".json,application/json"

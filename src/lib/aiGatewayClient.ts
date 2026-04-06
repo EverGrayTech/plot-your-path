@@ -14,6 +14,10 @@ import { aiConfigAppDefinition } from "./aiConfig";
 const AI_GATEWAY_BASE_URL = process.env.NEXT_PUBLIC_AI_GATEWAY_BASE_URL?.trim() ?? "";
 const AI_GATEWAY_CLIENT_ID = process.env.NEXT_PUBLIC_AI_GATEWAY_CLIENT_ID?.trim() ?? "";
 
+export function isAIConfigGatewayConfigured(): boolean {
+  return Boolean(AI_GATEWAY_BASE_URL && AI_GATEWAY_CLIENT_ID);
+}
+
 function trimTrailingSlash(value: string): string {
   return value.endsWith("/") ? value.slice(0, -1) : value;
 }

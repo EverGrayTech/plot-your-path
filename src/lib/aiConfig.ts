@@ -2,18 +2,6 @@ import type { AIConfigAppDefinition } from "@evergraytech/ai-config";
 
 export const aiConfigAppDefinition: AIConfigAppDefinition = {
   appId: "plot-your-path",
-  defaultMode: {
-    enabled: true,
-    label: "EverGray hosted AI",
-    description: "Use the app-provided hosted route for supported AI workflows.",
-    provider: "hosted",
-    model: "gpt-4o-mini",
-    usageHint: "Free usage may be limited by the host app.",
-  },
-  byok: {
-    enabled: true,
-    providers: ["openai", "anthropic", "gemini", "openrouter"],
-  },
   operationCategories: [
     {
       key: "role_parsing",

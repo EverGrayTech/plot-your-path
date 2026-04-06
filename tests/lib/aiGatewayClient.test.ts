@@ -141,7 +141,11 @@ describe("aiGatewayClient", () => {
     process.env.NEXT_PUBLIC_AI_GATEWAY_BASE_URL = "";
     process.env.NEXT_PUBLIC_AI_GATEWAY_CLIENT_ID = "";
 
-    const { getAIConfigManager } = await import("../../src/lib/aiGatewayClient");
+    const { getAIConfigManager, isAIConfigGatewayConfigured } = await import(
+      "../../src/lib/aiGatewayClient"
+    );
+
+    expect(isAIConfigGatewayConfigured()).toBe(false);
 
     expect(() => getAIConfigManager()).toThrow(
       /NEXT_PUBLIC_AI_GATEWAY_BASE_URL and NEXT_PUBLIC_AI_GATEWAY_CLIENT_ID/i,
