@@ -1,9 +1,4 @@
 import {
-  analyzeLocalRoleFit,
-  generateLocalInterviewPrepPack,
-  generateLocalResumeTuning,
-} from "../../src/lib/localAi";
-import {
   captureLocalRole,
   getLocalRole,
   getLocalSkill,
@@ -57,18 +52,14 @@ describe("localRoles migration foundation", () => {
     expect(updated.status).toBe("submitted");
   });
 
-  it("hydrates generated browser-local detail surfaces from dedicated stores", async () => {
+  it("keeps generated detail surfaces empty when AI workflows are explicitly unavailable", async () => {
     const captured = await captureLocalRole({
       url: "pasted-role-description",
       fallback_text: "Staff Engineer\nTypeScript\nSystems design",
     });
 
-    await analyzeLocalRoleFit(captured.role_id);
-    await generateLocalInterviewPrepPack(captured.role_id);
-    await generateLocalResumeTuning(captured.role_id);
-
     const role = await getLocalRole(captured.role_id);
-    expect(role.latest_fit_analysis).not.toBeNull();
+    expect(role.latest_fit_analysis).toBeNull();
     expect(role.interview_stage_timeline).toEqual([]);
     expect(role.application_ops).toBeNull();
   });

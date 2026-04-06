@@ -47,13 +47,13 @@ describe("api", () => {
 
   it("lists local materials and generates browser-local artifacts", async () => {
     expect(await listApplicationMaterials(2)).toEqual([]);
-    const created = await generateCoverLetter(2);
-    expect(created.artifact_type).toBe("cover_letter");
+    await expect(generateCoverLetter(2)).rejects.toThrow(/not implemented yet/i);
   });
 
   it("question generation creates browser-local artifacts", async () => {
-    const created = await generateQuestionAnswers(2, ["Why this role?"]);
-    expect(created.artifact_type).toBe("application_qa");
+    await expect(generateQuestionAnswers(2, ["Why this role?"])).rejects.toThrow(
+      /not implemented yet/i,
+    );
   });
 
   it("lists local outcomes", async () => {

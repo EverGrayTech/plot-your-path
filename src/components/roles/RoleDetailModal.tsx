@@ -123,10 +123,6 @@ function materialLabel(material: ApplicationMaterial): string {
   return material.artifact_type;
 }
 
-function fallbackLabel(fallbackUsed: boolean | undefined): string {
-  return fallbackUsed ? "Fallback output" : "Model output";
-}
-
 export function RoleDetailModal({
   analyzingFit,
   applicationMaterials,
@@ -494,8 +490,7 @@ export function RoleDetailModal({
                 <p>
                   <small>
                     Generated {new Date(role.latest_fit_analysis.created_at).toLocaleString()} with{" "}
-                    {role.latest_fit_analysis.provider}/{role.latest_fit_analysis.model} ·{" "}
-                    {fallbackLabel(role.latest_fit_analysis.fallback_used)}
+                    {role.latest_fit_analysis.provider}/{role.latest_fit_analysis.model}
                   </small>
                 </p>
               </div>
@@ -538,16 +533,12 @@ export function RoleDetailModal({
                 <p>
                   <strong>Cached until:</strong>{" "}
                   {new Date(role.latest_desirability_score.cache_expires_at).toLocaleString()}
-                  {role.latest_desirability_score.fallback_used
-                    ? " · Includes fallback factors"
-                    : ""}
                 </p>
                 <ul>
                   {role.latest_desirability_score.factor_breakdown.map((factor) => (
                     <li key={factor.factor_id}>
                       <strong>{factor.factor_name}</strong> — score {factor.score}/10, weight{" "}
                       {(factor.weight * 100).toFixed(1)}% — {factor.reasoning}
-                      {factor.fallback_used ? " (fallback)" : ""}
                     </li>
                   ))}
                 </ul>
@@ -686,7 +677,7 @@ export function RoleDetailModal({
                     </p>
                     <p>
                       <strong>Generated with:</strong> {selectedMaterial.provider}/
-                      {selectedMaterial.model} · {fallbackLabel(selectedMaterial.fallback_used)}
+                      {selectedMaterial.model}
                     </p>
                     <pre>{selectedMaterial.content}</pre>
                     <TraceabilityBlock
@@ -738,8 +729,7 @@ export function RoleDetailModal({
                   <div className="card mt-md">
                     <p>
                       <strong>Generated with:</strong> {selectedInterviewPrepPack.provider}/
-                      {selectedInterviewPrepPack.model} ·{" "}
-                      {fallbackLabel(selectedInterviewPrepPack.fallback_used)}
+                      {selectedInterviewPrepPack.model}
                     </p>
                     <div className="form-grid">
                       <label className="form-label">
@@ -890,8 +880,7 @@ export function RoleDetailModal({
                   <div className="card mt-md">
                     <p>
                       <strong>Generated with:</strong> {selectedResumeTuning.provider}/
-                      {selectedResumeTuning.model} ·{" "}
-                      {fallbackLabel(selectedResumeTuning.fallback_used)}
+                      {selectedResumeTuning.model}
                     </p>
                     {[
                       ["Keep Bullets", selectedResumeTuning.sections.keep_bullets],

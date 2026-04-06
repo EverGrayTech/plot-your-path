@@ -117,10 +117,7 @@ describe("useRolesBoard", () => {
   });
 
   it("surfaces loader failures and supports reload", async () => {
-    const loader = vi
-      .fn<[], Promise<typeof roles>>()
-      .mockRejectedValueOnce(new Error("boom"))
-      .mockResolvedValueOnce(roles);
+    const loader = vi.fn().mockRejectedValueOnce(new Error("boom")).mockResolvedValueOnce(roles);
     setRolesLoaderForTests(loader);
 
     const { result } = renderHook(() => useRolesBoard());

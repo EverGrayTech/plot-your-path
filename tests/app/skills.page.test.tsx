@@ -36,13 +36,6 @@ function createServices(overrides: Partial<FrontendServices> = {}): FrontendServ
       updateNextAction: vi.fn(),
       upsertApplicationOps: vi.fn(),
     },
-    aiSettings: {
-      clearAISettingToken: vi.fn(),
-      healthcheckAISetting: vi.fn(),
-      listAISettings: vi.fn(),
-      updateAISetting: vi.fn(),
-      updateAISettingToken: vi.fn(),
-    },
     aiGeneration: {
       analyzeRoleFit: vi.fn(),
       generateCoverLetter: vi.fn(),

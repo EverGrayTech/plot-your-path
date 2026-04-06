@@ -17,8 +17,11 @@ describe("aiGatewayClient", () => {
 
   function getManagerOptions(): AIConfigManagerOptions {
     expect(createManagerMock).toHaveBeenCalled();
-
-    return createManagerMock.mock.calls[0]?.[0] as AIConfigManagerOptions;
+    const firstArg = createManagerMock.mock.calls.at(0)?.at(0);
+    if (!firstArg) {
+      throw new Error("Expected createAIConfigManager to be called with options.");
+    }
+    return firstArg as AIConfigManagerOptions;
   }
 
   beforeEach(() => {
@@ -46,8 +49,8 @@ describe("aiGatewayClient", () => {
 
     const options = getManagerOptions();
     expect(options.appDefinition.appId).toBe("plot-your-path");
-    expect(options.hostedGateway.clientId).toBe("plot-your-path-client");
-    expect(options.hostedGateway.gateway).toBeDefined();
+    expect(options.hostedGateway?.clientId).toBe("plot-your-path-client");
+    expect(options.hostedGateway?.gateway).toBeDefined();
   });
 
   it("calls ai-config invocation with the provided category", async () => {
@@ -87,14 +90,15 @@ describe("aiGatewayClient", () => {
     const manager = getAIConfigManager();
 
     const options = getManagerOptions();
-    const gateway = options.hostedGateway.gateway;
+    const gateway = options.hostedGateway?.gateway;
+    expect(gateway).toBeDefined();
 
     await expect(
-      gateway.authenticate({ appId: "plot-your-path", clientId: "plot-your-path-client" }),
+      gateway!.authenticate({ appId: "plot-your-path", clientId: "plot-your-path-client" }),
     ).resolves.toEqual(authResponse);
 
     await expect(
-      gateway.invoke({
+      gateway!.invoke({
         token: "signed-token",
         provider: "openai",
         model: "gpt-4o-mini",

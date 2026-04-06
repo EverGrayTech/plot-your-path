@@ -23,6 +23,7 @@ const baseProps = {
   interviewPrepError: null,
   interviewPrepLoading: false,
   interviewPrepPacks: [],
+  role: null,
   loadingDetail: false,
   loadingMaterials: false,
   materialsError: null,
@@ -370,7 +371,7 @@ describe("RoleDetailModal", () => {
     expect(screen.getByText(/No status changes yet/i)).toBeInTheDocument();
   });
 
-  it("covers helper-based labels and fallback function paths", () => {
+  it("covers helper-based labels without fallback wording", () => {
     const props = {
       ...baseProps,
       applicationMaterials: [
@@ -463,7 +464,8 @@ describe("RoleDetailModal", () => {
     render(<RoleDetailModal {...props} />);
 
     expect(screen.getAllByText(/Application Q&A/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/Model output/i).length).toBeGreaterThan(0);
+    expect(screen.queryByText(/Model output/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Fallback output/i)).not.toBeInTheDocument();
     expect(screen.getByText(/No explicit gaps/i)).toBeInTheDocument();
   });
 
