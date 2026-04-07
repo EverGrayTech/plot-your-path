@@ -147,16 +147,90 @@ export async function generateLocalResumeTuning(roleId: number): Promise<ResumeT
 }
 
 export async function listLocalDesirabilityFactors(): Promise<DesirabilityFactor[]> {
+  const now = nowIso();
   return [
     {
       id: 1,
-      name: "Growth potential",
-      prompt: "Does this role support long-term growth?",
-      weight: 0.4,
+      name: "Culture",
+      prompt: 'Fetch Glassdoor "Culture & Values" rating (1-5)',
+      weight: 1.0,
       is_active: true,
       display_order: 0,
-      created_at: nowIso(),
-      updated_at: nowIso(),
+      created_at: now,
+      updated_at: now,
+    },
+    {
+      id: 2,
+      name: "Notoriety",
+      prompt: "Use company Market Cap (Trillion/Billion/Million)",
+      weight: 1.0,
+      is_active: true,
+      display_order: 1,
+      created_at: now,
+      updated_at: now,
+    },
+    {
+      id: 3,
+      name: "Progressiveness",
+      prompt: "Analyze public Diversity & Inclusion reports and parental leave policy length",
+      weight: 1.0,
+      is_active: true,
+      display_order: 2,
+      created_at: now,
+      updated_at: now,
+    },
+    {
+      id: 4,
+      name: "Inventiveness",
+      prompt: "Analyze Patent/R&D spend/recent product breakthroughs",
+      weight: 1.0,
+      is_active: true,
+      display_order: 3,
+      created_at: now,
+      updated_at: now,
+    },
+    {
+      id: 5,
+      name: "Social Impact",
+      prompt: "Determine the company's mission alignment with the UN SDGs or social good",
+      weight: 1.0,
+      is_active: true,
+      display_order: 4,
+      created_at: now,
+      updated_at: now,
+    },
+    {
+      id: 6,
+      name: "Wow Factor",
+      prompt:
+        'Rate based on the use of cutting-edge technology (e.g., Generative AI, Quantum) and public perception of "coolness"',
+      weight: 1.0,
+      is_active: true,
+      display_order: 5,
+      created_at: now,
+      updated_at: now,
+    },
+    {
+      id: 7,
+      name: "Reputation",
+      prompt:
+        "Calculate average RepTrak/TrustPilot score and overall Glassdoor rating (excluding salary)",
+      weight: 1.0,
+      is_active: true,
+      display_order: 6,
+      created_at: now,
+      updated_at: now,
+    },
+    {
+      id: 8,
+      name: "Comp Growth",
+      prompt:
+        "Rate based on median salary and clarity/budget for internal career development/training",
+      weight: 1.0,
+      is_active: true,
+      display_order: 7,
+      created_at: now,
+      updated_at: now,
     },
   ];
 }

@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@evergraytech/ai-config':
-        specifier: ^0.2.2
-        version: 0.2.2
+        specifier: ^0.3.1
+        version: 0.3.1
       '@evergraytech/design-system':
         specifier: ^0.2.0
         version: 0.2.0
@@ -413,8 +413,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@evergraytech/ai-config@0.2.2':
-    resolution: {integrity: sha512-yda//AJ5rz/aK6zDi6H5bU0AEoZGgGWVnRVqzh3CYPbRyKUstp1n1Dz2OHuDCnQhP1wwgHP6s6egPN0BkxchCA==, tarball: https://npm.pkg.github.com/download/@evergraytech/ai-config/0.2.2/efef8127266b9e7c0e23b773512890b2c0d224dc}
+  '@evergraytech/ai-config@0.3.1':
+    resolution: {integrity: sha512-f8kFUWh4U7iRyg5UTROcNehqgVQxgrXfmwcP9rUkSQh0Dz77ceOWywco5WsA3yv/NKQ3ssSXocbo1diOnutSZA==, tarball: https://npm.pkg.github.com/download/@evergraytech/ai-config/0.3.1/079d39b1c1aa1d111600e505ea6ecf88bdb5cf16}
 
   '@evergraytech/design-system@0.2.0':
     resolution: {integrity: sha512-ncYluMST8o61wm+ZQnHC/xCC2OmrHOgWeC73reoRNx9Sk1iEjCNek7VYTRFS9O/m/nDcFwSzjnyIwoz6oy2I/Q==, tarball: https://npm.pkg.github.com/download/@evergraytech/design-system/0.2.0/8d7fd8bc34f8183a76db93aff74b018321bf6b70}
@@ -1853,7 +1853,7 @@ snapshots:
   '@esbuild/win32-x64@0.21.5':
     optional: true
 
-  '@evergraytech/ai-config@0.2.2': {}
+  '@evergraytech/ai-config@0.3.1': {}
 
   '@evergraytech/design-system@0.2.0': {}
 

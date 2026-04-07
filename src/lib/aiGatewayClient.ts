@@ -129,10 +129,16 @@ function createHostedGatewayClient(): { clientId: string; gateway: AIHostedGatew
 
 let aiConfigManager: AIConfigManager | null = null;
 
+export function getAIConfigManagerOptions() {
+  return {
+    hostedGateway: createHostedGatewayClient(),
+  };
+}
+
 export function getAIConfigManager(): AIConfigManager {
   aiConfigManager ??= createAIConfigManager({
     appDefinition: aiConfigAppDefinition,
-    hostedGateway: createHostedGatewayClient(),
+    ...getAIConfigManagerOptions(),
   });
 
   return aiConfigManager;

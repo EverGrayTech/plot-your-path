@@ -25,9 +25,6 @@ vi.mock("../../src/components/roles/RolesToolbar", () => ({
       <button onClick={() => (props.onOpenCapture as () => void)()} type="button">
         Open Capture
       </button>
-      <button onClick={() => (props.onOpenFactorSettings as () => void)()} type="button">
-        Open Factors
-      </button>
       <button onClick={() => (props.onOpenPipeline as () => void)()} type="button">
         Open Pipeline
       </button>
@@ -75,17 +72,6 @@ vi.mock("../../src/components/roles/RoleDetailModal", () => ({
       <div>Role Detail Modal</div>
       <button onClick={() => (props.onClose as () => void)()} type="button">
         Close Role Detail
-      </button>
-    </div>
-  ),
-}));
-
-vi.mock("../../src/components/roles/FactorSettingsModal", () => ({
-  FactorSettingsModal: (props: Record<string, unknown>) => (
-    <div>
-      <div>Factor Settings Modal</div>
-      <button onClick={() => (props.onClose as () => void)()} type="button">
-        Close Factors
       </button>
     </div>
   ),
@@ -252,20 +238,6 @@ describe("RolesPageClient", () => {
     });
 
     useRolesFeatureModalsMock.mockReturnValue({
-      closeFactorSettings: vi.fn(),
-      closeOutcomeInsights: vi.fn(),
-      closePipeline: vi.fn(),
-      factors: [],
-      factorsError: null,
-      factorsLoading: false,
-      handleAddFactor: vi.fn(),
-      handleDeleteFactor: vi.fn(),
-      handleMoveFactor: vi.fn(),
-      handleUpdateFactor: vi.fn(),
-      newFactorName: "",
-      newFactorPrompt: "",
-      newFactorWeight: "0.10",
-      openFactorSettings: vi.fn(),
       openOutcomeInsights: vi.fn(),
       openPipeline: vi.fn(),
       outcomeInsights: null,
@@ -279,14 +251,10 @@ describe("RolesPageClient", () => {
       pipelineRecentlyUpdated: false,
       pipelineStageFilter: "all",
       pipelineWeekDeadlines: false,
-      setNewFactorName: vi.fn(),
-      setNewFactorPrompt: vi.fn(),
-      setNewFactorWeight: vi.fn(),
       setPipelineOverdueOnly: vi.fn(),
       setPipelineRecentlyUpdated: vi.fn(),
       setPipelineStageFilter: vi.fn(),
       setPipelineWeekDeadlines: vi.fn(),
-      showFactorSettings: false,
       showOutcomeInsights: false,
       showPipeline: false,
       tuningSuggestions: null,
@@ -311,13 +279,12 @@ describe("RolesPageClient", () => {
 
   it("renders modal branches when hook state enables them", () => {
     useRoleDetailStateMock.mockReturnValueOnce({
-      ...useRoleDetailStateMock(),
+      ...useRoleDetailStateMock.mock.results[0]?.value,
       selectedRoleId: 7,
       selectedSkillId: 3,
     });
     useRolesFeatureModalsMock.mockReturnValueOnce({
-      ...useRolesFeatureModalsMock(),
-      showFactorSettings: true,
+      ...useRolesFeatureModalsMock.mock.results[0]?.value,
       showPipeline: true,
       showOutcomeInsights: true,
     });
@@ -326,14 +293,13 @@ describe("RolesPageClient", () => {
 
     expect(screen.getByText("Role Detail Modal")).toBeInTheDocument();
     expect(screen.getByText("Skill Detail Modal")).toBeInTheDocument();
-    expect(screen.getByText("Factor Settings Modal")).toBeInTheDocument();
     expect(screen.getByText("Pipeline Modal")).toBeInTheDocument();
     expect(screen.getByText("Outcome Insights Modal")).toBeInTheDocument();
   });
 
   it("wires modal callbacks and cross-modal role opening actions", () => {
     const detailState = {
-      ...useRoleDetailStateMock(),
+      ...useRoleDetailStateMock.mock.results[0]?.value,
       closeRoleDetail: vi.fn(),
       closeSkillDetail: vi.fn(),
       openRoleDetail: vi.fn(),
@@ -341,11 +307,9 @@ describe("RolesPageClient", () => {
       selectedSkillId: 3,
     };
     const featureState = {
-      ...useRolesFeatureModalsMock(),
-      closeFactorSettings: vi.fn(),
+      ...useRolesFeatureModalsMock.mock.results[0]?.value,
       closeOutcomeInsights: vi.fn(),
       closePipeline: vi.fn(),
-      showFactorSettings: true,
       showOutcomeInsights: true,
       showPipeline: true,
     };
@@ -355,16 +319,12 @@ describe("RolesPageClient", () => {
 
     render(<RolesPageClient />);
 
-    fireEvent.click(screen.getByRole("button", { name: /Close Role Detail/i }));
-    fireEvent.click(screen.getByRole("button", { name: /Close Factors/i }));
     fireEvent.click(screen.getByRole("button", { name: /Open Pipeline Role/i }));
     fireEvent.click(screen.getByRole("button", { name: /Close Pipeline/i }));
     fireEvent.click(screen.getByRole("button", { name: /Close Insights/i }));
     fireEvent.click(screen.getByRole("button", { name: /Open Skill Role/i }));
     fireEvent.click(screen.getByRole("button", { name: /Close Skill/i }));
 
-    expect(detailState.closeRoleDetail).toHaveBeenCalled();
-    expect(featureState.closeFactorSettings).toHaveBeenCalled();
     expect(featureState.closePipeline).toHaveBeenCalledTimes(2);
     expect(detailState.openRoleDetail).toHaveBeenCalledWith(9);
     expect(featureState.closeOutcomeInsights).toHaveBeenCalled();

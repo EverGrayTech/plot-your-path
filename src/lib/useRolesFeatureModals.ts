@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import type {
   DesirabilityFactor,
@@ -72,7 +72,7 @@ export function useRolesFeatureModals() {
     void fetchPipeline();
   }, [pipelineOverdueOnly, pipelineRecentlyUpdated, pipelineWeekDeadlines, showPipeline]);
 
-  const loadFactors = async () => {
+  const loadFactors = useCallback(async () => {
     setFactorsLoading(true);
     setFactorsError(null);
     try {
@@ -82,9 +82,9 @@ export function useRolesFeatureModals() {
     } finally {
       setFactorsLoading(false);
     }
-  };
+  }, []);
 
-  const fetchOutcomeInsights = async () => {
+  const fetchOutcomeInsights = useCallback(async () => {
     setOutcomeInsightsLoading(true);
     setOutcomeInsightsError(null);
     try {
@@ -101,36 +101,36 @@ export function useRolesFeatureModals() {
     } finally {
       setOutcomeInsightsLoading(false);
     }
-  };
+  }, []);
 
-  const openFactorSettings = () => {
+  const openFactorSettings = useCallback(() => {
     setShowFactorSettings(true);
     void loadFactors();
-  };
+  }, [loadFactors]);
 
-  const closeFactorSettings = () => {
+  const closeFactorSettings = useCallback(() => {
     setShowFactorSettings(false);
     setFactorsError(null);
-  };
+  }, []);
 
-  const openPipeline = () => {
+  const openPipeline = useCallback(() => {
     setShowPipeline(true);
-  };
+  }, []);
 
-  const closePipeline = () => {
+  const closePipeline = useCallback(() => {
     setShowPipeline(false);
     setPipelineError(null);
-  };
+  }, []);
 
-  const openOutcomeInsights = () => {
+  const openOutcomeInsights = useCallback(() => {
     setShowOutcomeInsights(true);
     void fetchOutcomeInsights();
-  };
+  }, [fetchOutcomeInsights]);
 
-  const closeOutcomeInsights = () => {
+  const closeOutcomeInsights = useCallback(() => {
     setShowOutcomeInsights(false);
     setOutcomeInsightsError(null);
-  };
+  }, []);
 
   const handleAddFactor = async () => {
     const parsedWeight = Number(newFactorWeight);
@@ -229,6 +229,7 @@ export function useRolesFeatureModals() {
     handleDeleteFactor,
     handleMoveFactor,
     handleUpdateFactor,
+    loadFactors,
     newFactorName,
     newFactorPrompt,
     newFactorWeight,

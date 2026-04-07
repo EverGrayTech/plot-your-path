@@ -5,7 +5,6 @@ import type { DesirabilityFilter, RecommendationFilter, SortMode } from "../../l
 interface RolesToolbarProps {
   desirabilityFilter: DesirabilityFilter;
   onOpenCapture: () => void;
-  onOpenFactorSettings: () => void;
   onOpenOutcomeInsights: () => void;
   onOpenPipeline: () => void;
   recommendationFilter: RecommendationFilter;
@@ -21,7 +20,6 @@ interface RolesToolbarProps {
 export function RolesToolbar({
   desirabilityFilter,
   onOpenCapture,
-  onOpenFactorSettings,
   onOpenOutcomeInsights,
   onOpenPipeline,
   recommendationFilter,
@@ -47,13 +45,6 @@ export function RolesToolbar({
           <button className="btn btn-secondary" onClick={onOpenOutcomeInsights} type="button">
             Outcome Insights
           </button>
-          <button
-            className="btn btn-tertiary btn-compact"
-            onClick={onOpenFactorSettings}
-            type="button"
-          >
-            Factor Settings
-          </button>
         </div>
       </header>
 
@@ -62,6 +53,9 @@ export function RolesToolbar({
       <p className="page-description">
         AI configuration now lives on the Settings page through the shared EverGray configuration
         panel.
+      </p>
+      <p className="page-description">
+        Desirability factor management now lives under Settings → Desirability Factors.
       </p>
 
       <div className="form-grid-4col">

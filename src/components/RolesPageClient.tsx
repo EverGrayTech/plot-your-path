@@ -7,7 +7,6 @@ import { useRolesBoard } from "../lib/useRolesBoard";
 import { useRolesFeatureModals } from "../lib/useRolesFeatureModals";
 import { CaptureRoleForm } from "./CaptureRoleForm";
 import { Modal } from "./Modal";
-import { FactorSettingsModal } from "./roles/FactorSettingsModal";
 import { OutcomeInsightsModal } from "./roles/OutcomeInsightsModal";
 import { PipelineModal } from "./roles/PipelineModal";
 import { RoleDetailModal } from "./roles/RoleDetailModal";
@@ -138,20 +137,8 @@ export function RolesPageClient() {
   } = useRoleDetailState({ loadRoles });
 
   const {
-    closeFactorSettings,
     closeOutcomeInsights,
     closePipeline,
-    factors,
-    factorsError,
-    factorsLoading,
-    handleAddFactor,
-    handleDeleteFactor,
-    handleMoveFactor,
-    handleUpdateFactor,
-    newFactorName,
-    newFactorPrompt,
-    newFactorWeight,
-    openFactorSettings,
     openOutcomeInsights,
     openPipeline,
     outcomeInsights,
@@ -165,14 +152,10 @@ export function RolesPageClient() {
     pipelineRecentlyUpdated,
     pipelineStageFilter,
     pipelineWeekDeadlines,
-    setNewFactorName,
-    setNewFactorPrompt,
-    setNewFactorWeight,
     setPipelineOverdueOnly,
     setPipelineRecentlyUpdated,
     setPipelineStageFilter,
     setPipelineWeekDeadlines,
-    showFactorSettings,
     showOutcomeInsights,
     showPipeline,
     tuningSuggestions,
@@ -183,7 +166,6 @@ export function RolesPageClient() {
       <RolesToolbar
         desirabilityFilter={desirabilityFilter}
         onOpenCapture={() => setShowCaptureModal(true)}
-        onOpenFactorSettings={openFactorSettings}
         onOpenOutcomeInsights={openOutcomeInsights}
         onOpenPipeline={openPipeline}
         recommendationFilter={recommendationFilter}
@@ -311,25 +293,6 @@ export function RolesPageClient() {
           statusError={statusError}
           syncingResumeProfile={syncingResumeProfile}
           updatingStatus={updatingStatus}
-        />
-      ) : null}
-
-      {showFactorSettings ? (
-        <FactorSettingsModal
-          error={factorsError}
-          factors={factors}
-          loading={factorsLoading}
-          newFactorName={newFactorName}
-          newFactorPrompt={newFactorPrompt}
-          newFactorWeight={newFactorWeight}
-          onAddFactor={handleAddFactor}
-          onClose={closeFactorSettings}
-          onDeleteFactor={handleDeleteFactor}
-          onMoveFactor={handleMoveFactor}
-          onSetNewFactorName={setNewFactorName}
-          onSetNewFactorPrompt={setNewFactorPrompt}
-          onSetNewFactorWeight={setNewFactorWeight}
-          onUpdateFactor={handleUpdateFactor}
         />
       ) : null}
 

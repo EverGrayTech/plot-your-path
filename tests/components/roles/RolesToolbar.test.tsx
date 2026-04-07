@@ -6,7 +6,6 @@ import { RolesToolbar } from "../../../src/components/roles/RolesToolbar";
 describe("RolesToolbar", () => {
   it("wires search, sort, filter, and action callbacks", () => {
     const onOpenCapture = vi.fn();
-    const onOpenFactorSettings = vi.fn();
     const onOpenOutcomeInsights = vi.fn();
     const onOpenPipeline = vi.fn();
     const setDesirabilityFilter = vi.fn();
@@ -18,7 +17,6 @@ describe("RolesToolbar", () => {
       <RolesToolbar
         desirabilityFilter="all"
         onOpenCapture={onOpenCapture}
-        onOpenFactorSettings={onOpenFactorSettings}
         onOpenOutcomeInsights={onOpenOutcomeInsights}
         onOpenPipeline={onOpenPipeline}
         recommendationFilter="all"
@@ -48,7 +46,6 @@ describe("RolesToolbar", () => {
     fireEvent.click(screen.getByRole("button", { name: "Add Role" }));
     fireEvent.click(screen.getByRole("button", { name: "Pipeline" }));
     fireEvent.click(screen.getByRole("button", { name: "Outcome Insights" }));
-    fireEvent.click(screen.getByRole("button", { name: "Factor Settings" }));
 
     expect(setSearch).toHaveBeenCalledWith("beta");
     expect(setSortMode).toHaveBeenCalledWith("company_az");
@@ -57,6 +54,8 @@ describe("RolesToolbar", () => {
     expect(onOpenCapture).toHaveBeenCalledTimes(1);
     expect(onOpenPipeline).toHaveBeenCalledTimes(1);
     expect(onOpenOutcomeInsights).toHaveBeenCalledTimes(1);
-    expect(onOpenFactorSettings).toHaveBeenCalledTimes(1);
+    expect(
+      screen.getByText(/Desirability factor management now lives under Settings/i),
+    ).toBeInTheDocument();
   });
 });
